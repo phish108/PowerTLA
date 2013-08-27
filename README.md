@@ -12,7 +12,7 @@ PowerTLA offers a REST service layer for
  * Authentication using OAuth 1
  * Experience API 
  * IMS QTI JSON binding
- * Learner profile service.
+ * Learner profile service
  
  PowerTLA builds ontop of the existing LMS code and allows easy integration of mobile tools and services. 
  
