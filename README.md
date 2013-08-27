@@ -21,3 +21,10 @@ PowerTLA offers a REST service layer for
  =======
  
  PowerTLA is licensed under the GNU Affero License. 
+
+ 
+ Contributors
+ ============
+ 
+ Christian Glahn (ISN, ETH Zurich)
+ Evangelia Mitsopoulou (ISN, ETH Zurich)
