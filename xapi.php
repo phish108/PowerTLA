@@ -1,9 +1,6 @@
 <?php
 
 require_once("include/ilServiceInit.php");  
-
-
-
 require_once("include/class.XAPIService.php");
 
 
