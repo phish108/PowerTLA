@@ -26,5 +26,5 @@ PowerTLA offers a REST service layer for
  Contributors
  ============
  
- Christian Glahn (ISN, ETH Zurich)
- Evangelia Mitsopoulou (ISN, ETH Zurich)
+  * Christian Glahn (ISN, ETH Zurich)
+  * Evangelia Mitsopoulou (ISN, ETH Zurich)
