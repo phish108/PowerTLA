@@ -12,7 +12,8 @@ class IliasServiceInit extends VLEHandler
 
         if (!empty($plugins))
         {
-            cd ('../..');
+            // assume that PowerTLA lives in the same include path.
+            // We require a configuration variable that informs us about the LMS include path.
             include_once("include/inc.ilias_version.php");
 
             $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
@@ -32,7 +33,7 @@ class IliasServiceInit extends VLEHandler
                 $ilInit->initILIAS();
 
                 // now we can initialize the system internals
-		// We should always avoid to fall back into Ilias' GLOBAL mode
+                // We should always avoid to fall back into Ilias' GLOBAL mode
                 $this->dbhandler    = $GLOBALS['ilDB'];
                 $this->user         = $GLOBALS['ilUser'];
                 $this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
@@ -44,8 +45,8 @@ class IliasServiceInit extends VLEHandler
     public function isPluginActive($pName)
     {
         if (!empty($pName) && array_key_exists($pName, $this->plugins))
-	{
-	    return $this->pluginAdmin->isActive(IL_COMP_SERVICE,
+        {
+            return $this->pluginAdmin->isActive(IL_COMP_SERVICE,
                                                 $this->plugins[$pName][0],
                                                 $this->plugins[$pName][1],
                                                 $this->plugins[$pName][2]);
@@ -56,7 +57,7 @@ class IliasServiceInit extends VLEHandler
     public function isActiveUser()
     {
         if($this->user->getLogin())
-	{
+        {
             return true;
         }
         return false;
