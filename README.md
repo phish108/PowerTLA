@@ -9,22 +9,22 @@ Currently the ILIAS LMS (www.ilias.de) is supported.
 
 PowerTLA offers a REST service layer for 
 
- * Authentication using OAuth 1
- * Experience API 
- * IMS QTI JSON binding
- * Learner profile service
+* Authentication using OAuth 1
+* Experience API 
+* IMS QTI JSON binding
+* Learner profile service
  
 PowerTLA builds on top of the existing LMS code and allows easy integration of mobile tools and services. 
  
  
- LICENSE
- =======
+LICENSE
+-------
  
- PowerTLA is licensed under the GNU Affero License. 
+PowerTLA is licensed under the GNU Affero License. 
 
  
- Contributors
- ============
+Contributors
+------------
  
-  * Christian Glahn (ISN, ETH Zurich)
-  * Evangelia Mitsopoulou (ISN, ETH Zurich)
+* Christian Glahn (ISN, ETH Zurich)
+* Evangelia Mitsopoulou (ISN, ETH Zurich)
