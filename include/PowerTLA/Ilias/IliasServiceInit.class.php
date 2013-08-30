@@ -17,7 +17,8 @@ class IliasServiceInit extends VLEHandler
             include_once("include/inc.ilias_version.php");
 
             $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
-            $strVersionInit = 'restservice/include/ilRESTInitialization.' . $aVersion[0] . '.' . $aVersion[1] . '.php';
+            $vstring = $aVersion[0] . '.' . $aVersion[1];
+            $strVersionInit = 'restservice/include/ilRESTInitialization.' . $vstring . '.php';
 
             if ( file_exists($strVersionInit) )
             {
@@ -28,10 +29,23 @@ class IliasServiceInit extends VLEHandler
                 require_once 'Services/Component/classes/class.ilPlugin.php';
 
                 // initialize Ilias
-                $ilInit = new ilInitialisation();
-                $GLOBALS['ilInit'] = $ilInit;
-                $ilInit->initILIAS();
-
+                // unfortunately they changed the initialization routine completely
+                switch ($vstring)
+                {
+                    case '4.2':
+                       $ilInit = new ilRESTInitialization();
+                       $GLOBALS['ilInit'] = $ilInit;
+                       $ilInit->initILIAS();
+                       break;
+                    case '4.3':
+                        // why oh why?!?
+                        ilRESTInitialization::initIlias();
+                        break;
+                    default:
+                        return;
+                        break;
+                }
+                
                 // now we can initialize the system internals
                 // We should always avoid to fall back into Ilias' GLOBAL mode
                 $this->dbhandler    = $GLOBALS['ilDB'];
