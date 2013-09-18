@@ -108,6 +108,9 @@ class AuthService extends VLEService
                 $this->log('enter grant_accessToken');
                 $this->grant_accessToken();
                 break;
+            case 'register':
+            	$this->register_service();
+            	break;
             default:
                 // bad request
                 $this->bad_request();
@@ -265,6 +268,7 @@ class AuthService extends VLEService
         }
     }
     
+      
     /**
      * @method void invalidateAccessToken()
      *
@@ -280,6 +284,20 @@ class AuthService extends VLEService
         $this->session->invalidateAccessToken();
         $this->authentication_required();  
     }
+    
+    
+    /**
+     * @method void register_service()
+     */
+    protected function register_service()
+    {
+    	$this->mark();
+    	 
+    }
+    
+    
+    protected function generateAppKey($appID,$deviceID){}
+    
 }
 
 ?>
