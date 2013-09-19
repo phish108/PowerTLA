@@ -5,7 +5,7 @@ include('include/RESTling/contrib/Restling.auto.php');
 include('include/PowerTLA/PowerTLA.auto.php');
 
 require_once("include/PowerTLA/ilias/IliasServiceInit.php");     // the LMS functions
-require_once("include/classes/AuthService.class.php"); // The service logic
+require_once("include/classes/PowerTLA/AuthService.class.php"); // The service logic
 
 $plugins = array("oauth" => array("UIComponent", "uiroa", "OAuthREST"));
 
@@ -13,6 +13,6 @@ $plugins = array("oauth" => array("UIComponent", "uiroa", "OAuthREST"));
 $VLEAPI = new IliasServiceInit($plugins); 
 $service = new AuthService($VLEAPI);
 
-$service->initializeRun();
+$service->run();
 
 ?>
