@@ -366,7 +366,7 @@ class AuthService extends VLEService
     		$consumerKey = $fetch["consumer_key"];
     		$consumerSecret = $fetch["consumer_secret"];
     
-    		//if no client key (= app key) exists yet, generate a new one
+    		//if no consumer 
     		if ($consumerKey == null && $consumerSecret == null) {
     
     			$randomSeed = rand();
