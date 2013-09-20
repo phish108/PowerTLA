@@ -1,11 +1,13 @@
 <?php
+set_include_path(".." . PATH_SEPARATOR . get_include_path());
 
 // Include the auto loading hooks for RESTling and our own classes
-include('$_SERVER["DOCUMENT_ROOT"]./include/RESTling/contrib/Restling.auto.php');
-include('$_SERVER["DOCUMENT_ROOT"]./include/PowerTLA/PowerTLA.auto.php');
+include('include/RESTling/contrib/Restling.auto.php');
+include('include/PowerTLA/PowerTLA.auto.php');
 
-require_once('$_SERVER["DOCUMENT_ROOT"]./include/PowerTLA/ilias/IliasServiceInit.php');     // the LMS functions
-require_once('$_SERVER["DOCUMENT_ROOT"].include/classes/PowerTLA/AuthService.class.php'); // The service logic
+
+require_once('include/PowerTLA/Ilias/IliasServiceInit.class.php');     // the LMS functions
+// require_once('include/PowerTLA/AuthService.class.php'); // The service logic
 
 $plugins = array("oauth" => array("UIComponent", "uiroa", "OAuthREST"));
 
