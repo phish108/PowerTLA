@@ -143,7 +143,7 @@ class AuthService extends VLEService
      *
      *  Maps the functions for the  PUT modes
      */
-    protected function handle_POST()
+    protected function handle_PUT()
     {
     	$this->log("handle put");
     
@@ -316,7 +316,8 @@ class AuthService extends VLEService
     	$deviceID = $_PUT["UUID"];
     	$appID = $_PUT["APPID"];
     	
-    	return generateConsumerTokens($appID,$deviceID);
+    	$response=json_encode(generateConsumerTokens($appID,$deviceID));
+    	echo($response);
     }
     
     /**
