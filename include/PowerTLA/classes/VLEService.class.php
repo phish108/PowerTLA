@@ -16,7 +16,7 @@ class VLEService extends OAuthService {
     /**
      * @method void
      */
-    protected function __construct($vleHandler) {
+    public function __construct($vleHandler) {
         // we need to find out which initialization we should run.
        
         
@@ -35,7 +35,7 @@ class VLEService extends OAuthService {
      */    
     protected function initializeRun() {
         if ( $this->dberr ) {
-            $this->status = RESTService::UNINITIALIZED;
+            $this->status = RESTling::UNINITIALIZED;
         }
         else {
             parent::initializeRun();
@@ -43,10 +43,10 @@ class VLEService extends OAuthService {
             $this->response_type = "json"; // we always talk JSON
              
             // now test if all the required plugins are running.
-            if ($this->status === RESTService::OK
+            if ($this->status === RESTling::OK
                 && !$this->VLE->arePluginsActive()) {
                 // plugin has been deactivated in the system administration.
-                $this->status = RESTService::UNINITIALIZED;
+                $this->status = RESTling::UNINITIALIZED;
             }
         }
     }
