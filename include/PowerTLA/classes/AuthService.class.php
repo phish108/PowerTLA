@@ -74,8 +74,10 @@ class AuthService extends VLEService
                 $this->session->verifyRequestToken();
                 break;
             default:
+            	
                 // this should not be reached.
                 $this->status = RESTService::BAD_HEADER; 
+                $this->log("there is not mode, so status gets a bad header");
                 break;
         }
         

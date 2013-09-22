@@ -18,14 +18,16 @@ class VLEService extends OAuthService {
      */
     public function __construct($vleHandler) {
         // we need to find out which initialization we should run.
-       
+    	$this->log("enter constructor of VLE service");
         
         if ( !empty($vleHandler) && $vleHandler->getDBHandler() ) {
+        	$this->log("VLE Handler is not empty");
             // pass the database handler down to OAuth handling
             parent::__construct($vleHandler->getDBHandler());
             $this->VLE = $vleHandler;
         }
         else {
+        	$this->log("VLE Handler is empty");
             $this->dberr = true;
         }
     }
