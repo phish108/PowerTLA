@@ -1,6 +1,7 @@
 <?php
-
-require_once('Services/Init/classes/class.ilInitialization.php');
+set_include_path(" "  . PATH_SEPARATOR . get_include_path());
+include('Services/Init/classes/class.ilInitialization.php');
+//require_once('Services/Init/classes/class.ilInitialization.php');
 
 class ilRESTInitialization extends ilInitialization {
 
@@ -130,6 +131,7 @@ class ilRESTInitialization extends ilInitialization {
     }
     
     function initIlias($context = "web") {
+    	$this->log("enter initIlias f");
         global $ilDB, $ilUser, $ilLog, $ilErr, $ilClientIniFile, $ilIliasIniFile,
                 $ilSetting, $ilias, $https, $ilObjDataCache,
                 $ilLog, $objDefinition, $lng, $ilCtrl, $ilBrowser, $ilHelp,

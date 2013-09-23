@@ -11,12 +11,13 @@ class AuthService extends VLEService
      * Path Info Variable for the steps in the process.
      */
     protected $mode;
-
+    
     /**
      * @method void initializeRun() 
      */    
     protected function initializeRun()
     {
+    	$this->log("enter initializeRun of Auth service ");
         // only real service requests are allowed no web-site interaction from other locations
         // Web-sites should use their backend!
         $this->forbidCORS();

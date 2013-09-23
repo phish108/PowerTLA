@@ -13,6 +13,8 @@ $plugins = array("oauth" => array("UIComponent", "uiroa", "OAuthREST"));
 
 // TODO: wrapper that decides which LMS initialization has to be used. 
 $VLEAPI = new IliasServiceInit($plugins); 
+
+
 $service = new AuthService($VLEAPI);
 
 $service->run();

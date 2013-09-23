@@ -1,5 +1,6 @@
 <?php
 
+
 class IliasServiceInit extends VLEHandler
 {
     protected $pluginAdmin;
@@ -7,10 +8,13 @@ class IliasServiceInit extends VLEHandler
 
     public function __construct($plugins)
     {
-
+    	$this->log("enter construct of IliasServiceInit");
+    	
         parent::__construct($plugins);
 
         if (!empty($plugins))
+        	
+        	$this->log("Plugins is not empty ");
         {
             // assume that PowerTLA lives in the same include path.
             // We require a configuration variable that informs us about the LMS include path.
@@ -18,10 +22,16 @@ class IliasServiceInit extends VLEHandler
 
             $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
             $vstring = $aVersion[0] . '.' . $aVersion[1];
-            $strVersionInit = 'restservice/include/ilRESTInitialization.' . $vstring . '.php';
+            $this->log("ilias version is  ".$vstring);
+          //  set_include_path(".." . PATH_SEPARATOR . get_include_path());
+         //   $strVersionInit = 'restservice/include/ilRESTInitialization.' . $vstring . '.php';
+            $strVersionInit = '../include/PowerTLA/Ilias/ilRESTInitialization.' . $vstring . '.php';
 
-            if ( file_exists($strVersionInit) )
+           $this->log("strVersionInit is ".$strVersionInit); 
+           
+            if (file_exists($strVersionInit) )
             {
+            	$this->log("ilias file exists");
                 require_once($strVersionInit);
 
                 require_once 'Services/Database/classes/class.ilDB.php';
@@ -51,6 +61,8 @@ class IliasServiceInit extends VLEHandler
                 $this->dbhandler    = $GLOBALS['ilDB'];
                 $this->user         = $GLOBALS['ilUser'];
                 $this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
+            }else{
+            	$this->log("ilias file does not exist");
             }
         }
     }
