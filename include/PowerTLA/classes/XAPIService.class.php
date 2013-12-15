@@ -38,65 +38,16 @@ class XAPIService extends VLEService
         }
     }
     
-    protected function validateMethod()
-    {
-        parent::validateMethod();
-        
-        // build the name of the handler method of the XAPI protocol.
-        $action_name = "";
-        switch ($this->method)
-        {
-            case 'GET':
-                $action_name = "get_";
-                break;
-            case 'PUT':
-                $action_name = "insert_";
-                break;
-            case 'POST':
-                $action_name = "update_";
-                break;
-            case 'DELETE':
-                $action_name = "delete_";
-                break;
-            case 'OPTIONS':
-                // CORS madness ;)
-                break;
-            default:
-                $this->status = RESTService::BAD_METHOD;
-            break;
-        }
-        
+    protected function prepareOperation() {
         // This service is quite complex regarding what methods are allowed.
-        if ($this->status === RESTService::OK)
+        $action_name = strtolower($this->method) . '_' . strtolower($this->mode);
+        
+        if (!empty($this->feature))
         {
-            $action_name .= $this->mode;
-            
-            if (!empty($this->feature))
-            {
-                $action_name .= "_" . $this->feature;
-            }
-            
-            // Now we have the handler method name in $action_name for the requested XAPI protocol operation.
-            
-            // checkMethod() does some magic for us and prepares the method handling to call the correct method
-            // of the requested XAPI protocol.
-            $this->checkMethod($action_name);
+            $action_name .= "_" . strtolower($this->feature);
         }
         
-        if ($this->status === RESTService::OK &&
-            ($this->method === "PUT" || $this->method === "POST") )
-        {
-            $content = file_get_contents("php://input");
-	    $data = json_decode($content, true);
-            if (!empty($data))
-            {
-                $this->input = $data;
-            }
-            else
-            {
-                $this->status = RESTService::BAD_METHOD;
-            }
-        }
+        $this->action = $action_name;
     }
     
     // About resource
@@ -114,9 +65,7 @@ class XAPIService extends VLEService
      * used of PUT and POST statements
      */
     private function store_single_statement($statement) {
-        // insert the statement and index the context
-        
-        
+        // insert the statement and index the context 
         if($this->check_trigger($statement))
         {
             $this->call_trigger();
@@ -142,57 +91,97 @@ class XAPIService extends VLEService
     }
         
     protected function delete_statements()
-    {}
+    {
+        $this->missing();
+    }
     
     // Agent Document API
     protected function get_agents()
-    {}
+    {
+        $this->missing();
+    }
    
     protected function get_agents_profile()
-    {}
+    {
+        $this->missing();
+    }
     protected function insert_agents_profile()
-    {}
+    {
+        $this->missing();
+    }
     protected function update_agents_profile()
-    {}
+    {
+        $this->missing();
+    }
     protected function delete_agents_profile()
-    {}
+    {
+        $this->missing();
+    }
     
     // Activities Document API
     protected function get_activities()
-    {}
+    {
+        $this->missing();
+    }
     
     protected function get_activities_profile()
-    {}
+    {
+        $this->missing();
+    }
     protected function insert_activities_profile()
-    {}
+    {
+        $this->missing();
+    }
     protected function update_activities_profile()
-    {}
+    {
+        $this->missing();
+    }
     protected function delete_activities_profile()
-    {}
+    {
+        $this->missing();
+    }
     
     protected function get_activities_state()
-    {}
+    {
+        $this->missing();
+    }
     protected function insert_activities_state()
-    {}
+    {
+        $this->missing();
+    }
     protected function update_activities_state()
-    {}
+    {
+        $this->missing();
+    }
     protected function delete_activities_state()
-    {}
+    {
+        $this->missing();
+    }
     
     
     // TODO Filter API
     protected function get_filters()
-    {}
+    {
+        $this->missing();
+    }
     protected function insert_filter()
-    {}
+    {
+        $this->missing();
+    }
     protected function delete_filter()
-    {}
+    {
+        $this->missing();
+    }
     protected function update_filter()
-    {}
+    {
+        $this->missing();
+    }
     
     // GET statements/filter/filter_id
     protected function get_filter_result()
-    {}
+    {
+        $this->missing();
+    }
     
     // TODO Trigger API
     
@@ -204,13 +193,21 @@ class XAPIService extends VLEService
     
     // system envents are useful on integrated systems that allow cross process messaging 
     protected function get_triggers()
-    {}
+    {
+        $this->missing();
+    }
     protected function insert_trigger()
-    {}
+    {
+        $this->missing();
+    }
     protected function delete_trigger()
-    {}
+    {
+        $this->missing();
+    }
     protected function update_trigger()
-    {}
+    {
+        $this->missing();
+    }
     
     protected function check_trigger($statement)
     {

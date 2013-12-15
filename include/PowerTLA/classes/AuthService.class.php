@@ -34,18 +34,13 @@ class AuthService extends VLEService
         
         if($this->status === RESTService::OK)
         {
-            $this->mode = $this->path_info;
-            $this->log("mode " . $this->mode);
-            switch ($this->mode)
+            $pathArray = explode('/', $this->path_info);
+            if (count($pathArray) == 1) 
             {
-                case 'register':        // device registration for hooking mobile devices into the process
-                case 'request_token':   // request a new session
-                case 'authorize':       // intermediate step to authorizing a service
-                case 'access_token':    // grant the access token
-                    break;
-                default:
-                    $this->status = RESTService::BAD_URI;
-                    break;
+                $this->mode = $pathArray[0];
+            }
+            else {
+                this->status = RESTService::BAD_URI;
             }
         }
     }
@@ -55,31 +50,23 @@ class AuthService extends VLEService
      */
     protected function validateHeader()
     {
-        // do the oauth tricks
+        // do the standard oauth tricks
         if ($this->method === 'DELETE')
         {
-            parent::validateHeaders();
+            parent::validateHeader();
             return;
         }
         
-        // this is only necessary because this service handles the user authentication
-        switch($this->mode)
+        $valFunction = 'validate_' . $this->mode;
+        
+        if(method_exists($this, $valFunc))
         {
-            case "request_token":
-                $this->session->validateConsumerToken();
-                break;
-            case 'authorize':
-                $this->session->validateRequestToken();
-                break;
-            case 'access_token':
-                $this->session->verifyRequestToken();
-                break;
-            default:
-            	
-                // this should not be reached.
-                $this->status = RESTService::BAD_HEADER; 
-                $this->log("there is not mode, so status gets a bad header");
-                break;
+            call_user_func(array($this, $valFunc)) ;
+        }
+        else
+        {
+            $this->log("validation is not allowed for mode " . $this->mode);
+            $this->status = RESTling::BAD_HEADER;
         }
         
         // this is a pre check
@@ -87,103 +74,42 @@ class AuthService extends VLEService
         if ( $this->session->getOAuthState() !== OAUTH_OK )
         {
             $this->status = RESTService::BAD_HEADER;
-            $this->not_allowed(); 
         }
+    }
+    
+    protected function prepareOperation() 
+    {
+        $this->action = strtolower($this->method) . '_' . strtolower($this->mode);
+    }
+    
+    /**
+     * validation helper functions
+     */
+    protected function validate_request_token()
+    {
+        $this->session->validateConsumerToken();
+    }
+    
+    protected function validate_authorize() 
+    {
+        $this->session->validateRequestToken();
     }
      
-    /**
-     * @method void handle_GET()
-     *
-     * Maps the functions for the  GET modes
-     */    
-    protected function handle_GET()
+    protected function validate_access_token()
     {
-    	$this->log("handle_GET");
-    	switch($this->mode)
-    	{
-    		case "request_token":
-    			$this->grant_requestToken();
-    			break;
-    		case 'authorize':
-    			$this->obtain_authorization();
-    			break;
-    		case 'access_token':
-    			$this->log('enter grant_accessToken');
-    			$this->grant_accessToken();
-    			break;
-    		default:
-    			// bad request
-    			$this->bad_request();
-    			break;
-    	}
-    }
-       
-    /**
-     * @method void handle_POST()
-     *
-     *  Maps the functions for the  POST modes
-     */
-    protected function handle_POST()
-    {
-        $this->log("handle post");
-        
-        switch ($this->mode) {
-            case 'register':
-                $this->register_service();
-                break;
-            case 'authorize':
-                // normally this won't be handled by the service. 
-                $this->authenticate_user();
-                break;
-            default:
-                $this->bad_request();
-                break;
-        }
+        $this->session->verifyRequestToken();
     }
     
-    /**
-     * @method void handle_PUT()
-     *
-     *  Maps the functions for the  PUT modes
-     */
-    protected function handle_PUT()
+    protected function validate_register() 
     {
-    	$this->log("handle put");
-    
-    	switch ($this->mode) {
-    		case 'register':
-    			$this->register_service();
-    			break;
-   		default:
-    			$this->bad_request();
-    			break;
-    	}
-    }
-    
- 
-    /**
-     * @method void handle_DELETE()
-     *
-     * Triggers session invalidation
-     */    
-    protected function handle_DELETE()
-    {
-        $this->mark();
-        
-        switch($this->mode) {
-            case 'access_token':
-                $this->invalidate_accessToken();
-                break;
-            default:
-                $this->bad_request();
-                break;
-        }
-    }
+        // nothing to be done at this point.
+        // the registration is the token free first step 
+    }    
     
     /**
      * @method void grant_requestToken() 
      */
-    protected function grant_requestToken()
+    protected function get_request_token()
     {
         // GET BASE_URI/request-token
         $this->log("grant request token");
@@ -202,7 +128,7 @@ class AuthService extends VLEService
     /**
      * @method void  obtain_authorization() 
      */    
-    protected function obtain_authorization()
+    protected function get_authorize()
     {
         // GET BASE_URI/authorize
         $this->mark();
@@ -247,7 +173,7 @@ class AuthService extends VLEService
     /**
      * @method void authenticate_user()
      */
-    protected function authenticate_user()
+    protected function post_authorize()
     {
         // POST BASE_URI/authorize
         $this->mark();
@@ -271,7 +197,7 @@ class AuthService extends VLEService
     /**
      * @method void grant_accessToken()
      */
-    protected function grant_accessToken()
+    protected function get_access_token()
     {
         // GET BASE_URI/access_token
         $this->mark();
@@ -297,7 +223,7 @@ class AuthService extends VLEService
      *
      * This function always returns an error code. 
      */
-    protected function invalidate_accessToken()
+    protected function delete_access_token()
     {
         // DELETE BASE_URI/access_token
         $this->mark();
@@ -313,13 +239,18 @@ class AuthService extends VLEService
      * It stores them in the database and then it sends them to the client.
      * 
      */
-    protected function register_service()
+    protected function put_register() 
+    {
+        $this->post_register();    
+    }
+    
+    protected function post_register()
     {
     	$this->mark();
     	$deviceID = $_PUT["UUID"];
     	$appID = $_PUT["APPID"];
     	
-    	$response=json_encode(generateConsumerTokens($appID,$deviceID));
+    	$response=json_encode($this->generateConsumerTokens($appID,$deviceID));
     	echo($response);
     }
     
