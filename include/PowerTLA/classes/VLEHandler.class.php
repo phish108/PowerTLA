@@ -40,7 +40,7 @@ class VLEHandler extends Logger
         {
             if (!empty($pName) && !$this->isPluginActive($pName))
             {
-                      return false;
+                return false;
             }
         }
         
