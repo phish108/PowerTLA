@@ -6,7 +6,7 @@ set_include_path(".." . PATH_SEPARATOR . get_include_path());
 include('include/RESTling/contrib/Restling.auto.php');
 include('include/PowerTLA/PowerTLA.auto.php');
 
-require_once("include/ilServiceInit.php");  
+require_once('include/PowerTLA/Ilias/IliasHandler.class.php'); 
 require_once("include/class.XAPIService.php");
 
 
@@ -16,7 +16,7 @@ $plugins = array("oauth" => array("UIComponent", "uiroa", "OAuthREST"),
 
                  
 // TODO: wrapper that decides which LMS initialization has to be used. 
-$VLEAPI  = new IliasServiceInit($plugins); 
+$VLEAPI  = new IliasHandler($plugins); 
 $service = new XAPIService($VLEAPI);
 
 $service->run();
