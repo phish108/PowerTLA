@@ -45,7 +45,7 @@ class VLEService extends OAuthService {
             $this->response_type = "json"; // we always talk JSON
              
             // now test if all the required plugins are running.
-            if ($this->status === RESTling::OK
+            if ($this->status == RESTling::OK
                 && !$this->VLE->arePluginsActive()) {
                 // plugin has been deactivated in the system administration.
                 $this->status = RESTling::UNINITIALIZED;
