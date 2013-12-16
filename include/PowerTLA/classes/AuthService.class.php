@@ -79,7 +79,7 @@ class AuthService extends VLEService
     
     protected function prepareOperation() 
     {
-        $this->action = strtolower($this->method) . '_' . strtolower($this->mode);
+        $this->operation = strtolower($this->method) . '_' . strtolower($this->mode);
     }
     
     /**

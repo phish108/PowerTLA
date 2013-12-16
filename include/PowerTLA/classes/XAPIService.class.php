@@ -47,7 +47,7 @@ class XAPIService extends VLEService
             $action_name .= "_" . strtolower($this->feature);
         }
         
-        $this->action = $action_name;
+        $this->operation = $action_name;
     }
     
     // About resource
