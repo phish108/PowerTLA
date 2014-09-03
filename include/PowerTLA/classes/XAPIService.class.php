@@ -22,8 +22,8 @@ class XAPIService extends RESTling
         if($this->status === RESTling::OK)
         {
             $aPI = explode('/', $this->path_info);
-            $this->mode    = $aPI[0];
-            $this->feature = $aPI[1];
+            $this->mode    = array_shift($aPI);
+            $this->feature = array_shift($aPI);
 
             // reset the mode and feature for the filter API
             if (!empty($this->mode)
@@ -31,16 +31,34 @@ class XAPIService extends RESTling
                 && !empty($this->feature)
                 && $this->feature === 'filter')
             {
-                $this->mode = $aPI[1];
+                $this->mode = $this->feature;
                 $this->feature = "result";
-                $this->filter_id= $aPI[2];
+                $this->filter_id= array_shift($aPI);
             }
         }
     }
 
     protected function prepareOperation() {
-        // This service is quite complex regarding what methods are allowed.
-        $action_name = strtolower($this->method) . '_' . strtolower($this->mode);
+        // This service is quite complex regarding the permitted methods.
+        // the prepareOperation() method generates service functions directly from the
+        // request.
+
+        // The class provides
+        $action_name = strtolower($this->method);
+
+        // translate put and post to insert and update
+        switch ($action_name) {
+            case 'put':
+                $action_name = 'insert';
+                break;
+            case 'post':
+                $action_name = 'update';
+                break;
+            default:
+                break;
+        }
+
+        $action_name .= '_' . strtolower($this->mode);
 
         if (!empty($this->feature))
         {
@@ -48,6 +66,7 @@ class XAPIService extends RESTling
         }
 
         $this->operation = $action_name;
+        $this->log("call method " . $action_name);
     }
 
     // About resource
@@ -98,7 +117,8 @@ class XAPIService extends RESTling
     protected function insert_statements()
     {
         // for each statement in the input
-        $this->store_single_statement($statement);
+        $this->log('insert statement');
+        $this->store_single_statement($this->input);
     }
     protected function update_statements()
     {
@@ -106,7 +126,8 @@ class XAPIService extends RESTling
 
         // for each statement in the input
         // check whether the statement is stored and remove it if this the case.
-        $this->store_single_statement($statement);
+        $this->log('update statement');
+        $this->store_single_statement($this->input);
     }
 
     protected function delete_statements()
