@@ -7,11 +7,14 @@
      * initialization of your root script.
      */
     spl_autoload_register(function ($class) {
-    	$path = 'include/PowerTLA/classes/' . $class . '.class.php';
-    	if (!file_exists($path))
-        {
-            return false;
+    	$path = 'classes/' . $class . '.class.php';
+        $prefixes = explode(PATH_SEPARATOR, get_include_path());
+
+        foreach ( $prefixes as $p ) {
+            if (file_exists($p .'/' . $path))
+            {
+                include_once $p . '/' . $path;
+            }
         }
-        include_once $path;
     });
 ?>
