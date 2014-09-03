@@ -1,93 +1,118 @@
 <?php
 
 /**
-* @class XAPIStatement
-*/
+ * @class XAPIStatement
+ */
 
 class XAPIStatement
 {
-    private $agent;
-    private $verb;
-    private $object;
-    private $result;
-    private $id;
+    private $data;
 
     public function __construct()
     {
-        $this->agent = array();
-        $this->verb  = array();
-        $this->
+        $this->data = array();
     }
 
     public function addID(id)
-    {}
+    {
+        $this->data["id"] = id;
+    }
 
     public function generateID()
-    {}
+    {
+        $i_url = "";
+        if (!empty($this->data["agent"]["id"]))
+            $i_url .= $this->data["agent"]["id"];
+        if (!empty($this->data["verb"]["id"]))
+                $i_url .= $this->data["verb"]["id"];
+        if (!empty($this->data["object"]["id"]))
+            $i_url .= $this->data["object"]["id"];
 
-    public function addAgent(id)
-    {}
+        uuid_create(&$context);
+        uuid_create(&$namespace);
 
-    public function addVerb(id)
-    {}
+        uuid_make($context, UUID_MAKE_V5, $namespace, $i_url);
+        uuid_export($context, UUID_FMT_STR, &$uuid);
 
-    public function addObject(id)
-    {}
+        $this->data["id"] = trim($uuid);
+    }
 
-    public function addTimestamp(time)
-    {}
+    public function addAgent(objAgent)
+    {
+        $this->data["agent"] = objAgent;
+    }
+
+    public function addVerb(objVerb)
+    {
+        $this->data["verb"] = objVerb;
+    }
+
+    public function addObject(objObject)
+    {
+        $this->data["object"] = objObject;
+    }
+
+    public function addResult(objResult)
+    {
+        $this->data["result"] = objResult;
+    }
+
+    public function addContext(objContext)
+    {
+        $this->data["context"] = objContext;
+    }
+
+    public function addAuthority(objAuthority)
+    {
+        $this->data["authority"] = objAuthority;
+    }
+
+    public function addTimestamp(timestamp)
+    {
+        $this->data["timestamp"] = timestamp;
+    }
 
     public function makeTimestamp() ///< the time is now
-    {}
+    {
+        $dt = new DateTime('NOW');
+        $this->data["stored"] = $dt->format(DateTime::ISO8601);
+    }
 
-    public function addStoredTimestamp()
-    {}
+    public function addStoredTimestamp(timestamp)
+    {
+        $this->data["stored"] = timestamp;
+    }
 
     public function makeStoredTimestamp()
-    {}
-
-    public function addScore(score, type) ///< score - the score value, type - 'scaled', 'raw', 'min', 'max'
-    {}
-
-    public function addDuration(duration)
-    {}
-
-    public function addResponse(response)
-    {}
-
-    public function addSuccessState(success)
-    {}
-
-    public function addCompletedState(completed)
-    {}
-
-    public function addPlatform(platform)
-    {}
-
-    /**
-     * Dictionaries
-     */
-
-    public function agentDictionary(dictObject)
-    {}
-
-    public function objectDictionary(dictObject)
-    {}
-
-    public function verbDictionary(dictObject)
-    {}
-
-    public function useVerbDictionary(dictObject)
-    {}
-
-
-    public function data()
     {
-        if (empty($this->id))
+        $dt = new DateTime('NOW');
+        $this->data["stored"] = $dt->format(DateTime::ISO8601);
+    }
+
+    public function result()
+    {
+        // this function returns the statement only if it is valid
+        if (!(empty($this->data["actor"]) &&
+              empty($this->data["verb"]) &&
+              empty($this->data["object"])))
         {
-            $this->generateID();
+            if (empty($this->data["id"]))
+            {
+                $this->generateID();
+            }
+
+            if (empty($this->data["timestamp"]))
+            {
+                $this->makeTimestamp();
+            }
+
+            if (empty($this->data["stored"]))
+            {
+                $this->makeStoredTimestamp();
+            }
+
+            return $this->data;
         }
-        // accessor function to retrieve the statement
 
         return array();
     }

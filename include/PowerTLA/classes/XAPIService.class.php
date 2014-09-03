@@ -94,21 +94,97 @@ class XAPIService extends RESTling
     protected function get_statements()
     {
         // get all statements
+        $userDict = array("1234" => array("id" => "mailto:foo@example.org",
+                                          "name" => "Foo Bar"),
+                          "1235" => array("id" => "mailto:hello.world@example.org",
+                                          "name" => "Hello World"));
+
+        $verbDict = array("qti.response.item" => array("id" => "http://imsglobal.com/vocab/qti/response/item",
+                                                       "display" => array("en" => "responded to a test question",
+                                                                          "de" => "Testfrage beantwortet")),
+                          "ob.achieve.badge" => array("id" => "http://openbadges.org/vocab/earned/badge",
+                                                      "display" => array("en" => "earned Badge",
+                                                                         "de" => "verdiente Belohnung")),
+                          "course.enroll" => array("id" => "http://ilias.org/vocab/course/enroll",
+                                                   "display" => array("en" => "enrolled into course",
+                                                                         "de" => "Kurs begetreten")),
+                         );
+
+        $objectDict = array("123" => array("id" => "http://pfp.ethz.ch/qti/pool/54321/123",
+                                           "definition" => array("name" => array("de" => "frage 1"),
+                                                                 "type" => "http://imsglobal.com/vocab/qti/item")),
+                            "4122" => array("id" => "http://pfp.ethz.ch/course/4122",
+                                           "definition" => array("name" => array("de" => "UZH Test Kurs"),
+                                                                 "type" => "http://ilias.org/vocal/course")),
+                            "124" => array("id" => "http://pfp.ethz.ch/qti/pool/54321/124",
+                                           "definition" => array("name" => array("de" => "frage 2"),
+                                                                 "type" => "http://imsglobal.com/vocab/qti/item"))
+                           );
+
+        $resDict = array("0" => array("score" => array("raw" => "0", "scaled" => -1, "success" => FALSE, "completion" => FALSE)),
+                         "0.5" => array("score" => array("raw" => "0.5", "scaled" => 0, "success" => FALSE, "completion" => FALSE)),
+                         "1" => array("score" => array("raw" => "1", "scaled" => 1, "success" => TRUE, "completion" => FALSE)));
+
+        $ctxtDict = array(
+            "1234-course.enroll-4122"=> array("statement" => array("objectType" => "StatementRef", "id" => "1234-course.enroll-4122")),
+            "1235-course.enroll-4122"=> array("statement" => array("objectType" => "StatementRef", "id" => "1235-course.enroll-4122"))
+        );
+
         $jsonfeed   = array();
-        array_push($jsonfeed, array(
-            "actor" => "me",
-            "verb"  => "coded",
-            "object"=> "powertla",
-            "time"  => "1233"
-        ));
 
-        array_push($jsonfeed, array(
-            "actor" => "me",
-            "verb"  => "coded",
-            "object"=> "powertla",
-            "time"  => "1234"
-        ));
+        $s = new XAPIStatement();
+        $s->addID('1234-course.enroll-4122');
+        $s->addAgent($userDict["1234"]);
+        $s->addVerb($verbDict["course.enroll"]);
+        $s->addObject($objectDict["4122"]);
+        array_push($jsonfeed,$s->result());
 
+        $s = new XAPIStatement();
+        $s->addID('1235-course.enroll-4122');
+        $s->addAgent($userDict["1235"]);
+        $s->addVerb($verbDict["course.enroll"]);
+        $s->addObject($objectDict["4122"]);
+        array_push($jsonfeed,$s->result());
+
+        $s = new XAPIStatement();
+        $s->addAgent($userDict["1234"]);
+        $s->addVerb($verbDict["qti.response.item"]);
+        $s->addObject($objectDict["123"]);
+        $s->addResult($resDict["0"]);
+        $s->addContext($ctxtDict["1234-course.enroll-4122"]);
+        array_push($jsonfeed,$s->result());
+
+        $s = new XAPIStatement();
+        $s->addAgent($userDict["1235"]);
+        $s->addVerb($verbDict["qti.response.item"]);
+        $s->addObject($objectDict["123"]);
+        $s->addResult($resDict["0.5"]);
+        $s->addContext($ctxtDict["1235-course.enroll-4122"]);
+        array_push($jsonfeed,$s->result());
+
+        $s = new XAPIStatement();
+        $s->addAgent($userDict["1235"]);
+        $s->addVerb($verbDict["qti.response.item"]);
+        $s->addObject($objectDict["124"]);
+        $s->addResult($resDict["0.5"]);
+        $s->addContext($ctxtDict["1235-course.enroll-4122"]);
+        array_push($jsonfeed,$s->result());
+
+        $s = new XAPIStatement();
+        $s->addAgent($userDict["1234"]);
+        $s->addVerb($verbDict["qti.response.item"]);
+        $s->addObject($objectDict["124"]);
+        $s->addResult($resDict["1"]);
+        $s->addContext($ctxtDict["1234-course.enroll-4122"]);
+        array_push($jsonfeed,$s->result());
+
+        $s = new XAPIStatement();
+        $s->addAgent($userDict["1234"]);
+        $s->addVerb($verbDict["qti.response.item"]);
+        $s->addObject($objectDict["123"]);
+        $s->addResult($resDict["1"]);
+        $s->addContext($ctxtDict["1234-course.enroll-4122"]);
+        array_push($jsonfeed,$s->result());
 
         $this->data = $jsonfeed;
     }
