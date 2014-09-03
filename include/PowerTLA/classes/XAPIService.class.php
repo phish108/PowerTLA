@@ -105,9 +105,12 @@ class XAPIService extends RESTling
                           "ob.achieve.badge" => array("id" => "http://openbadges.org/vocab/earned/badge",
                                                       "display" => array("en" => "earned Badge",
                                                                          "de" => "verdiente Belohnung")),
-                          "course.enroll" => array("id" => "http://ilias.org/vocab/course/enroll",
-                                                   "display" => array("en" => "enrolled into course",
-                                                                         "de" => "Kurs begetreten")),
+                          "course.participate.start" => array("id" => "http://ilias.org/vocab/course/participation/start",
+                                                              "display" => array("en" => "Course participation started",
+                                                                                 "de" => "Kursteilnahme begonnen")),
+                          "course.participate.end" => array("id" => "http://ilias.org/vocab/course/participation/end",
+                                                              "display" => array("en" => "Course participation ended",
+                                                                                 "de" => "Kursteilnahme abgeschlossen")),
                          );
 
         $objectDict = array("123" => array("id" => "http://pfp.ethz.ch/qti/pool/54321/123",
@@ -135,14 +138,14 @@ class XAPIService extends RESTling
         $s = new XAPIStatement();
         $s->addID('1234-course.enroll-4122');
         $s->addAgent($userDict["1234"]);
-        $s->addVerb($verbDict["course.enroll"]);
+        $s->addVerb($verbDict["course.participate.start"]);
         $s->addObject($objectDict["4122"]);
         array_push($jsonfeed,$s->result());
 
         $s = new XAPIStatement();
         $s->addID('1235-course.enroll-4122');
         $s->addAgent($userDict["1235"]);
-        $s->addVerb($verbDict["course.enroll"]);
+        $s->addVerb($verbDict["course.participate.start"]);
         $s->addObject($objectDict["4122"]);
         array_push($jsonfeed,$s->result());
 
