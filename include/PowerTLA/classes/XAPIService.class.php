@@ -100,11 +100,11 @@ class XAPIService extends RESTling
                                           "name" => "Hello World"));
 
         $verbDict = array("qti.response.item" => array("id" => "http://imsglobal.com/vocab/qti/response/item",
-                                                       "display" => array("en" => "responded to a test question",
+                                                       "display" => array("en" => "Responded to a test item",
                                                                           "de" => "Testfrage beantwortet")),
                           "ob.achieve.badge" => array("id" => "http://openbadges.org/vocab/earned/badge",
-                                                      "display" => array("en" => "earned Badge",
-                                                                         "de" => "verdiente Belohnung")),
+                                                      "display" => array("en" => "Earned badge",
+                                                                         "de" => "Verdiente Belohnung")),
                           "course.participate.start" => array("id" => "http://ilias.org/vocab/course/participation/start",
                                                               "display" => array("en" => "Course participation started",
                                                                                  "de" => "Kursteilnahme begonnen")),
@@ -118,7 +118,7 @@ class XAPIService extends RESTling
                                                                  "type" => "http://imsglobal.com/vocab/qti/item")),
                             "4122" => array("id" => "http://pfp.ethz.ch/course/4122",
                                            "definition" => array("name" => array("de" => "UZH Test Kurs"),
-                                                                 "type" => "http://ilias.org/vocal/course")),
+                                                                 "type" => "http://ilias.org/vocab/course")),
                             "124" => array("id" => "http://pfp.ethz.ch/qti/pool/54321/124",
                                            "definition" => array("name" => array("de" => "frage 2"),
                                                                  "type" => "http://imsglobal.com/vocab/qti/item"))
