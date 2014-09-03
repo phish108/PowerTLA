@@ -25,7 +25,7 @@ class XAPIService extends RESTling
             $this->mode    = array_shift($aPI);
             $this->feature = array_shift($aPI);
 
-            // reset the mode and feature for the filter API
+            // reset the mode and feature for Our filter API
             if (!empty($this->mode)
                 && $this->mode === 'statements'
                 && !empty($this->feature)
@@ -90,7 +90,6 @@ class XAPIService extends RESTling
             $this->call_trigger();
         }
     }
-
 
     protected function get_statements()
     {

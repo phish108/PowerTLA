@@ -75,43 +75,43 @@ class ilRESTInitialization extends ilInitialization {
 
         $ilBench->stop("Core", "HeaderInclude_IncludeFiles");
     }
-    
+
     function determineClient() {
         global $ilIliasIniFile;
-        
+
         // check whether ini file object exists
         if (!is_object($ilIliasIniFile))
         {
                 die ("Fatal Error: ilInitialisation::determineClient called without initialisation of ILIAS ini file object.");
         }
-        
+
         // CGL: there is some "client" information stored in the ini file.
         // CGL: without this information the database initialization fails.
-        $client_id = $ilIliasIniFile->readVariable("clients","default");    
-        define ("CLIENT_ID", $client_id);    
+        $client_id = $ilIliasIniFile->readVariable("clients","default");
+        define ("CLIENT_ID", $client_id);
     }
-    
+
     function goToPublicSection() {
         global $ilAuth;
-        
+
         // logout and end previous session
         $ilAuth->logout();
         session_unset();
         session_destroy();
-        
+
         // new session and login as anonymous
         $this->setSessionHandler();
         session_start();
         $_POST["username"] = "anonymous";
         $_POST["password"] = "anonymous";
         ilAuthUtils::_initAuth();
-        
+
         $oldSid = session_id();
-        
+
         $ilAuth->start();
-        
+
         $newSid = session_id();
-        //include_once './Services/Payment/classes/class.ilPaymentShoppingCart.php';	
+        //include_once './Services/Payment/classes/class.ilPaymentShoppingCart.php';
         //ilPaymentShoppingCart::_migrateShoppingCart($oldSid, $newSid);
 
         if (ANONYMOUS_USER_ID == "")
@@ -119,17 +119,17 @@ class ilRESTInitialization extends ilInitialization {
             // REST SERVICES SHOULD RESPOND A 400 error
             die ("Public Section enabled, but no Anonymous user found.");
         }
-        
+
         if (!$ilAuth->getAuth())
         {
-            // REST SERVICES SHOULD RESPOND A 400 error    
+            // REST SERVICES SHOULD RESPOND A 400 error
             die("ANONYMOUS user with the object_id ".ANONYMOUS_USER_ID." not found!");
         }
-        
+
         // stop immediately to avoid redirection madness.
         return true;
     }
-    
+
     function initIlias($context = "web") {
     	$this->log("enter initIlias f");
         global $ilDB, $ilUser, $ilLog, $ilErr, $ilClientIniFile, $ilIliasIniFile,
@@ -139,7 +139,7 @@ class ilRESTInitialization extends ilInitialization {
 
         // remove unsafe characters
         $this->removeUnsafeCharacters();
-        
+
         // error reporting
         // remove notices from error reporting
         if (version_compare(PHP_VERSION, '5.3.0', '>='))
@@ -150,7 +150,7 @@ class ilRESTInitialization extends ilInitialization {
         {
                 error_reporting(ini_get('error_reporting') & ~E_NOTICE);
         }
-        
+
         // include common code files
         $this->requireCommonIncludes();
         global $ilBench;
@@ -166,11 +166,11 @@ class ilRESTInitialization extends ilInitialization {
         // prepare file access to work with safe mode (has been done in class ilias before)
         umask(0117);
         // set cookie params
-	$this->setCookieParams();
-        
+    $this->setCookieParams();
+
         // $ilIliasIniFile initialisation
         $this->initIliasIniFile();
-        
+
         // CLIENT_ID determination
         $this->determineClient();
 
@@ -191,10 +191,10 @@ class ilRESTInitialization extends ilInitialization {
 
         // set session handler
         $this->setSessionHandler();
-    
+
         // $ilSetting initialisation
         $this->initSettings();
-    
+
         // $ilLog initialisation
         $this->initLog();
 
@@ -203,10 +203,10 @@ class ilRESTInitialization extends ilInitialization {
         $https = new ilHTTPS();
         $GLOBALS['https'] =& $https;
         $https->enableSecureCookies();
-        $https->checkPort();		
-        
+        $https->checkPort();
+
         if($this->returnBeforeAuth()) return;
-        
+
         $ilCtrl = new ilCtrl2();
         $GLOBALS['ilCtrl'] =& $ilCtrl;
 
@@ -214,12 +214,12 @@ class ilRESTInitialization extends ilInitialization {
         include_once("./Services/Authentication/classes/class.ilAuthUtils.php");
         ilAuthUtils::_initAuth();
         global $ilAuth;
-        
+
         $this->includePhp5Compliance();
 
         //echo get_class($ilAuth);
         //var_dump($ilAuth);
-        
+
         // Do not accept external session ids
         if (!ilSession::_exists(session_id()))
         {
@@ -279,15 +279,15 @@ class ilRESTInitialization extends ilInitialization {
         ////require_once('Log.php');
         ////$ilAuth->logger = Log::singleton('error_log',PEAR_LOG_TYPE_SYSTEM,'TEST');
         ////$ilAuth->enableLogging = true;
-                
+
         if (!defined("IL_PHPUNIT_TEST"))
         {
             $oldSid = session_id();
-            
+
             $ilAuth->start();
-            
+
             $newSid = session_id();
-            include_once './Services/Payment/classes/class.ilPaymentShoppingCart.php';	
+            include_once './Services/Payment/classes/class.ilPaymentShoppingCart.php';
             ilPaymentShoppingCart::_migrateShoppingCart($oldSid, $newSid);
         }
 
@@ -355,10 +355,10 @@ class ilRESTInitialization extends ilInitialization {
                 }
             }
         }
-        
+
         //
         // SUCCESSFUL AUTHENTICATION
-        //        
+        //
         if($ilAuth->getStatus() == '' &&
                 $ilias->account->isCurrentUserActive() ||
                 (defined("IL_PHPUNIT_TEST") && DEVMODE))
@@ -368,9 +368,9 @@ class ilRESTInitialization extends ilInitialization {
             //var_dump($_SESSION);
             // get user data
             $this->initUserAccount();
-            
-            //var_dump($_SESSION);    
-            
+
+            //var_dump($_SESSION);
+
             // differentiate account security mode
             require_once('./Services/PrivacySecurity/classes/class.ilSecuritySettings.php');
             $security_settings = ilSecuritySettings::_getInstance();
@@ -420,8 +420,8 @@ class ilRESTInitialization extends ilInitialization {
         // $lng initialisation
         $this->initLanguage();
 
-	// store user language in tree
-	$GLOBALS['tree']->initLangCode();
+    // store user language in tree
+    $GLOBALS['tree']->initLangCode();
 
         // ### AA 03.10.29 added new LocatorGUI class ###
         // when locator data array does not exist, initialise
@@ -431,25 +431,25 @@ class ilRESTInitialization extends ilInitialization {
             $_SESSION["locator_level"] = -1;
         }
         // initialise global ilias_locator object
-                        
+
         // ECS Tasks
         include_once('./Services/WebServices/ECS/classes/class.ilECSTaskScheduler.php');
         $scheduler = ilECSTaskScheduler::start();
 
-	$ilBench->stop("Core", "HeaderInclude");
+    $ilBench->stop("Core", "HeaderInclude");
     }
-    
+
     /**
      * EMPTY FUNCTIONS!
      *
-     * These function must not run!
+     * These function must not get executed!
      */
     function handleMaintenanceMode() {}
     function setCookieParams() {}
     function checkUserClientIP() {}
     function checkUserAgreement() {}
     function goToLogin($a_auth_stat="") {}
-    
+
 }
 
 
