@@ -13,8 +13,6 @@ class XAPIService extends RESTling
 
     protected $filter_id;
 
-    protected $input;
-
     protected function validateURI()
     {
         parent::validateURI();
