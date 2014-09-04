@@ -12,6 +12,19 @@ class XAPIService extends VLEService
     protected $feature;
 
     protected $filter_id;
+    protected $filters;
+
+    public function __construct()
+    {
+        $this->filters = array(
+            "course.questions" => array("id" => "http://mobinaut.io/xapi/filters/course.questions",
+                                        "description" => "Filters QTI question statements for one course",
+                                        "query-type" => "XAPI"),
+            "course.questions2" => array("id" => "http://mobinaut.io/mobler-cards/filters/course.questions",
+                                         "description" => "Filters QTI question statements for one course",
+                                         "query-type" => "moblercards")
+        );
+    }
 
     protected function validateURI()
     {
@@ -285,11 +298,7 @@ class XAPIService extends VLEService
     protected function get_filters()
     {
         // $this->missing();
-        $this->data["filters"] = array(
-            "course.questions" => array("id" => "http://mobinaut.io/xapi/filters/coruse.questions",
-                                        "description" => "Filters QTI question statements for one course")
-        );
-
+        $this->data["filters"] = $this->filters;
     }
     protected function insert_filter()
     {
@@ -308,7 +317,12 @@ class XAPIService extends VLEService
     protected function get_filter_result()
     {
         // $this->missing();
+        // query-type "moblercards" is a legacy query type to process old moblercards tables
+        if ($this->filters[$this->filter_id]["query-type"] == "moblercards")
+        {
 
+
+        }
 
         $this->get_statements();
     }
