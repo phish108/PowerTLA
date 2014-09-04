@@ -1,5 +1,5 @@
 <?php
-
+date_default_timezone_set("Europe/Zurich");
 /**
  *
  */
@@ -122,7 +122,7 @@ class XAPIService extends RESTling
         $objectDict = array("123" => array("id" => "http://pfp.ethz.ch/qti/pool/54321/123",
                                            "definition" => array("name" => array("de" => "frage 1"),
                                                                  "type" => "http://imsglobal.com/vocab/qti/item")),
-                            "4122" => array("id" => "http://pfp.ethz.ch/course/4122",
+                            "4122" => array("id" => "http://hornet.ethz.ch/course/4122",
                                            "definition" => array("name" => array("de" => "UZH Test Kurs"),
                                                                  "type" => "http://ilias.org/vocab/course")),
                             "124" => array("id" => "http://pfp.ethz.ch/qti/pool/54321/124",
@@ -288,7 +288,8 @@ class XAPIService extends RESTling
     {
         // $this->missing();
         $this->data["filters"] = array(
-            "course.questions" => "Filters QTI question statements for one course"
+            "course.questions" => array("id" => "http://mobinaut.io/xapi/filters/coruse.questions",
+                                        "description" => "Filters QTI question statements for one course")
         );
 
     }
