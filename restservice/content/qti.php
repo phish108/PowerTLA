@@ -2,7 +2,7 @@
 
 set_include_path("tla/include" . PATH_SEPARATOR . "tla/include/PowerTLA/". PATH_SEPARATOR . get_include_path());
 
-chdir("../..");
+chdir("../../..");
 
 
 // Include the auto loading hooks for RESTling and our own classes

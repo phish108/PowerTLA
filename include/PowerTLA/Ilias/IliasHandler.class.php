@@ -11,7 +11,7 @@ class IliasHandler extends VLEHandler
 
         // set_include_path("../../" . PATH_SEPARATOR . get_include_path());
 
-        $this->log("Include Path " . get_include_path());
+        // $this->log("Include Path " . get_include_path());
         // assume that PowerTLA lives in the same include path.
         // We require a configuration variable that informs us about the LMS include path.
         include_once("include/inc.ilias_version.php");
