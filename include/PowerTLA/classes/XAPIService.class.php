@@ -3,7 +3,7 @@ date_default_timezone_set("Europe/Zurich");
 /**
  *
  */
-class XAPIService extends RESTling
+class XAPIService extends VLEService
 {
     /**
      * @property $mode
@@ -98,23 +98,23 @@ class XAPIService extends RESTling
     protected function get_statements()
     {
         // get all statements
+        // DANGEROUS!
+        // this function loads all items from the LRS and dumps it to the client
+        // the filter API is more selective with this respect.
         $userDict = array("1234" => array("id" => "mailto:foo@example.org",
                                           "name" => "Foo Bar"),
                           "1235" => array("id" => "mailto:hello.world@example.org",
                                           "name" => "Hello World"));
 
-        $verbDict = array("qti.response.item" => array("id" => "http://imsglobal.com/vocab/qti/response/item",
+        $verbDict = array("qti.item.response" => array("id" => "http://imsglobal.com/vocab/qti/response/item",
                                                        "display" => array("en" => "Responded to a test item",
                                                                           "de" => "Testfrage beantwortet")),
-                          "ob.achieve.badge" => array("id" => "http://openbadges.org/vocab/earned/badge",
+                          "mozilla.achieve.badge" => array("id" => "http://openbadges.org/vocab/earned/badge",
                                                       "display" => array("en" => "Earned badge",
-                                                                         "de" => "Verdiente Belohnung")),
-                          "course.participate.start" => array("id" => "http://ilias.org/vocab/course/participation/start",
-                                                              "display" => array("en" => "Course participation started",
+                                                                         "de" => "Belohnung verdient")),
+                          "course.participate.start" => array("id" => "http://ilias.org/vocab/course/participationt",
+                                                              "display" => array("en" => "Course participation",
                                                                                  "de" => "Kursteilnahme begonnen")),
-                          "course.participate.end" => array("id" => "http://ilias.org/vocab/course/participation/end",
-                                                              "display" => array("en" => "Course participation ended",
-                                                                                 "de" => "Kursteilnahme abgeschlossen")),
                          );
 
         $objectDict = array("123" => array("id" => "http://pfp.ethz.ch/qti/pool/54321/123",
@@ -308,6 +308,8 @@ class XAPIService extends RESTling
     protected function get_filter_result()
     {
         // $this->missing();
+
+
         $this->get_statements();
     }
 

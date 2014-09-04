@@ -20,6 +20,8 @@ $VLEAPI  = new IliasHandler();
 
 $service = new XAPIService();
 
+$service->setVLE($VLEAPI);
+
 $service->run();
 
 ?>
