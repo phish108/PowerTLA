@@ -1,9 +1,9 @@
 <?php
-set_include_path(" "  . PATH_SEPARATOR . get_include_path());
-include('Services/Init/classes/class.ilInitialization.php');
+//set_include_path(" "  . PATH_SEPARATOR . get_include_path());
+require_once('Services/Init/classes/class.ilInitialisation.php');
 //require_once('Services/Init/classes/class.ilInitialization.php');
 
-class ilRESTInitialization extends ilInitialization {
+class ilRESTInitialisation extends ilInitialisation {
 
     function requireCommonIncludes() {
         global $ilBench;
@@ -13,7 +13,7 @@ class ilRESTInitialization extends ilInitialization {
         require_once("include/inc.check_pear.php");
 
         //include class.util first to start StopWatch
-        require_once "./Services/Utilities/classes/class.ilUtil.php";
+        require_once "Services/Utilities/classes/class.ilUtil.php";
         require_once "classes/class.ilBenchmark.php";
         $ilBench = new ilBenchmark();
         $GLOBALS['ilBench'] = $ilBench;
@@ -37,20 +37,20 @@ class ilRESTInitialization extends ilInitialization {
 
         //include classes and function libraries
         require_once "include/inc.db_session_handler.php";
-        require_once "./Services/Database/classes/class.ilDB.php";
-        require_once "./Services/AuthShibboleth/classes/class.ilShibboleth.php";
+        require_once "Services/Database/classes/class.ilDB.php";
+        require_once "Services/AuthShibboleth/classes/class.ilShibboleth.php";
         require_once "classes/class.ilias.php";
-        require_once './Services/User/classes/class.ilObjUser.php';
+        require_once 'Services/User/classes/class.ilObjUser.php';
         require_once "classes/class.ilFormat.php";
-        require_once "./Services/Calendar/classes/class.ilDatePresentation.php";
+        require_once "Services/Calendar/classes/class.ilDatePresentation.php";
         require_once "classes/class.ilSaxParser.php";
-        require_once "./Services/Object/classes/class.ilObjectDefinition.php";
-        require_once "./Services/Style/classes/class.ilStyleDefinition.php";
-        require_once "./Services/Tree/classes/class.ilTree.php";
-        require_once "./Services/Language/classes/class.ilLanguage.php";
-        require_once "./Services/Logging/classes/class.ilLog.php";
+        require_once "Services/Object/classes/class.ilObjectDefinition.php";
+        require_once "Services/Style/classes/class.ilStyleDefinition.php";
+        require_once "Services/Tree/classes/class.ilTree.php";
+        require_once "Services/Language/classes/class.ilLanguage.php";
+        require_once "Services/Logging/classes/class.ilLog.php";
         require_once "classes/class.ilCtrl2.php";
-        require_once "./Services/AccessControl/classes/class.ilConditionHandler.php";
+        require_once "Services/AccessControl/classes/class.ilConditionHandler.php";
         require_once "classes/class.ilBrowser.php";
         require_once "classes/class.ilFrameTargetInfo.php";
         require_once "Services/Navigation/classes/class.ilNavigationHistory.php";
@@ -58,17 +58,17 @@ class ilRESTInitialization extends ilInitialization {
         require_once "include/inc.ilias_version.php";
 
         //include role based access control system
-        require_once "./Services/AccessControl/classes/class.ilAccessHandler.php";
-        require_once "./Services/AccessControl/classes/class.ilRbacAdmin.php";
-        require_once "./Services/AccessControl/classes/class.ilRbacSystem.php";
-        require_once "./Services/AccessControl/classes/class.ilRbacReview.php";
+        require_once "Services/AccessControl/classes/class.ilAccessHandler.php";
+        require_once "Services/AccessControl/classes/class.ilRbacAdmin.php";
+        require_once "Services/AccessControl/classes/class.ilRbacSystem.php";
+        require_once "Services/AccessControl/classes/class.ilRbacReview.php";
 
         // include object_data cache
         require_once "classes/class.ilObjectDataCache.php";
         require_once 'Services/Tracking/classes/class.ilOnlineTracking.php';
 
         //include LocatorGUI
-        require_once "./Services/Locator/classes/class.ilLocatorGUI.php";
+        require_once "Services/Locator/classes/class.ilLocatorGUI.php";
 
         // include error_handling
         require_once "classes/class.ilErrorHandling.php";
@@ -131,7 +131,7 @@ class ilRESTInitialization extends ilInitialization {
     }
 
     function initIlias($context = "web") {
-    	$this->log("enter initIlias f");
+    	error_log("enter initIlias f");
         global $ilDB, $ilUser, $ilLog, $ilErr, $ilClientIniFile, $ilIliasIniFile,
                 $ilSetting, $ilias, $https, $ilObjDataCache,
                 $ilLog, $objDefinition, $lng, $ilCtrl, $ilBrowser, $ilHelp,
@@ -166,7 +166,7 @@ class ilRESTInitialization extends ilInitialization {
         // prepare file access to work with safe mode (has been done in class ilias before)
         umask(0117);
         // set cookie params
-    $this->setCookieParams();
+        $this->setCookieParams();
 
         // $ilIliasIniFile initialisation
         $this->initIliasIniFile();
@@ -185,7 +185,7 @@ class ilRESTInitialization extends ilInitialization {
         $this->initDatabase();
 
         // init plugin admin class
-        include_once("./Services/Component/classes/class.ilPluginAdmin.php");
+        include_once("Services/Component/classes/class.ilPluginAdmin.php");
         $ilPluginAdmin = new ilPluginAdmin();
         $GLOBALS['ilPluginAdmin'] = $ilPluginAdmin;
 
@@ -199,7 +199,7 @@ class ilRESTInitialization extends ilInitialization {
         $this->initLog();
 
         // $https initialisation
-        require_once './classes/class.ilHTTPS.php';
+        require_once 'classes/class.ilHTTPS.php';
         $https = new ilHTTPS();
         $GLOBALS['https'] =& $https;
         $https->enableSecureCookies();
@@ -211,7 +211,7 @@ class ilRESTInitialization extends ilInitialization {
         $GLOBALS['ilCtrl'] =& $ilCtrl;
 
         // $ilAuth initialisation
-        include_once("./Services/Authentication/classes/class.ilAuthUtils.php");
+        include_once("Services/Authentication/classes/class.ilAuthUtils.php");
         ilAuthUtils::_initAuth();
         global $ilAuth;
 
@@ -287,7 +287,7 @@ class ilRESTInitialization extends ilInitialization {
             $ilAuth->start();
 
             $newSid = session_id();
-            include_once './Services/Payment/classes/class.ilPaymentShoppingCart.php';
+            include_once 'Services/Payment/classes/class.ilPaymentShoppingCart.php';
             ilPaymentShoppingCart::_migrateShoppingCart($oldSid, $newSid);
         }
 
@@ -372,7 +372,7 @@ class ilRESTInitialization extends ilInitialization {
             //var_dump($_SESSION);
 
             // differentiate account security mode
-            require_once('./Services/PrivacySecurity/classes/class.ilSecuritySettings.php');
+            require_once('Services/PrivacySecurity/classes/class.ilSecuritySettings.php');
             $security_settings = ilSecuritySettings::_getInstance();
             if( $security_settings->getAccountSecurityMode() ==
                 ilSecuritySettings::ACCOUNT_SECURITY_MODE_CUSTOMIZED )
@@ -385,7 +385,7 @@ class ilRESTInitialization extends ilInitialization {
         }
         else if(!$ilAuth->getAuth())
         {
-            require_once('./Services/PrivacySecurity/classes/class.ilSecuritySettings.php');
+            require_once('Services/PrivacySecurity/classes/class.ilSecuritySettings.php');
             // differentiate account security mode
             $security = ilSecuritySettings::_getInstance();
             if( $security->getAccountSecurityMode() ==
@@ -433,7 +433,7 @@ class ilRESTInitialization extends ilInitialization {
         // initialise global ilias_locator object
 
         // ECS Tasks
-        include_once('./Services/WebServices/ECS/classes/class.ilECSTaskScheduler.php');
+        include_once('Services/WebServices/ECS/classes/class.ilECSTaskScheduler.php');
         $scheduler = ilECSTaskScheduler::start();
 
     $ilBench->stop("Core", "HeaderInclude");

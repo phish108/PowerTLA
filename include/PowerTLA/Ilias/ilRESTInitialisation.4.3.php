@@ -9,9 +9,7 @@ if(!isset($GLOBALS['ilGlobalStartTime']) || !$GLOBALS['ilGlobalStartTime'])
 
 include_once "Services/Context/classes/class.ilContext.php";
 
-
-
-class ilRESTInitialization extends ilInitialisation
+class ilRESTInitialisation extends ilInitialisation
 {
 
     // WRITE HERE MODIFIED CODE FOR ILIAS 4.3
@@ -28,12 +26,12 @@ class ilRESTInitialization extends ilInitialisation
 
 
         // really always required?
-        require_once "./Services/Utilities/classes/class.ilUtil.php";
-        require_once "./Services/Utilities/classes/class.ilFormat.php";
-        require_once "./Services/Calendar/classes/class.ilDatePresentation.php";
+        require_once "Services/Utilities/classes/class.ilUtil.php";
+        require_once "Services/Utilities/classes/class.ilFormat.php";
+        require_once "Services/Calendar/classes/class.ilDatePresentation.php";
         require_once "include/inc.ilias_version.php";
 
-        static::initGlobal("ilBench", "ilBenchmark", "./Services/Utilities/classes/class.ilBenchmark.php");
+        static::initGlobal("ilBench", "ilBenchmark", "Services/Utilities/classes/class.ilBenchmark.php");
     }
 
 
