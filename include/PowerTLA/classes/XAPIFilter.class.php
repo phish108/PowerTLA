@@ -34,13 +34,14 @@ class XAPIFilter
      *         "agent.id": {"param": "keyname", "map": "mailto:{param}"}    // simple parameter mapping (if no subqueries are needed)
      *      }
      *    ],
+     * }
      *
-     *   // trigger API
+     * // trigger API
      *   "action": {
+     *      "filterid": "filterURI",
      *      "experience": {}, // record a new experience; use array notation for multiple experiences
      *      "service": {},    // trigger an service with specific parameters, use array notation for multiple service calls
      *   }
-     * }
      *
      * mapped queries will always result in a list of statement ids
      * filter queries will always result in a list of statements
