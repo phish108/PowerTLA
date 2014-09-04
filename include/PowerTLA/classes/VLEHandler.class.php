@@ -4,15 +4,9 @@ class VLEHandler extends Logger
 {
     protected $dbhandler;
     protected $user;
-    protected $plugins;
 
-    public function __construct($plugins)
-    {
-        if (!empty($plugins))
-        {
-            $this->plugins = $plugins;
-        }
-    }
+    public function __construct()
+    {}
 
     public function getUser()
     {
@@ -27,24 +21,6 @@ class VLEHandler extends Logger
     protected function setDBHandler($dbh)
     {
         $this->dbhandler = $dbh;
-    }
-
-    public function arePluginsActive()
-    {
-        if (empty($this->plugins))
-        {
-            return false;
-        }
-        
-        foreach ( $this->plugings as $pName => $v )
-        {
-            if (!empty($pName) && !$this->isPluginActive($pName))
-            {
-                return false;
-            }
-        }
-        
-        return true;
     }
 
     public function isPluginActive($pname)

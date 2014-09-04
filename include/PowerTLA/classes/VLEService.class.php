@@ -1,55 +1,64 @@
 <?php
 
-class VLEService extends OAuthService {
-    /**
-     * @property $dberr
-     *
-     */
-    private $dberr = false;
-    
+class VLEService extends RESTling {
+
     /**
      * @property $VLE
      *
      */
     protected $VLE;
+    protected $dbh;
 
-    /**
-     * @method void
-     */
-    public function __construct($vleHandler) {
-        // we need to find out which initialization we should run.
-    	$this->log("enter constructor of VLE service");
-        
-        if ( !empty($vleHandler) && $vleHandler->getDBHandler() ) {
-        	$this->log("VLE Handler is not empty");
-            // pass the database handler down to OAuth handling
-            parent::__construct($vleHandler->getDBHandler());
-            $this->VLE = $vleHandler;
+    protected $pluginList;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->pluginList = array(); // setthe the plugins to test
+    }
+
+    public function setVLE($vle) {
+        if ($vle) {
+            $this->VLE = $vle;
+            $this->dbh = $vle->getDBHandler();
         }
-        else {
-        	$this->log("VLE Handler is empty");
-            $this->dberr = true;
+    }
+
+    public function addPluginID($pluginid)
+    {
+        if (!empty(plugin))
+        {
+            array_push($this->pluginList, $pluginid);
+        }
+    }
+
+    private function checkPlugins()
+    {
+        if ($this->status == RESTling::OK)
+        {
+            foreach ($this->pluginList as $p)
+            {
+                if (!empty($p) && !$this->VLE->isPluginActive($p)) {
+                    $this->status = RESTling::UNINITIALIZED;
+                    break;
+                }
+            }
         }
     }
 
     /**
      * @method void
-     */    
+     */
     protected function initializeRun() {
-        if ( $this->dberr ) {
+        $this->response_type = "json";
+
+        if (!$this->dbh && !$this->VLE) {
             $this->status = RESTling::UNINITIALIZED;
         }
         else {
             parent::initializeRun();
-            
-            $this->response_type = "json"; // we always talk JSON
-             
-            // now test if all the required plugins are running.
-            if ($this->status == RESTling::OK
-                && !$this->VLE->arePluginsActive()) {
-                // plugin has been deactivated in the system administration.
-                $this->status = RESTling::UNINITIALIZED;
-            }
+            $this->checkPlugins();
         }
     }
 }
