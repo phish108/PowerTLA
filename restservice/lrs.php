@@ -15,8 +15,6 @@ require_once('PowerTLA/Ilias/IliasHandler.class.php');
 //                 "xapi"  => array("UIComponent", "uixapi", "XAPIREST"));
 
 
-
-
 // TODO: wrapper that decides which LMS initialization has to be used.
 $VLEAPI  = new IliasHandler();
 
