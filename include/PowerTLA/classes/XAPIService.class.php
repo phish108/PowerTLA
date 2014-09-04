@@ -21,15 +21,15 @@ class XAPIService extends RESTling
 
         if($this->status === RESTling::OK)
         {
-            $aPI = explode('/', $this->path_info);
+            $aPI = explode("/", $this->path_info);
             $this->mode    = array_shift($aPI);
             $this->feature = array_shift($aPI);
 
             // reset the mode and feature for Our filter API
             if (!empty($this->mode)
-                && $this->mode === 'statements'
+                && $this->mode === "statements"
                 && !empty($this->feature)
-                && $this->feature === 'filter')
+                && $this->feature === "filter")
             {
                 $this->mode = $this->feature;
                 $this->feature = "result";
@@ -48,21 +48,26 @@ class XAPIService extends RESTling
 
         // translate put and post to insert and update
         switch ($action_name) {
-            case 'put':
-                $action_name = 'insert';
+            case "put":
+                $action_name = "insert";
                 break;
-            case 'post':
-                $action_name = 'update';
+            case "post":
+                $action_name = "update";
                 break;
             default:
                 break;
         }
 
-        $action_name .= '_' . strtolower($this->mode);
+        if (empty($this->mode)) {
+            $action_name .= "_about";
+        }
+        else {
+            $action_name .= "_" . strtolower($this->mode);
 
-        if (!empty($this->feature))
-        {
-            $action_name .= "_" . strtolower($this->feature);
+            if (!empty($this->feature))
+            {
+                $action_name .= "_" . strtolower($this->feature);
+            }
         }
 
         $this->operation = $action_name;
@@ -72,7 +77,8 @@ class XAPIService extends RESTling
     // About resource
     protected function get_about()
     {
-        $this->data = array('version' => array('1.0.0'));
+        $this->data = array("version" => array("1.0.0"),
+                            "extensions" => array("filters" => array("0.0.1")));
     }
 
     // Statement API
@@ -136,14 +142,14 @@ class XAPIService extends RESTling
         $jsonfeed   = array();
 
         $s = new XAPIStatement();
-        $s->addID('1234-course.enroll-4122');
+        $s->addID("1234-course.enroll-4122");
         $s->addAgent($userDict["1234"]);
         $s->addVerb($verbDict["course.participate.start"]);
         $s->addObject($objectDict["4122"]);
         array_push($jsonfeed,$s->result());
 
         $s = new XAPIStatement();
-        $s->addID('1235-course.enroll-4122');
+        $s->addID("1235-course.enroll-4122");
         $s->addAgent($userDict["1235"]);
         $s->addVerb($verbDict["course.participate.start"]);
         $s->addObject($objectDict["4122"]);
@@ -195,7 +201,7 @@ class XAPIService extends RESTling
     protected function insert_statements()
     {
         // for each statement in the input
-        $this->log('insert statement');
+        $this->log("insert statement");
         $this->store_single_statement($this->input);
     }
     protected function update_statements()
@@ -204,7 +210,7 @@ class XAPIService extends RESTling
 
         // for each statement in the input
         // check whether the statement is stored and remove it if this the case.
-        $this->log('update statement');
+        $this->log("update statement");
         $this->store_single_statement($this->input);
     }
 
