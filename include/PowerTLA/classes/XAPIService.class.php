@@ -66,7 +66,7 @@ class XAPIService extends RESTling
         }
 
         $this->operation = $action_name;
-        $this->log("call method " . $action_name);
+        // $this->log("call method " . $action_name);
     }
 
     // About resource
@@ -280,7 +280,11 @@ class XAPIService extends RESTling
     // TODO Filter API
     protected function get_filters()
     {
-        $this->missing();
+        // $this->missing();
+        $this->data["filters"] = array(
+            "course.questions" => "Filters QTI question statements for one course"
+        );
+
     }
     protected function insert_filter()
     {
@@ -298,7 +302,8 @@ class XAPIService extends RESTling
     // GET statements/filter/filter_id
     protected function get_filter_result()
     {
-        $this->missing();
+        // $this->missing();
+        $this->get_statements();
     }
 
     // TODO Trigger API

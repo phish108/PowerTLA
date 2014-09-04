@@ -13,63 +13,66 @@ class XAPIStatement
         $this->data = array();
     }
 
-    public function addID(id)
+    public function addID($id)
     {
-        $this->data["id"] = id;
+        $this->data["id"] = $id;
     }
 
     public function generateID()
     {
-        $i_url = "";
-        if (!empty($this->data["agent"]["id"]))
-            $i_url .= $this->data["agent"]["id"];
-        if (!empty($this->data["verb"]["id"]))
-                $i_url .= $this->data["verb"]["id"];
-        if (!empty($this->data["object"]["id"]))
-            $i_url .= $this->data["object"]["id"];
+//        $i_url = "";
+//        if (!empty($this->data["agent"]["id"]))
+//            $i_url .= $this->data["agent"]["id"];
+//        if (!empty($this->data["verb"]["id"]))
+//                $i_url .= $this->data["verb"]["id"];
+//        if (!empty($this->data["object"]["id"]))
+//            $i_url .= $this->data["object"]["id"];
+//
+//        uuid_create(&$context);
+//        uuid_create(&$namespace);
+//
+//        uuid_make($context, UUID_MAKE_V5, $namespace, $i_url);
+//        uuid_export($context, UUID_FMT_STR, &$uuid);
 
-        uuid_create(&$context);
-        uuid_create(&$namespace);
+        $prefix = uniqid();
+        $uuid = uniqid($prefix, true);
 
-        uuid_make($context, UUID_MAKE_V5, $namespace, $i_url);
-        uuid_export($context, UUID_FMT_STR, &$uuid);
-
-        $this->data["id"] = trim($uuid);
+         $this->data["id"] = trim($uuid);
     }
 
-    public function addAgent(objAgent)
+    public function addAgent($objAgent)
     {
-        $this->data["agent"] = objAgent;
+        $this->data["agent"] = $objAgent;
     }
 
-    public function addVerb(objVerb)
+    public function addVerb($objVerb)
     {
-        $this->data["verb"] = objVerb;
+        $this->data["verb"] = $objVerb;
     }
 
-    public function addObject(objObject)
+    public function addObject($objObject)
     {
-        $this->data["object"] = objObject;
+        $this->data["object"] = $objObject;
     }
 
-    public function addResult(objResult)
+    public function addResult($objResult)
     {
-        $this->data["result"] = objResult;
+        $this->data["result"] = $objResult;
     }
 
-    public function addContext(objContext)
+    public function addContext($objContext)
     {
-        $this->data["context"] = objContext;
+        $this->data["context"] = $objContext;
     }
 
-    public function addAuthority(objAuthority)
+    public function addAuthority($objAuthority)
     {
-        $this->data["authority"] = objAuthority;
+        $this->data["authority"] = $objAuthority;
     }
 
-    public function addTimestamp(timestamp)
+    public function addTimestamp($timestamp)
     {
-        $this->data["timestamp"] = timestamp;
+        $this->data["timestamp"] = $timestamp;
     }
 
     public function makeTimestamp() ///< the time is now
@@ -78,9 +81,9 @@ class XAPIStatement
         $this->data["stored"] = $dt->format(DateTime::ISO8601);
     }
 
-    public function addStoredTimestamp(timestamp)
+    public function addStoredTimestamp($timestamp)
     {
-        $this->data["stored"] = timestamp;
+        $this->data["stored"] = $timestamp;
     }
 
     public function makeStoredTimestamp()
