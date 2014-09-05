@@ -22,6 +22,11 @@ $service = new XAPIService();
 
 $service->setVLE($VLEAPI);
 
+// CORS should be OK for the testing.
+// In production code we need to have additional access control for CORS Sites
+$service->allowCORS();
+$service->addCORShost('*', array('GET', 'POST', 'PUT'));
+
 $service->run();
 
 ?>
