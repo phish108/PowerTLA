@@ -1,16 +1,11 @@
 <?php
-
-set_include_path("tla/include" . PATH_SEPARATOR . "tla/include/PowerTLA/". PATH_SEPARATOR . get_include_path());
-
-chdir("../../..");
-
-
-// Include the auto loading hooks for RESTling and our own classes
-require_once('RESTling/contrib/Restling.auto.php');
-require_once('PowerTLA/PowerTLA.auto.php');
-
+require_once("../../include/findeVLE.php");
 
 $service = new QTIService();
+// CORS should be OK for the testing.
+// In production code we need to have additional access control for CORS Sites
+$service->allowCORS();
+$service->addCORSHost('*', array('GET', 'POST', 'PUT'));
 
 $service->run();
 
