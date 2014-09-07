@@ -1,5 +1,4 @@
 <?php
-date_default_timezone_set("Europe/Zurich");
 /**
  *
  */
@@ -16,13 +15,15 @@ class XAPIService extends VLEService
 
     public function __construct()
     {
+        parent::__construct();
         $this->filters = array(
             "course.questions" => array("id" => "http://mobinaut.io/xapi/filters/course.questions",
                                         "description" => "Filters QTI question statements for one course",
                                         "query-type" => "XAPI"),
-            "course.questions2" => array("id" => "http://mobinaut.io/mobler-cards/filters/course.questions",
+            "course2.questions" => array("id" => "http://mobinaut.io/mobler-cards/filters/course.questions",
                                          "description" => "Filters QTI question statements for one course",
-                                         "query-type" => "moblercards")
+                                         "query-type" => "moblercards",
+                                         "query" => array("context.statement.id" => array("param" => "cid")))
         );
     }
 
@@ -38,9 +39,9 @@ class XAPIService extends VLEService
 
             // reset the mode and feature for Our filter API
             if (!empty($this->mode)
-                && $this->mode === "statements"
+                && $this->mode == "statements"
                 && !empty($this->feature)
-                && $this->feature === "filter")
+                && $this->feature == "filter")
             {
                 $this->mode = $this->feature;
                 $this->feature = "result";
@@ -318,13 +319,35 @@ class XAPIService extends VLEService
     {
         // $this->missing();
         // query-type "moblercards" is a legacy query type to process old moblercards tables
+
         if ($this->filters[$this->filter_id]["query-type"] == "moblercards")
         {
-
+            $this->log("old mobler cards filter");
+            $filter = new MCFilter($this->VLE);
+        }
+        else if ($this->filters[$this->filter_id]["query-type"] == "XAPI")
+        {
+            $this->log("new XAPI filter");
 
         }
 
-        $this->get_statements();
+        $filter->addSelector($this->filters[$this->filter_id]);
+        $filter->setParams($this->queryParam);
+
+        $lstStatement = $filter->apply();
+        $this->data = array("filter" => $this->filter_id);
+
+        if (strlen($filter->lastError()))
+        {
+            $this->data["message"] = $filter->lastError();
+            $this->data["params"] = $filter->getParams();
+            $this->not_found();
+            return;
+        }
+
+        $this->data["sql"] = $lstStatement;
+
+        // $this->get_statements();
     }
 
     // TODO Trigger API

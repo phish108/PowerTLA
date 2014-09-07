@@ -1,6 +1,6 @@
 <?php
 
-class XAPIFilter
+class XAPIFilter extends Logger
 {
     protected $dbh;
     protected $param;
@@ -54,10 +54,10 @@ class XAPIFilter
     public function setParams($oParam)
     {}
 
-    public function runSelector()
+    public function apply()
     {}
 
-    public function matchStatement($statement)
+    public function match($statement)
     {
         return false;
     }
