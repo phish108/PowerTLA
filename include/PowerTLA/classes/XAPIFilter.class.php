@@ -55,7 +55,9 @@ class XAPIFilter extends Logger
     {}
 
     public function apply()
-    {}
+    {
+        return array();
+    }
 
     public function match($statement)
     {
