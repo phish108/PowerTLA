@@ -15,6 +15,7 @@ class ilRESTInitialisation extends ilInitialisation {
         //include class.util first to start StopWatch
         require_once "Services/Utilities/classes/class.ilUtil.php";
         require_once "classes/class.ilBenchmark.php";
+
         $ilBench = new ilBenchmark();
         $GLOBALS['ilBench'] = $ilBench;
 
@@ -29,10 +30,9 @@ class ilRESTInitialisation extends ilInitialisation {
         $GLOBALS['t_pagestart'] = ilUtil::StopWatch();
 
         $ilBench->start("Core", "HeaderInclude_IncludeFiles");
-        //echo ":".class_exists("HTML_Template_ITX").":";
+
         // Major PEAR Includes
         require_once "PEAR.php";
-        //require_once "DB.php";
         require_once "Auth/Auth.php";
 
         //include classes and function libraries
@@ -82,7 +82,7 @@ class ilRESTInitialisation extends ilInitialisation {
         // check whether ini file object exists
         if (!is_object($ilIliasIniFile))
         {
-                die ("Fatal Error: ilInitialisation::determineClient called without initialisation of ILIAS ini file object.");
+            die ("Fatal Error: ilInitialisation::determineClient called without initialisation of ILIAS ini file object.");
         }
 
         // CGL: there is some "client" information stored in the ini file.
@@ -131,7 +131,6 @@ class ilRESTInitialisation extends ilInitialisation {
     }
 
     function initIlias($context = "web") {
-    	error_log("enter initIlias f");
         global $ilDB, $ilUser, $ilLog, $ilErr, $ilClientIniFile, $ilIliasIniFile,
                 $ilSetting, $ilias, $https, $ilObjDataCache,
                 $ilLog, $objDefinition, $lng, $ilCtrl, $ilBrowser, $ilHelp,
@@ -161,7 +160,6 @@ class ilRESTInitialisation extends ilInitialisation {
         $GLOBALS['ilErr'] =& $ilErr;
         $ilErr->setErrorHandling(PEAR_ERROR_CALLBACK,array($ilErr,'errorHandler'));
         $ilBench->stop("Core", "HeaderInclude_GetErrorHandler");
-
 
         // prepare file access to work with safe mode (has been done in class ilias before)
         umask(0117);
@@ -217,9 +215,6 @@ class ilRESTInitialisation extends ilInitialisation {
 
         $this->includePhp5Compliance();
 
-        //echo get_class($ilAuth);
-        //var_dump($ilAuth);
-
         // Do not accept external session ids
         if (!ilSession::_exists(session_id()))
         {
@@ -234,15 +229,6 @@ class ilRESTInitialisation extends ilInitialisation {
         $GLOBALS['ilias'] =& $ilias;
         $ilBench->stop("Core", "HeaderInclude_GetILIASObject");
 
-        // test: trace function calls in debug mode
-        if (DEVMODE)
-        {
-            if (function_exists("xdebug_start_trace"))
-            {
-                //xdebug_start_trace("/tmp/test.txt");
-            }
-        }
-
         // $ilObjDataCache initialisation
         $ilObjDataCache = new ilObjectDataCache();
         $GLOBALS['ilObjDataCache'] =& $ilObjDataCache;
@@ -253,10 +239,8 @@ class ilRESTInitialisation extends ilInitialisation {
             $_POST = $_SESSION["post_vars"];
         }
 
-
         // put debugging functions here
         require_once "include/inc.debug.php";
-
 
         // $objDefinition initialisation
         $ilBench->start("Core", "HeaderInclude_getObjectDefinitions");
@@ -298,18 +282,18 @@ class ilRESTInitialisation extends ilInitialisation {
         // workaround: force login
         if ((isset($_GET["cmd"]) && $_GET["cmd"] == "force_login") || $this->script == "login.php")
         {
-                $ilAuth->logout();
-                if(!isset($_GET['forceShoppingCartRedirect']))
-                        $_SESSION = array();
-                $_SESSION["AccountId"] = "";
-                $ilAuth->start();
-                $ilias->setAuthError($ilErr->getLastError());
+            $ilAuth->logout();
+            if(!isset($_GET['forceShoppingCartRedirect']))
+                    $_SESSION = array();
+            $_SESSION["AccountId"] = "";
+            $ilAuth->start();
+            $ilias->setAuthError($ilErr->getLastError());
         }
 
         // check correct setup
         if (!$ilias->getSetting("setup_ok"))
         {
-                die("Setup is not completed. Please run setup routine again.");
+            die("Setup is not completed. Please run setup routine again.");
         }
 
         // $ilUser initialisation (1)
@@ -391,7 +375,9 @@ class ilRESTInitialisation extends ilInitialisation {
             if( $security->getAccountSecurityMode() ==
                 ilSecuritySettings::ACCOUNT_SECURITY_MODE_CUSTOMIZED )
             {
-                if(isset($_POST['username']) && $_POST['username'] && $ilUser->getId() == 0)
+                if(isset($_POST['username']) &&
+                   $_POST['username'] &&
+                   $ilUser->getId() == 0)
                 {
                     $username = ilUtil::stripSlashes( $_POST['username'] );
                     $usr_id = ilObjUser::_lookupId( $username );
@@ -420,8 +406,8 @@ class ilRESTInitialisation extends ilInitialisation {
         // $lng initialisation
         $this->initLanguage();
 
-    // store user language in tree
-    $GLOBALS['tree']->initLangCode();
+        // store user language in tree
+        $GLOBALS['tree']->initLangCode();
 
         // ### AA 03.10.29 added new LocatorGUI class ###
         // when locator data array does not exist, initialise
@@ -436,20 +422,19 @@ class ilRESTInitialisation extends ilInitialisation {
         include_once('Services/WebServices/ECS/classes/class.ilECSTaskScheduler.php');
         $scheduler = ilECSTaskScheduler::start();
 
-    $ilBench->stop("Core", "HeaderInclude");
+        $ilBench->stop("Core", "HeaderInclude");
     }
 
     /**
      * EMPTY FUNCTIONS!
      *
-     * These function must not get executed!
+     * These function must not get executed, so they are set to emptiness.
      */
     function handleMaintenanceMode() {}
     function setCookieParams() {}
     function checkUserClientIP() {}
     function checkUserAgreement() {}
     function goToLogin($a_auth_stat="") {}
-
 }
 
 

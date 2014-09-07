@@ -5,60 +5,63 @@ class IliasHandler extends VLEHandler
     protected $pluginAdmin;
     protected $plugins;
 
-    public function __construct()
+    protected $tlapath;
+
+    public function __construct($tp)
     {
-    	$this->log("enter construct of IliasServiceInit");
-
-        // set_include_path("../../" . PATH_SEPARATOR . get_include_path());
-
-        // $this->log("Include Path " . get_include_path());
-        // assume that PowerTLA lives in the same include path.
+    	// assume that PowerTLA lives in the same include path.
         // We require a configuration variable that informs us about the LMS include path.
+
         include_once("include/inc.ilias_version.php");
 
         $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
-        $vstring = $aVersion[0] . '.' . $aVersion[1];
-        $this->log("ilias version is  ".$vstring);
-      //  set_include_path(".." . PATH_SEPARATOR . get_include_path());
-     //   $strVersionInit = 'restservice/include/ilRESTInitialization.' . $vstring . '.php';
-        $strVersionInit = 'PowerTLA/Ilias/ilRESTInitialisation.' . $vstring . '.php';
 
-        $this->log("strVersionInit is ".$strVersionInit);
+        if (!empty($aVersion)) {
+            $vstring = $aVersion[0] . '.' . $aVersion[1];
 
-        if (file_exists("../include/" . $strVersionInit) )
-        {
-            $this->log("ilias file exists");
-            require_once($strVersionInit);
+            $this->log("ilias version is  " . $vstring);
 
-            require_once 'Services/Database/classes/class.ilDB.php';
-//            require_once 'Services/Component/classes/class.ilPluginAdmin.php';
-//            require_once 'Services/Component/classes/class.ilPlugin.php';
+            $strVersionInit = 'PowerTLA/Ilias/ilRESTInitialisation.' . $vstring . '.php';
 
-            // initialize Ilias
-            // unfortunately they change the initialization routine completely between releases
-            switch ($vstring)
+            // $this->log("strVersionInit is ".$strVersionInit);
+
+            if (file_exists($tp . $strVersionInit) )
             {
-                case '4.2':
-                   $ilInit = new ilRESTInitialisation();
-                   $GLOBALS['ilInit'] = $ilInit;
-                   $ilInit->initILIAS();
-                   break;
-                case '4.3':
-                    // why oh why?!?
-                    ilRESTInitialisation::initIlias();
-                    break;
-                default:
-                    return;
-                    break;
-            }
+                // $this->log("ilias file exists");
+                require_once($strVersionInit);
 
-            // now we can initialize the system internals
-            // We should always avoid to fall back into Ilias' GLOBAL mode
-            $this->dbhandler    = $GLOBALS['ilDB'];
-            $this->user         = $GLOBALS['ilUser'];
-            //$this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
-        }else{
-            $this->log("ilias file does not exist");
+                // initialize Ilias
+                // unfortunately they change the initialization routine completely between releases
+                switch ($vstring)
+                {
+                    case '4.2':
+                       $this->log('init ' . $vstring);
+                       $ilInit = new ilRESTInitialisation();
+                       $GLOBALS['ilInit'] = $ilInit;
+                       $ilInit->initILIAS();
+                       break;
+                    case '4.3':
+                        $this->log('init ' . $vstring);
+
+                        ilRESTInitialisation::initIlias(); // why oh why?!?
+                        break;
+                    default:
+                        return;
+                        break;
+                }
+
+                // now we can initialize the system internals
+                // We should always avoid to fall back into Ilias' GLOBAL mode
+                $this->dbhandler    = $GLOBALS['ilDB'];
+                $this->user         = $GLOBALS['ilUser'];
+
+                //$this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
+                //$this->log("ilias init done");
+            }
+            // else
+            // {
+            //     $this->log("ilias file does not exist");
+            // }
         }
     }
 
@@ -71,7 +74,6 @@ class IliasHandler extends VLEHandler
                                                 $this->plugins[$pName][0],
                                                 $this->plugins[$pName][1],
                                                 $this->plugins[$pName][2]);
-
         }
     }
 
