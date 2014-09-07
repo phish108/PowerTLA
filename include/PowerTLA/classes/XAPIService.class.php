@@ -328,7 +328,7 @@ class XAPIService extends VLEService
         else if ($this->filters[$this->filter_id]["query-type"] == "XAPI")
         {
             $this->log("new XAPI filter");
-
+            $filter = new XAIFilter($this->VLE);
         }
 
         $filter->addSelector($this->filters[$this->filter_id]);
