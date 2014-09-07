@@ -62,7 +62,11 @@ class XAPIStatement
 
     public function addContext($objContext)
     {
-        $this->data["context"] = $objContext;
+        if (!isset($this->data["context"]))
+        {
+            $this->data["context"] = array();
+        }
+        $this->data["context"] = array_merge($this->data["context"], $objContext);
     }
 
     public function addAuthority($objAuthority)
