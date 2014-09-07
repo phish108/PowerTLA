@@ -1,5 +1,7 @@
 <?php
 
+require_once 'Modules/Course/classes/class.ilCourseParticipant.php';
+
 class MCFilter extends Logger
 {
     protected $vle;
@@ -291,8 +293,24 @@ class MCFilter extends Logger
                 // FIXME - avoid VLE specific code
                 $oUser    = new ilObjUser($record["user_id"]);
                 $fullName = $oUser->getFirstname() . " " . $oUser->getLastname();
+                // exclude course administrator data from the steam
+                // we need the internal course id not the official ref_id
+
+                // $cuser = new ilCourseParticipant($record["course_id"], $record["user_id"]);
+
+//                include_once 'Services/Membership/classes/class.ilParticipants.php';
+//                $items = ilParticipants::_isParticipant($record["course_id"], $record["user_id"]);
+//                $this->log("user is participant " . json_encode($items));
+
+
+//                if(!($cuser->isAdmin() || $this->isTutor()))
+//                {
+//                    $this->log('remove course admins');
+//                    break;
+//                }
                 $userDict[$record["user_id"]] = array("id" => "mailto:" . $oUser->getEmail(),
-                                                      "name" => $fullname);
+                                                      "name" => $fullName);
+
             }
             $s->addAgent($userDict[$record["user_id"]]);
 

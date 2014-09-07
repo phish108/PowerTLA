@@ -345,7 +345,7 @@ class XAPIService extends VLEService
             return;
         }
 
-        $this->data["sql"] = $lstStatement;
+        $this->data = $lstStatement;
 
         // $this->get_statements();
     }
