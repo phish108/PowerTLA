@@ -18,7 +18,8 @@ class VLEService extends RESTling {
         $this->pluginList = array(); // setthe the plugins to test
     }
 
-    public function setVLE($vle) {
+    public function setVLE($vle)
+    {
         if ($vle) {
             $this->VLE = $vle;
             $this->dbh = $vle->getDBHandler();
@@ -27,7 +28,7 @@ class VLEService extends RESTling {
 
     public function addPluginID($pluginid)
     {
-        if (!empty(plugin))
+        if (!empty($pluginid))
         {
             array_push($this->pluginList, $pluginid);
         }
@@ -35,7 +36,7 @@ class VLEService extends RESTling {
 
     private function checkPlugins()
     {
-        if ($this->status == RESTling::OK)
+        if ($this->status == RESTling::OK && !empty($this->pluginList))
         {
             foreach ($this->pluginList as $p)
             {
@@ -50,7 +51,8 @@ class VLEService extends RESTling {
     /**
      * @method void
      */
-    protected function initializeRun() {
+    protected function initializeRun()
+    {
         $this->response_type = "json";
 
         if (!$this->dbh && !$this->VLE) {
