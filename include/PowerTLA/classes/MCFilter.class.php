@@ -12,6 +12,7 @@ class MCFilter extends Logger
     private   $types;
     private   $error;
     private   $dateLimit;
+    private   $withTutor;
 
     public function __construct($vle)
     {
@@ -20,8 +21,9 @@ class MCFilter extends Logger
         $this->query  = array();
         $this->values = array();
         $this->types  = array();
-        $this->error  = "missing filter";
+        $this->error  = "";
         $this->dateLimit = array();
+        $this->withTutor = FALSE;
     }
 
     /*
@@ -137,7 +139,7 @@ class MCFilter extends Logger
             $this->param  = $params;
             $this->values = $values;
             $this->query  = $query;
-            $this->error  = "missing param";
+            //$this->error  = "missing param";
         }
     }
 
@@ -149,6 +151,12 @@ class MCFilter extends Logger
         {
             $this->dateLimit = $oParam["date"];
             unset($oParam["date"]);
+        }
+
+        if (array_key_exists("include", $oParam) && in_array("instructor", $oParam["include"]))
+        {
+            $this->withTutor = TRUE;
+            unset($oParam["include"]);
         }
 
         foreach ($this->param as $k => $v)
@@ -203,8 +211,9 @@ class MCFilter extends Logger
 
     public function apply()
     {
-        $sql = "SELECT * FROM ui_uihk_xmob_stat";
+        $sql = "SELECT s.*, r.ref_id FROM ui_uihk_xmob_stat s, object_reference r WHERE s.course_id = r.obj_id";
 
+        $query = array();
         if (count($this->dateLimit))
         {
             sort($this->dateLimit);
@@ -214,22 +223,28 @@ class MCFilter extends Logger
 
             if ($max > 0)
             {
-                array_push($this->query, "day > ?");
-                array_push($this->query, "day < ?");
+                array_push($query, "day > ?");
+                array_push($query, "day < ?");
                 array_push($this->values, $min);
                 array_push($this->values, $max);
             }
             else
             {
-                array_push($this->query, "day = ?");
+                array_push($query, "day = ?");
                 array_push($this->values, $min);
             }
         }
 
         if (count($this->query))
         {
-            $sql .= " WHERE " . implode(" AND ", $this->query);
+            $query = array_merge($this->query, $query);
         }
+
+        if (count($query))
+        {
+            $sql .= " AND " . implode(" AND ", $query);
+        }
+
         $this->log("MC FILTER SQL " . $sql);
         // $sth = $this->dbh->prepare($sql);
         // $res = $sth->execute($this->values);
@@ -239,7 +254,6 @@ class MCFilter extends Logger
             $this->log("stop loading : " . $this->error);
             return;
         }
-
 
         $rv = array();
 
@@ -269,8 +283,8 @@ class MCFilter extends Logger
         $res = $sth->execute($this->values);
 
         while ($record = $res->fetchRow(MDB2_FETCHMODE_ASSOC)){
-            $this->log(json_encode($record));
-
+            // $this->log(json_encode($record))
+            $cuser = new ilCourseParticipant($record["ref_id"], $record["user_id"]);
 
             $s = new XAPIStatement();
             $s->addID($record["id"]);
@@ -294,20 +308,13 @@ class MCFilter extends Logger
                 $oUser    = new ilObjUser($record["user_id"]);
                 $fullName = $oUser->getFirstname() . " " . $oUser->getLastname();
                 // exclude course administrator data from the steam
-                // we need the internal course id not the official ref_id
+                // we need the officila ref_id not the internal course id
 
-                // $cuser = new ilCourseParticipant($record["course_id"], $record["user_id"]);
-
-//                include_once 'Services/Membership/classes/class.ilParticipants.php';
-//                $items = ilParticipants::_isParticipant($record["course_id"], $record["user_id"]);
-//                $this->log("user is participant " . json_encode($items));
-
-
-//                if(!($cuser->isAdmin() || $this->isTutor()))
-//                {
-//                    $this->log('remove course admins');
-//                    break;
-//                }
+                if(!$this->withTutor && !($cuser->isAdmin() || $cuser->isTutor()))
+                {
+                    $this->log('remove course admins');
+                    break;
+                }
                 $userDict[$record["user_id"]] = array("id" => "mailto:" . $oUser->getEmail(),
                                                       "name" => $fullName);
 
@@ -323,7 +330,7 @@ class MCFilter extends Logger
                 );
 
                 $data = $this->dbh->fetchAssoc($result);
-                $urlid = ILIAS_HTTP_PATH . "qti/pool/" . $data["obj_fi"] . "/" . $data["question_id"];
+                $urlid = ILIAS_HTTP_PATH . "tla/restservice/content/qti.php/pool/" . $data["obj_fi"] . "/" . $data["question_id"];
                 $question = $data["question_text"];
                 if ($data["type_tag"] == "assClozeTest")
                 {
@@ -339,12 +346,22 @@ class MCFilter extends Logger
                 // populate context dict
             if (!array_key_exists ($record["course_id"], $ctxtDict))
             {
-                $pseudoStatement = "course.participate-" . $record["course_id"] . "-" . $record["user_id"];
-                $ctxtDict[$record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
-                                                                             "id" => $pseudoStatement));
+
+                if($cuser->isAdmin() || $cuser->isTutor())
+                {
+                    $pseudoStatement = "course.admin-" . $record["course_id"] . "-" . $record["user_id"];
+                    $ctxtDict[$record["course_id"]."admin"] = array("statement" => array("objectType" => "StatementRef",
+                                                                                         "id" => $pseudoStatement));
+                }
+                else
+                {
+                    $pseudoStatement = "course.participate-" . $record["course_id"] . "-" . $record["user_id"];
+                    $ctxtDict[$record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
+                                                                                 "id" => $pseudoStatement));
+                }
             }
             $s->addContext($ctxtDict[$record["course_id"]]);
-            $this->log(json_encode($s->result()));
+            // $this->log(json_encode($s->result()));
             array_push($rv, $s->result());
         }
 
