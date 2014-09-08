@@ -9,10 +9,10 @@ Currently the ILIAS LMS (www.ilias.de) is supported.
 
 PowerTLA offers a REST service layer for
 
-* Authentication using OAuth 1
-* Experience API
-* IMS QTI JSON binding
-* Learner profile service
+* Authentication using OAuth 1 (TODO)
+* Experience API (in progress)
+* IMS QTI JSON binding (TODO)
+* Learner profile service (TODO)
 
 PowerTLA builds on top of the existing LMS code and allows easy integration of mobile tools and services.
 
