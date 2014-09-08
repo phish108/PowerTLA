@@ -1,18 +1,18 @@
-## XAPI Filters
+# XAPI Filters
 
 PowerTLA's LRS interfaces implements XAPI version 1.0.
 
-### Status of development (WARNING)
+## Status of development (WARNING)
 
 The current version of PowerTLA is under development and does not (yet) implement all features.
 
 If you are missing a feature, please head over to github and set an issue.
 
-### Introduction
+## Introduction
 
-### Underlying Concepts
+## Underlying Concepts
 
-### XAPI selectors
+## XAPI selectors
 
 ```
    {
@@ -38,9 +38,9 @@ If you are missing a feature, please head over to github and set an issue.
      }
 ```
 
-### Defining a filter
+## Defining a filter
 
-#### Scope vs. Query Parameters
+### Scope vs. Query Parameters
 
 A scope defines a selectors that limits a filter. A scope can have exact one
 value that is passed as part of the request URL. A scope is always OPTIONAL!

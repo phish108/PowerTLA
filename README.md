@@ -1,4 +1,4 @@
-## PowerTLA
+# PowerTLA
 
 
 PowerTLA aims to be a reference implementation for the ADL Training and Learning Architecture (TLA) for mobile and web-based
@@ -16,19 +16,20 @@ PowerTLA offers a REST service layer for
 
 PowerTLA builds on top of the existing LMS code and allows easy integration of mobile tools and services.
 
-### Documentation
+## Documentation
 
-Find the documentation in the {docs/index.md}[docs folder].
+Find the documentation in the [docs folder](docs/).
 
-### Contribute
+## Contribute
 
 
 
-### LICENSE
+## LICENSE
 
 PowerTLA is licensed under the GNU Affero License.
 
-### Contributors
+## Contributors
 
 * Christian Glahn (ISN, ETH Zurich)
 * Evangelia Mitsopoulou (ISN, ETH Zurich)
+

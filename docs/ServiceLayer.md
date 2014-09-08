@@ -1,4 +1,4 @@
-## PowerTLA Service Layer
+# PowerTLA Service Layer
 
 PowerTLA is built as a set of TLA related services. Each service implements
 one part of the TLA architecture.
@@ -9,7 +9,7 @@ PowerTLA implements presently three levels of the TLA:
 * Content Broker (content/*.php)
 * Learner Profiles (profiles/*.php)
 
-### Getting an overview
+## Getting an overview
 
 In order to simplify the automatic detection of the appropriate services for
 callers, PowerTLA offers a simple API detection. This API detection provides
@@ -48,7 +48,7 @@ The service descriptors have the following format.
 
 The overarching service detection object mapps to the service id.
 
-### Using the service detection
+## Using the service detection
 
 The PowerTLA service detection only provides basic information on the service
 and does not replace the information that is provided by the service itself.
