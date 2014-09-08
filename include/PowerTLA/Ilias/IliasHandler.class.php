@@ -6,6 +6,7 @@ class IliasHandler extends VLEHandler
     protected $plugins;
 
     protected $tlapath;
+    protected $baseurl;
 
     public function __construct($tp)
     {
@@ -52,8 +53,10 @@ class IliasHandler extends VLEHandler
 
                 // now we can initialize the system internals
                 // We should always avoid to fall back into Ilias' GLOBAL mode
+                $this->tlapath = $tp;
                 $this->dbhandler    = $GLOBALS['ilDB'];
                 $this->user         = $GLOBALS['ilUser'];
+                $this->setBasePath();
 
                 //$this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
                 //$this->log("ilias init done");
@@ -64,7 +67,6 @@ class IliasHandler extends VLEHandler
             // }
         }
     }
-
 
     public function isPluginActive($pName)
     {
@@ -89,6 +91,23 @@ class IliasHandler extends VLEHandler
     public function getActiveUserId()
     {
         return $this->user->getId();
+    }
+
+    private function setBasePath()
+    {
+        $tp = explode('/', $this->tlapath);
+        array_pop($tp);
+        array_pop($tp);
+        $tp = implode('/', $tp);
+        // strip include suffix
+        $pos = strpos(ILIAS_HTTP_PATH, $tp);
+        // now strip everything from that position to the end
+        $this->baseurl = substr(ILIAS_HTTP_PATH, 0, $pos);
+    }
+
+    public function getBaseURL()
+    {
+        return $this->baseurl;
     }
 }
 
