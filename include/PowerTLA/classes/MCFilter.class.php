@@ -1,6 +1,7 @@
 <?php
 
 require_once 'Modules/Course/classes/class.ilCourseParticipant.php';
+include_once 'Services/Membership/classes/class.ilParticipants.php';
 
 class MCFilter extends Logger
 {
@@ -13,14 +14,19 @@ class MCFilter extends Logger
     private   $error;
     private   $dateLimit;
     private   $withTutor;
+    private   $scope; // the scope selectors
+    private   $curScope; // the scope selector mapping
 
     public function __construct($vle)
     {
-        $this->dbh    = $vle->getDBHandler();
-        $this->param  = array();
-        $this->query  = array();
-        $this->values = array();
-        $this->types  = array();
+        $this->vle     = $vle;
+        $this->dbh     = $vle->getDBHandler();
+        $this->param   = array();
+        $this->query   = array();
+        $this->values  = array();
+        $this->types   = array();
+        $this->scope = array();
+        $this->curScope = array();
         $this->error  = "";
         $this->dateLimit = array();
         $this->withTutor = FALSE;
@@ -29,6 +35,7 @@ class MCFilter extends Logger
     /*
      * {
      *    "id": "filterURI",     // the official reference to the filter, should provice a description
+     *    "scope": ["selector"]  // additional path info data will be assigned to the provided call scope variables
      *    "query": [             // arrays refer to OR statements
      *      {                    // objects refer to AND statements
      *         "context.statement.id": { // dot notation for filter parameter
@@ -79,7 +86,7 @@ class MCFilter extends Logger
                         }
                         else if (array_key_exists("value", $qv))
                         {
-                            array_push($values, $qv["value"]);
+                            $values[] = $qv["value"];
                             array_push($query, "course_id = ?");
                             array_push($this->types, "text");
                         }
@@ -91,7 +98,7 @@ class MCFilter extends Logger
                         }
                         else if (array_key_exists("value", $qv))
                         {
-                            array_push($values, $qv["value"]);
+                            $values[] = $qv["value"];
                             array_push($query, "user_id = ?");
                             array_push($this->types, "text");
                         }
@@ -103,7 +110,7 @@ class MCFilter extends Logger
                         }
                         else if (array_key_exists("value", $qv))
                         {
-                            array_push($values, $qv["value"]);
+                            $values[] = $qv["value"];
                             array_push($query, "score = ?");
                             array_push($this->types, "float");
                         }
@@ -115,7 +122,7 @@ class MCFilter extends Logger
                         }
                         else if (array_key_exists("value", $qv))
                         {
-                            array_push($values, $qv["value"]);
+                            $values[] = $qv["value"];
                             array_push($query, "duration = ?");
                             array_push($this->types, "integer");
                         }
@@ -127,7 +134,7 @@ class MCFilter extends Logger
                         }
                         else if (array_key_exists("value", $qv))
                         {
-                            array_push($values, $qv["value"]);
+                            $values[] = $qv["value"];
                             array_push($query, "question_id = ?");
                             array_push($this->types, "text");
                         }
@@ -139,7 +146,27 @@ class MCFilter extends Logger
             $this->param  = $params;
             $this->values = $values;
             $this->query  = $query;
-            //$this->error  = "missing param";
+
+            if (isset($selector) &&
+                isset($selector["scope"]) &&
+                !empty($selector["scope"]))
+            {
+                foreach ($selector["scope"] as $c)
+                {
+                    $this->scope[] = $c;
+                }
+            }
+        }
+    }
+
+    public function setScope($oCtxt)
+    {
+        if (isset($this->scope) && count($this->scope))
+        {
+            foreach ($this->scope as $scope)
+            {
+                $this->curScope[$scope] = array_shift($oCtxt);
+            }
         }
     }
 
@@ -211,9 +238,60 @@ class MCFilter extends Logger
 
     public function apply()
     {
-        $sql = "SELECT s.*, r.ref_id FROM ui_uihk_xmob_stat s, object_reference r WHERE s.course_id = r.obj_id";
+        // fetch the object reference information in one go, because
+        // ilias hardly ever uses the actual object id.
+        // $sql = "SELECT s.*, r.ref_id FROM ui_uihk_xmob_stat s, object_reference r WHERE s.course_id = r.obj_id"; // new
+        $sql = "SELECT s.*, r.ref_id FROM isnlc_statistics s, object_reference r WHERE s.course_id = r.obj_id"; // old
 
         $query = array();
+
+        if (array_key_exists("context.statement.id", $this->curScope) && isset($this->curScope["context.statement.id"]))
+        {
+            // check whether the current user is a member of the curent course context
+            $ctxtCourseID;
+            $refsql = "SELECT ref_id FROM object_reference WHERE obj_id = ?";
+            $sth    = $this->dbh->db->prepare($refsql, array("integer"));
+            if (PEAR::isError($sth))
+            {
+                return array();
+            }
+            $res    = $sth->execute(array($this->curScope["context.statement.id"]));
+            if ($row = $res->fetchRow(MDB2_FETCHMODE_ASSOC))
+            {
+                $ctxtCourseID = $row["ref_id"];
+            }
+            $sth->free();
+
+            // check if the active user is a member in the scope
+            if (!($this->vle->getActiveUserId() &&
+                  ilParticipants::_isParticipant($ctxtCourseID,
+                                                 $this->vle->getActiveUserId())))
+            {
+                // check whether the ative user is priviledged to access the requested scope.
+                // At this level the filter MUST apply sub scopes according to the user's
+                // privileges on the context object within the VLE.
+
+                // if the user is an admin or a special service they may continue
+                $this->log("user is not a participant");
+//                    $this->error = "forbidden"; // TODO pass directly to RESTling
+//                    return array();
+            }
+
+            $query[] = "s.course_id = ?";
+            $this->types[] = "integer";
+            $this->values[] = $this->curScope["context.statement.id"];
+
+//            $ctxtuser = new ilCourseParticipant($ctxtCourseID, $this->vle->getActiveUserId());
+
+//            if (!($ctxtuser->isAdmin() || $ctxtuser->isTutor))
+//            {
+//                // for now normal students can see only their personal data
+//                $query[] = "s.user_id = ?";
+//                $this->types[] = "integer";
+//                $this->values[] = $this->vle->getActiveUserId();
+//            }
+        }
+
         if (count($this->dateLimit))
         {
             sort($this->dateLimit);
@@ -280,7 +358,14 @@ class MCFilter extends Logger
 
         //$this->log(implode(", ", $this->types));
         //$this->log(implode(", ", $this->values));
-        $res = $sth->execute($this->values);
+        if (!PEAR::isError($sth))
+        {
+            $res = $sth->execute($this->values);
+        }
+        else
+        {
+            $this->log("DB ERROR " . $sth->getMessage());
+        }
 
         while ($record = $res->fetchRow(MDB2_FETCHMODE_ASSOC)){
             // $this->log(json_encode($record))
@@ -310,10 +395,10 @@ class MCFilter extends Logger
                 // exclude course administrator data from the steam
                 // we need the officila ref_id not the internal course id
 
-                if(!$this->withTutor && !($cuser->isAdmin() || $cuser->isTutor()))
+                if(!$this->withTutor && ($cuser->isAdmin() || $cuser->isTutor()))
                 {
                     $this->log('remove course admins');
-                    break;
+                    continue;
                 }
                 $userDict[$record["user_id"]] = array("id" => "mailto:" . $oUser->getEmail(),
                                                       "name" => $fullName);
@@ -330,7 +415,7 @@ class MCFilter extends Logger
                 );
 
                 $data = $this->dbh->fetchAssoc($result);
-                $urlid = ILIAS_HTTP_PATH . "tla/restservice/content/qti.php/pool/" . $data["obj_fi"] . "/" . $data["question_id"];
+                $urlid = $this->vle->getBaseURL() . "tla/restservice/content/qti.php/pool/" . $data["obj_fi"] . "/" . $data["question_id"];
                 $question = $data["question_text"];
                 if ($data["type_tag"] == "assClozeTest")
                 {
@@ -343,24 +428,23 @@ class MCFilter extends Logger
             }
             $s->addObject($objDict[$record["question_id"]]);
 
-                // populate context dict
-            if (!array_key_exists ($record["course_id"], $ctxtDict))
+            // populate     context dict
+            if (!array_key_exists ($record["user_id"] . $record["course_id"], $ctxtDict))
             {
-
                 if($cuser->isAdmin() || $cuser->isTutor())
                 {
                     $pseudoStatement = "course.admin-" . $record["course_id"] . "-" . $record["user_id"];
-                    $ctxtDict[$record["course_id"]."admin"] = array("statement" => array("objectType" => "StatementRef",
+                    $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
                                                                                          "id" => $pseudoStatement));
                 }
                 else
                 {
                     $pseudoStatement = "course.participate-" . $record["course_id"] . "-" . $record["user_id"];
-                    $ctxtDict[$record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
+                    $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
                                                                                  "id" => $pseudoStatement));
                 }
             }
-            $s->addContext($ctxtDict[$record["course_id"]]);
+            $s->addContext($ctxtDict[$record["user_id"] . $record["course_id"]]);
             // $this->log(json_encode($s->result()));
             array_push($rv, $s->result());
         }
