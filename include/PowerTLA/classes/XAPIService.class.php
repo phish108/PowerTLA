@@ -19,11 +19,13 @@ class XAPIService extends VLEService
         $this->filters = array(
             "course.questions" => array("id" => "http://mobinaut.io/xapi/filters/course.questions",
                                         "description" => "Filters QTI question statements for one course",
+                                        "scope" => array("context.statement.id"), // CHECK: maybe a simpler approach possible?
                                         "query-type" => "XAPI"),
             "course2.questions" => array("id" => "http://mobinaut.io/mobler-cards/filters/course.questions",
                                          "description" => "Filters QTI question statements for one course",
                                          "query-type" => "moblercards",
-                                         "query" => array("context.statement.id" => array("param" => "cid")))
+                                         "scope" => array("context.statement.id"),
+                                         "query" => array())
         );
     }
 
@@ -33,9 +35,8 @@ class XAPIService extends VLEService
 
         if($this->status === RESTling::OK)
         {
-            $aPI = explode("/", $this->path_info);
-            $this->mode    = array_shift($aPI);
-            $this->feature = array_shift($aPI);
+            $this->mode    = array_shift($this->operands);
+            $this->feature = array_shift($this->operands);
 
             // reset the mode and feature for Our filter API
             if (!empty($this->mode)
@@ -45,12 +46,28 @@ class XAPIService extends VLEService
             {
                 $this->mode = $this->feature;
                 $this->feature = "result";
-                $this->filter_id= array_shift($aPI);
+                $this->filter_id= array_shift($this->operands);
             }
         }
     }
 
-    protected function prepareOperation() {
+    protected function validateOperation()
+    {
+        // this function checks whether the current user is eligible to
+        // fetch the related information. validateOperation() covers entry
+        // level access control.
+        if (!$this->VLE->isActiveUser())
+        {
+            // in production set the status to not authenticated
+            // both, web-based cookie sessions and oauth should be valid
+
+            // $this->status = RESTling::OPERATION_FAILED;
+            // $this->authentication_required();
+        }
+    }
+
+    protected function prepareOperation()
+    {
         // This service is quite complex regarding the permitted methods.
         // the prepareOperation() method generates service functions directly from the
         // request.
@@ -90,7 +107,7 @@ class XAPIService extends VLEService
     protected function get_about()
     {
         $this->data = array("version" => array("1.0.0"),
-                            "extensions" => array("filters" => array("0.0.1")));
+                            "extensions" => array("filters" => array("0.0.2")));
     }
 
     // Statement API
@@ -120,6 +137,7 @@ class XAPIService extends VLEService
         $jsonfeed   = array();
 
         $filter = new MCFilter($this->VLE);
+        $filter->setScope($this->operands);
         $filter->setParams($this->queryParam);
 
         $jsonfeed = $filter->apply();
@@ -210,7 +228,6 @@ class XAPIService extends VLEService
         $this->missing();
     }
 
-
     // TODO Filter API
     protected function get_filters()
     {
@@ -248,6 +265,7 @@ class XAPIService extends VLEService
         }
 
         $filter->addSelector($this->filters[$this->filter_id]);
+        $filter->setScope($this->operands);
         $filter->setParams($this->queryParam);
 
         $lstStatement = $filter->apply();
