@@ -342,15 +342,21 @@ class MCFilter extends Logger
                                                    "display"=> array("en" => "Card Burner")));
         $ctxtDict = array();
 
-        $verbDict = array("qti.item.response" => array("id" => "http://imsglobal.com/vocab/qti/response/item",
+        $verbDict = array("qti.item.response" => array("id" => "http://imsglobal.com/vocab/qti/item/respond",
                                                        "display" => array("en" => "Responded to a test item",
                                                                           "de" => "Testfrage beantwortet")),
-                          "mozilla.achieve.badge" => array("id" => "http://openbadges.org/vocab/earned/badge",
+                          "qti.test.complete" => array("id" => "http://imsglobal.com/vocab/qti/test/respond",
+                                                       "display" => array("en" => "completed to a test",
+                                                                          "de" => "Test absolviert")),
+                          "mozilla.achieve.badge" => array("id" => "http://openbadges.org/vocab/badge/achieve",
                                                            "display" => array("en" => "Earned badge",
                                                                               "de" => "Belohnung verdient")),
-                          "participate"           => array("id" => "http://ilias.org/vocab/course/participation",
+                          "participate"           => array("id" => "http://ilias.org/vocab/course/participate",
                                                            "display" => array("en" => "Course participation",
                                                                               "de" => "am Kurs teilgenommen")),
+                          "facilitate"           => array("id" => "http://ilias.org/vocab/course/facilitate",
+                                                           "display" => array("en" => "Course facilitation",
+                                                                              "de" => "einen Kurs unterstützt"))
                          );
 
         $resDict = array("0"   => array("score" => array("raw" => "0", "scaled" => -1, "success" => FALSE, "completion" => FALSE)),
@@ -381,7 +387,7 @@ class MCFilter extends Logger
                 {
                     $pseudoStatement = "course.admin-" . $record["course_id"] . "-" . $record["user_id"];
                     $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
-                                                                                         "id" => $pseudoStatement));
+                                                                                                      "id" => $pseudoStatement));
                 }
                 else
                 {
@@ -417,9 +423,12 @@ class MCFilter extends Logger
                 // exclude course administrator data from the steam
                 // we need the officila ref_id not the internal course id
 
+                $courseRole = "participate";
+
                 if(!$this->withTutor && ($cuser->isAdmin() || $cuser->isTutor()))
                 {
                     $this->log('remove course admins');
+                    $courseRole = "facilitate";
                     continue;
                 }
                 $userDict[$record["user_id"]] = array("id" => "mailto:" . $oUser->getEmail(),
@@ -429,7 +438,7 @@ class MCFilter extends Logger
 
                 $ts->addID($ctxtDict[$record["user_id"] . $record["course_id"]]["statement"]["id"]);
                 $ts->addAgent($userDict[$record["user_id"]]);
-                $ts->addVerb($verbDict["participate"]);
+                $ts->addVerb($verbDict[$courseRole]);
                 $ts->addObject(array("id"=> $this->vle->getBaseURL() . "tla/restservice/content/course.php/" . $record["course_id"]));
 
                 $ts->addTimestamp($dt->format(DateTime::ISO8601));
