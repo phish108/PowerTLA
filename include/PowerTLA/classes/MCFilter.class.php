@@ -336,7 +336,10 @@ class MCFilter extends Logger
         $rv = array();
 
         $userDict = array();
-        $objDict  = array();
+        $objDict  = array("stackhandler" => array("id" => "http://mobinaut.io/badges/stackhandler",
+                                                   "display"=> array("en" => "Stack Handler")),
+                           "cardburner"   => array("id" => "http://mobinaut.io/badges/cardburner",
+                                                   "display"=> array("en" => "Card Burner")));
         $ctxtDict = array();
 
         $verbDict = array("qti.item.response" => array("id" => "http://imsglobal.com/vocab/qti/response/item",
@@ -345,9 +348,9 @@ class MCFilter extends Logger
                           "mozilla.achieve.badge" => array("id" => "http://openbadges.org/vocab/earned/badge",
                                                            "display" => array("en" => "Earned badge",
                                                                               "de" => "Belohnung verdient")),
-                          "course.participate.start" => array("id" => "http://ilias.org/vocab/course/participation",
-                                                              "display" => array("en" => "Course participation",
-                                                                                 "de" => "Kursteilnahme begonnen")),
+                          "participate"           => array("id" => "http://ilias.org/vocab/course/participation",
+                                                           "display" => array("en" => "Course participation",
+                                                                              "de" => "am Kurs teilgenommen")),
                          );
 
         $resDict = array("0"   => array("score" => array("raw" => "0", "scaled" => -1, "success" => FALSE, "completion" => FALSE)),
@@ -371,8 +374,26 @@ class MCFilter extends Logger
             // $this->log(json_encode($record))
             $cuser = new ilCourseParticipant($record["ref_id"], $record["user_id"]);
 
+            // populate context dict
+            if (!array_key_exists ($record["user_id"] . $record["course_id"], $ctxtDict))
+            {
+                if($cuser->isAdmin() || $cuser->isTutor())
+                {
+                    $pseudoStatement = "course.admin-" . $record["course_id"] . "-" . $record["user_id"];
+                    $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
+                                                                                         "id" => $pseudoStatement));
+                }
+                else
+                {
+                    $pseudoStatement = "course.participate-" . $record["course_id"] . "-" . $record["user_id"];
+                    $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
+                                                                                 "id" => $pseudoStatement));
+                }
+            }
+
             $s = new XAPIStatement();
             $s->addID($record["id"]);
+
             if ($record["duration"] > 0)
             {
                 $s->addVerb($verbDict["qti.item.response"]);
@@ -384,7 +405,8 @@ class MCFilter extends Logger
             {
                 $s->addVerb($verbDict["mozilla.achieve.badge"]);
             }
-
+            $dt = new DateTime();
+            $dt->setTimestamp(intval(intval($record["day"])/1000));
             // populate user dict
             if (!array_key_exists($record["user_id"], $userDict))
             {
@@ -403,7 +425,18 @@ class MCFilter extends Logger
                 $userDict[$record["user_id"]] = array("id" => "mailto:" . $oUser->getEmail(),
                                                       "name" => $fullName);
 
+                $ts = new XAPIStatement();
+
+                $ts->addID($ctxtDict[$record["user_id"] . $record["course_id"]]["statement"]["id"]);
+                $ts->addAgent($userDict[$record["user_id"]]);
+                $ts->addVerb($verbDict["participate"]);
+                $ts->addObject(array("id"=> $this->vle->getBaseURL() . "tla/restservice/content/course.php/" . $record["course_id"]));
+
+                $ts->addTimestamp($dt->format(DateTime::ISO8601));
+                array_push($rv, $ts->result());
+
             }
+            $s->addTimestamp($dt->format(DateTime::ISO8601));
             $s->addAgent($userDict[$record["user_id"]]);
 
             // polulate object dict
@@ -425,25 +458,11 @@ class MCFilter extends Logger
                 $objDict[$record["question_id"]] = array("id" => $urlid,
                                                          "definition" => array("name" => array("C" => $question),
                                                                                "type" => "http://imsglobal.com/vocab/qti/item/" . $data["type_tag"]));
+
             }
+
             $s->addObject($objDict[$record["question_id"]]);
 
-            // populate     context dict
-            if (!array_key_exists ($record["user_id"] . $record["course_id"], $ctxtDict))
-            {
-                if($cuser->isAdmin() || $cuser->isTutor())
-                {
-                    $pseudoStatement = "course.admin-" . $record["course_id"] . "-" . $record["user_id"];
-                    $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
-                                                                                         "id" => $pseudoStatement));
-                }
-                else
-                {
-                    $pseudoStatement = "course.participate-" . $record["course_id"] . "-" . $record["user_id"];
-                    $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
-                                                                                 "id" => $pseudoStatement));
-                }
-            }
             $s->addContext($ctxtDict[$record["user_id"] . $record["course_id"]]);
             // $this->log(json_encode($s->result()));
             array_push($rv, $s->result());
