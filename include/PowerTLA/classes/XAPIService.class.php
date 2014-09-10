@@ -35,6 +35,10 @@ class XAPIService extends VLEService
 
         if($this->status === RESTling::OK)
         {
+            // process the operands array set by parent::validateURI();
+            // the operands array keeps the sequence of the API part of the
+            // REQUEST URI and can be therefore used for defining the API
+            // functions.
             $this->mode    = array_shift($this->operands);
             $this->feature = array_shift($this->operands);
 
@@ -48,21 +52,6 @@ class XAPIService extends VLEService
                 $this->feature = "result";
                 $this->filter_id= array_shift($this->operands);
             }
-        }
-    }
-
-    protected function validateOperation()
-    {
-        // this function checks whether the current user is eligible to
-        // fetch the related information. validateOperation() covers entry
-        // level access control.
-        if (!$this->VLE->isActiveUser())
-        {
-            // in production set the status to not authenticated
-            // both, web-based cookie sessions and oauth should be valid
-
-            // $this->status = RESTling::OPERATION_FAILED;
-            // $this->authentication_required();
         }
     }
 
@@ -103,6 +92,25 @@ class XAPIService extends VLEService
         // $this->log("call method " . $action_name);
     }
 
+    protected function validateOperation()
+    {
+        // this function checks whether the current user is eligible to
+        // fetch the related information. validateOperation() covers entry
+        // level access control.
+        if (!$this->VLE->isActiveUser())
+        {
+            // in production set the status to not authenticated
+            // both, web-based cookie sessions and oauth should be valid
+
+            // $this->status = RESTling::OPERATION_FAILED;
+            // $this->authentication_required();
+        }
+    }
+
+    /**
+     * THE ACTUAL API
+     **/
+
     // About resource
     protected function get_about()
     {
@@ -136,7 +144,7 @@ class XAPIService extends VLEService
         // the feed should be only available to authenticated users or admins
         $jsonfeed   = array();
 
-        $filter = new MCFilter($this->VLE);
+        $filter = new MCFilter($this);
         $filter->setScope($this->operands);
         $filter->setParams($this->queryParam);
 
@@ -198,14 +206,17 @@ class XAPIService extends VLEService
     {
         $this->missing();
     }
+
     protected function insert_activities_profile()
     {
         $this->missing();
     }
+
     protected function update_activities_profile()
     {
         $this->missing();
     }
+
     protected function delete_activities_profile()
     {
         $this->missing();
@@ -215,21 +226,24 @@ class XAPIService extends VLEService
     {
         $this->missing();
     }
+
     protected function insert_activities_state()
     {
         $this->missing();
     }
+
     protected function update_activities_state()
     {
         $this->missing();
     }
+
     protected function delete_activities_state()
     {
         $this->missing();
     }
 
     // TODO Filter API
-    protected function get_filters()
+    protected function get_filter()
     {
         // $this->missing();
         $this->data["filters"] = $this->filters;
@@ -295,14 +309,17 @@ class XAPIService extends VLEService
     {
         $this->missing();
     }
+
     protected function insert_trigger()
     {
         $this->missing();
     }
+
     protected function delete_trigger()
     {
         $this->missing();
     }
+
     protected function update_trigger()
     {
         $this->missing();
@@ -313,6 +330,7 @@ class XAPIService extends VLEService
         // for the current statement we need to analyse, which filters might apply
         return false;
     }
+
     protected function call_trigger()
     {}
 }

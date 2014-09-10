@@ -6,7 +6,7 @@ class VLEService extends RESTling {
      * @property $VLE
      *
      */
-    protected $VLE;
+    public    $VLE;
     protected $dbh;
 
     protected $pluginList;

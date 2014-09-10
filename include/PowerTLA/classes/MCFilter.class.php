@@ -5,6 +5,7 @@ include_once 'Services/Membership/classes/class.ilParticipants.php';
 
 class MCFilter extends Logger
 {
+    private $service;
     protected $vle;
     protected $dbh;
     protected $param;
@@ -17,9 +18,10 @@ class MCFilter extends Logger
     private   $scope; // the scope selectors
     private   $curScope; // the scope selector mapping
 
-    public function __construct($vle)
+    public function __construct($service)
     {
-        $this->vle     = $vle;
+        $this->service = $service;
+        $this->vle     = $service->VLE;
         $this->dbh     = $vle->getDBHandler();
         $this->param   = array();
         $this->query   = array();
@@ -240,11 +242,14 @@ class MCFilter extends Logger
     {
         // fetch the object reference information in one go, because
         // ilias hardly ever uses the actual object id.
+        $rv = array();
+
         // $sql = "SELECT s.*, r.ref_id FROM ui_uihk_xmob_stat s, object_reference r WHERE s.course_id = r.obj_id"; // new
         $sql = "SELECT s.*, r.ref_id FROM isnlc_statistics s, object_reference r WHERE s.course_id = r.obj_id"; // old
 
         $query = array();
 
+        // prepare scope and imput parameters
         if (array_key_exists("context.statement.id", $this->curScope) && isset($this->curScope["context.statement.id"]))
         {
             // check whether the current user is a member of the curent course context
@@ -313,6 +318,8 @@ class MCFilter extends Logger
             }
         }
 
+        // combine extra query parameters with the normal filter parameters
+        // that were set via setParam()
         if (count($this->query))
         {
             $query = array_merge($this->query, $query);
@@ -333,8 +340,8 @@ class MCFilter extends Logger
             return;
         }
 
-        $rv = array();
-
+        // prepare internal dictionaries as the old LRS prototype is
+        // much simpler in design
         $userDict = array();
         $objDict  = array("stackhandler" => array("id" => "http://mobinaut.io/badges/stackhandler",
                                                    "display"=> array("en" => "Stack Handler")),
@@ -363,6 +370,7 @@ class MCFilter extends Logger
                          "0.5" => array("score" => array("raw" => "0.5", "scaled" => 0, "success" => FALSE, "completion" => FALSE)),
                          "1"   => array("score" => array("raw" => "1", "scaled" => 1, "success" => TRUE, "completion" => FALSE)));
 
+        // finally, query the database
         $sth = $this->dbh->db->prepare($sql, $this->types);
 
         //$this->log(implode(", ", $this->types));
@@ -374,13 +382,17 @@ class MCFilter extends Logger
         else
         {
             $this->log("DB ERROR " . $sth->getMessage());
+            return $rv;
         }
 
+        // process the results
         while ($record = $res->fetchRow(MDB2_FETCHMODE_ASSOC)){
             // $this->log(json_encode($record))
+
+            // get the profile information for the agent
             $cuser = new ilCourseParticipant($record["ref_id"], $record["user_id"]);
 
-            // populate context dict
+            // populate the context dict (depending whether the user is a facilitator)
             if (!array_key_exists ($record["user_id"] . $record["course_id"], $ctxtDict))
             {
                 if($cuser->isAdmin() || $cuser->isTutor())
@@ -397,8 +409,12 @@ class MCFilter extends Logger
                 }
             }
 
+            $dt = new DateTime();
+            $dt->setTimestamp(intval(intval($record["day"])/1000));
+
             $s = new XAPIStatement();
             $s->addID($record["id"]);
+            $s->addTimestamp($dt->format(DateTime::ISO8601));
 
             if ($record["duration"] > 0)
             {
@@ -411,8 +427,7 @@ class MCFilter extends Logger
             {
                 $s->addVerb($verbDict["mozilla.achieve.badge"]);
             }
-            $dt = new DateTime();
-            $dt->setTimestamp(intval(intval($record["day"])/1000));
+
             // populate user dict
             if (!array_key_exists($record["user_id"], $userDict))
             {
@@ -445,7 +460,7 @@ class MCFilter extends Logger
                 array_push($rv, $ts->result());
 
             }
-            $s->addTimestamp($dt->format(DateTime::ISO8601));
+
             $s->addAgent($userDict[$record["user_id"]]);
 
             // polulate object dict
@@ -474,6 +489,7 @@ class MCFilter extends Logger
 
             $s->addContext($ctxtDict[$record["user_id"] . $record["course_id"]]);
             // $this->log(json_encode($s->result()));
+            // $this->service->respondData($s->result()); // use the new RESTling streaming API when it becomes available
             array_push($rv, $s->result());
         }
 

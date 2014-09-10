@@ -2,12 +2,14 @@
 
 class XAPIFilter extends Logger
 {
+    private $service;
+    protected $vle;
     protected $dbh;
-    protected $param;
-    public function __construct($dbh)
+    public function __construct($service)
     {
-        $this->dbh = $dbh;
-        $this->param = array();
+        $this->service = $service;
+        $this->vle     = $service->VLE;
+        $this->dbh     = $vle->getDBHandler();
     }
 
     /**
