@@ -270,7 +270,7 @@ class XAPIService extends VLEService
         if ($this->filters[$this->filter_id]["query-type"] == "moblercards")
         {
             $this->log("old mobler cards filter");
-            $filter = new MCFilter($this->VLE);
+            $filter = new MCFilter($this);
         }
         else if ($this->filters[$this->filter_id]["query-type"] == "XAPI")
         {
