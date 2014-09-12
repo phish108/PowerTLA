@@ -22,7 +22,7 @@ class MCFilter extends Logger
     {
         $this->service = $service;
         $this->vle     = $service->VLE;
-        $this->dbh     = $vle->getDBHandler();
+        $this->dbh     = $this->vle->getDBHandler();
         $this->param   = array();
         $this->query   = array();
         $this->values  = array();
@@ -329,6 +329,8 @@ class MCFilter extends Logger
         {
             $sql .= " AND " . implode(" AND ", $query);
         }
+
+        $sql .= " ORDER BY day DESC";
 
         $this->log("MC FILTER SQL " . $sql);
         // $sth = $this->dbh->prepare($sql);
