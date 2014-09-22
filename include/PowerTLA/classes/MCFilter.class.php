@@ -392,6 +392,22 @@ class MCFilter extends Logger
             // $this->log(json_encode($record))
 
             // get the profile information for the agent
+            $r = $this->dbh->queryF("SELECT usr_id FROM usr_data ".
+                                    "WHERE usr_id= %s",
+                                    array("integer"),
+                                    array($record["user_id"]));
+
+            if (!$this->dbh->fetchAssoc($r))
+            {
+                // skip if the user does not exist.
+                continue;
+            }
+
+            // don't assume that we are looking at existing users
+            // FIXME - avoid VLE specific code
+            // how to catch the errors
+            $oUser    = new ilObjUser($record["user_id"]);
+
             $cuser = new ilCourseParticipant($record["ref_id"], $record["user_id"]);
 
             // populate the context dict (depending whether the user is a facilitator)
@@ -420,8 +436,20 @@ class MCFilter extends Logger
 
             if ($record["duration"] > 0)
             {
-                $s->addVerb($verbDict["qti.item.response"]);
-                $result = $resDict[$record["score"]];
+                if ($record["score"] < 0)
+                {
+                    $record["score"] = 0;
+                }
+                        $s->addVerb($verbDict["qti.item.response"]);
+                if ($resDict[$record["score"]])
+                {
+                             $result = $resDict[$record["score"]];
+                }
+                else
+                {
+                    $result = array("score" => array("raw" => $record["score"]));
+                }
+
                 $result["duration"] = $record["duration"];
                 $s->addResult($result);
             }
@@ -434,8 +462,6 @@ class MCFilter extends Logger
             if (!array_key_exists($record["user_id"], $userDict))
             {
                 // need to fetch agent information
-                // FIXME - avoid VLE specific code
-                $oUser    = new ilObjUser($record["user_id"]);
                 $fullName = $oUser->getFirstname() . " " . $oUser->getLastname();
                 // exclude course administrator data from the steam
                 // we need the officila ref_id not the internal course id
