@@ -29,18 +29,21 @@ class XAPIService extends VLEService
         );
     }
 
-    protected function validateURI()
+    protected function initializeRun()
     {
-        parent::validateURI();
+        parent::initializeRun();
 
+        $this->log('initialize run');
         if($this->status === RESTling::OK)
         {
             // process the operands array set by parent::validateURI();
             // the operands array keeps the sequence of the API part of the
             // REQUEST URI and can be therefore used for defining the API
             // functions.
-            $this->mode    = array_shift($this->operands);
-            $this->feature = array_shift($this->operands);
+            $this->mode    = array_shift($this->path_info);
+            $this->feature = array_shift($this->path_info);
+
+            $this->log( $this->mode . ' ' . $this->feature);
 
             // reset the mode and feature for Our filter API
             if (!empty($this->mode)
@@ -50,7 +53,7 @@ class XAPIService extends VLEService
             {
                 $this->mode = $this->feature;
                 $this->feature = "result";
-                $this->filter_id= array_shift($this->operands);
+                $this->filter_id= array_shift($this->path_info);
             }
         }
     }
@@ -145,7 +148,7 @@ class XAPIService extends VLEService
         $jsonfeed   = array();
 
         $filter = new MCFilter($this);
-        $filter->setScope($this->operands);
+        $filter->setScope($this->path_info);
         $filter->setParams($this->queryParam);
 
         $jsonfeed = $filter->apply();
@@ -279,7 +282,7 @@ class XAPIService extends VLEService
         }
 
         $filter->addSelector($this->filters[$this->filter_id]);
-        $filter->setScope($this->operands);
+        $filter->setScope($this->path_info);
         $filter->setParams($this->queryParam);
 
         $lstStatement = $filter->apply();
@@ -293,7 +296,7 @@ class XAPIService extends VLEService
             return;
         }
 
-        $this->data = $lstStatement;
+        $this->data = json_encode($lstStatement);
     }
 
     // TODO Trigger API

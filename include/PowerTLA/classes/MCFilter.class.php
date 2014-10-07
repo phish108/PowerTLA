@@ -270,7 +270,7 @@ class MCFilter extends Logger
                 // course does not exist
                 $this->service->not_found();
                 $sth->free();
-                return;
+                return array();
             }
             $sth->free();
 
@@ -346,7 +346,7 @@ class MCFilter extends Logger
         if (strlen($this->error))
         {
             $this->log("stop loading : " . $this->error);
-            return;
+            return array();
         }
 
         // prepare internal dictionaries as the old LRS prototype is
