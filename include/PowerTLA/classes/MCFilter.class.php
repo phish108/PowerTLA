@@ -14,7 +14,7 @@ class MCFilter extends Logger
     private   $types;
     private   $error;
     private   $dateLimit;
-    private   $withTutor;
+    private   $withTutor = false;
     private   $scope; // the scope selectors
     private   $curScope; // the scope selector mapping
 
@@ -254,7 +254,7 @@ class MCFilter extends Logger
         {
             // check whether the current user is a member of the curent course context
             $ctxtCourseID;
-            $refsql = "SELECT ref_id FROM object_reference WHERE obj_id = ?";
+            $refsql = "SELECT obj_id FROM object_reference WHERE ref_id = ?";
             $sth    = $this->dbh->db->prepare($refsql, array("integer"));
             if (PEAR::isError($sth))
             {
@@ -263,7 +263,14 @@ class MCFilter extends Logger
             $res    = $sth->execute(array($this->curScope["context.statement.id"]));
             if ($row = $res->fetchRow(MDB2_FETCHMODE_ASSOC))
             {
-                $ctxtCourseID = $row["ref_id"];
+                $ctxtCourseID = $row["obj_id"];
+            }
+            else
+            {
+                // course does not exist
+                $this->service->not_found();
+                $sth->free();
+                return;
             }
             $sth->free();
 
@@ -284,7 +291,7 @@ class MCFilter extends Logger
 
             $query[] = "s.course_id = ?";
             $this->types[] = "integer";
-            $this->values[] = $this->curScope["context.statement.id"];
+            $this->values[] = $ctxtCourseID;
 
 //            $ctxtuser = new ilCourseParticipant($ctxtCourseID, $this->vle->getActiveUserId());
 
@@ -408,11 +415,14 @@ class MCFilter extends Logger
             // how to catch the errors
             $oUser    = new ilObjUser($record["user_id"]);
 
-            $cuser = new ilCourseParticipant($record["ref_id"], $record["user_id"]);
+            $cuser = new ilCourseParticipant($record["course_id"], $record["user_id"]);
 
             // populate the context dict (depending whether the user is a facilitator)
             if (!array_key_exists ($record["user_id"] . $record["course_id"], $ctxtDict))
             {
+
+                // $this->log('courseuser: user id ' . $record["user_id"] . ' for course ' . $record["course_id"] . ' is member ' . $cuser->isMember() . ', isAdmin '. $cuser->isAdmin() . ', is tutor ' . $cuser->isTutor());
+
                 if($cuser->isAdmin() || $cuser->isTutor())
                 {
                     $pseudoStatement = "course.admin-" . $record["course_id"] . "-" . $record["user_id"];
