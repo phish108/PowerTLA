@@ -42,7 +42,7 @@ class XAPIStatement
 
     public function addAgent($objAgent)
     {
-        $this->data["agent"] = $objAgent;
+        $this->data["actor"] = $objAgent;
     }
 
     public function addVerb($objVerb)
