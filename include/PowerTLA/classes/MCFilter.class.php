@@ -425,7 +425,7 @@ class MCFilter extends Logger
 
                 if($cuser->isAdmin() || $cuser->isTutor())
                 {
-                    $pseudoStatement = "course.admin-" . $record["course_id"] . "-" . $record["user_id"];
+                    $pseudoStatement = "course.facilitate-" . $record["course_id"] . "-" . $record["user_id"];
                     $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
                                                                                                       "id" => $pseudoStatement));
                 }
