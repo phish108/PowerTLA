@@ -20,24 +20,16 @@ class XAPIStatement
 
     public function generateID()
     {
-//        $i_url = "";
-//        if (!empty($this->data["agent"]["id"]))
-//            $i_url .= $this->data["agent"]["id"];
-//        if (!empty($this->data["verb"]["id"]))
-//                $i_url .= $this->data["verb"]["id"];
-//        if (!empty($this->data["object"]["id"]))
-//            $i_url .= $this->data["object"]["id"];
-//
-//        uuid_create(&$context);
-//        uuid_create(&$namespace);
-//
-//        uuid_make($context, UUID_MAKE_V5, $namespace, $i_url);
-//        uuid_export($context, UUID_FMT_STR, &$uuid);
 
-        $prefix = uniqid();
-        $uuid = uniqid($prefix, true);
+        $uuid = sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                        mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+                        mt_rand( 0, 0xffff ),
+                        mt_rand( 0, 0x0fff ) | 0x4000,
+                        mt_rand( 0, 0x3fff ) | 0x8000,
+                        mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ));
 
-         $this->data["id"] = trim($uuid);
+        $this->data["id"] = trim($uuid);
+        return $this->data["id"];
     }
 
     public function addAgent($objAgent)

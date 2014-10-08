@@ -375,9 +375,9 @@ class MCFilter extends Logger
                                                                               "de" => "einen Kurs unterstützt"))
                          );
 
-        $resDict = array("0"   => array("score" => array("raw" => "0", "scaled" => -1, "success" => FALSE, "completion" => FALSE)),
-                         "0.5" => array("score" => array("raw" => "0.5", "scaled" => 0, "success" => FALSE, "completion" => FALSE)),
-                         "1"   => array("score" => array("raw" => "1", "scaled" => 1, "success" => TRUE, "completion" => FALSE)));
+        $resDict = array("0"   => array("score" => array("raw" => 0, "scaled" => -1, "success" => FALSE, "completion" => FALSE)),
+                         "0.5" => array("score" => array("raw" => 0.5, "scaled" => 0, "success" => FALSE, "completion" => FALSE)),
+                         "1"   => array("score" => array("raw" => 1, "scaled" => 1, "success" => TRUE, "completion" => FALSE)));
 
         // finally, query the database
         $sth = $this->dbh->db->prepare($sql, $this->types);
@@ -484,7 +484,7 @@ class MCFilter extends Logger
                     $courseRole = "facilitate";
                     continue;
                 }
-                $userDict[$record["user_id"]] = array("id" => "mailto:" . $oUser->getEmail(),
+                $userDict[$record["user_id"]] = array("mbox" => "mailto:" . $oUser->getEmail(),
                                                       "name" => $fullName);
 
                 $ts = new XAPIStatement();
