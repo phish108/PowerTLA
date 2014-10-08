@@ -422,10 +422,13 @@ class MCFilter extends Logger
             {
 
                 // $this->log('courseuser: user id ' . $record["user_id"] . ' for course ' . $record["course_id"] . ' is member ' . $cuser->isMember() . ', isAdmin '. $cuser->isAdmin() . ', is tutor ' . $cuser->isTutor());
+                $tsH = new XAPIStatement();
+                $pseudoStatement = $tsH->generateID(); // FIXME stop generating new ids every time the service is called
 
                 if($cuser->isAdmin() || $cuser->isTutor())
                 {
-                    $pseudoStatement = "course.facilitate-" . $record["course_id"] . "-" . $record["user_id"];
+
+                    // $pseudoStatement = "course.facilitate-" . $record["course_id"] . "-" . $record["user_id"];
                     $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
                                                                                                       "id" => $pseudoStatement));
                 }
@@ -441,7 +444,7 @@ class MCFilter extends Logger
             $dt->setTimestamp(intval(intval($record["day"])/1000));
 
             $s = new XAPIStatement();
-            $s->addID($record["id"]);
+            // $s->addID($record["id"]);
             $s->addTimestamp($dt->format(DateTime::ISO8601));
 
             if ($record["duration"] > 0)
@@ -460,7 +463,10 @@ class MCFilter extends Logger
                     $result = array("score" => array("raw" => $record["score"]));
                 }
 
-                $result["duration"] = $record["duration"];
+                // P%yY%mM%dDT%hH%iM%sS
+                // $iv = new DateInterval($record["duration"]);
+                // $result["duration"] = $iv->format('P%yY%mM%dDT%hH%iM%sS');
+                $result["duration"] = $this->time_to_iso8601_duration($record["duration"]);
                 $s->addResult($result);
             }
             else
@@ -549,6 +555,34 @@ class MCFilter extends Logger
     public function getParams()
     {
         return $this->param;
+    }
+
+    private function time_to_iso8601_duration($time) {
+        $units = array(
+            "Y" => 365*24*3600000,
+            "D" =>     24*3600000,
+            "H" =>        3600000,
+            "M" =>          60000,
+            "S" =>           1000,
+        );
+
+        $str = "P";
+        $istime = false;
+
+        foreach ($units as $unitName => &$unit) {
+            $quot  = intval($time / $unit);
+            $time -= $quot * $unit;
+            $unit  = $quot;
+            if ($unit > 0) {
+                if (!$istime && in_array($unitName, array("H", "M", "S"))) { // There may be a better way to do this
+                    $str .= "T";
+                    $istime = true;
+                }
+                $str .= strval($unit) . $unitName;
+            }
+        }
+
+        return $str;
     }
 }
 ?>
