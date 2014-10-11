@@ -245,7 +245,7 @@ class MCFilter extends Logger
         $rv = array();
 
         // $sql = "SELECT s.*, r.ref_id FROM ui_uihk_xmob_stat s, object_reference r WHERE s.course_id = r.obj_id"; // new
-        $sql = "SELECT s.*, r.ref_id FROM isnlc_statistics s, object_reference r WHERE s.course_id = r.obj_id"; // old
+        $sql = "SELECT s.*, r.ref_id FROM isnlc_statistics s, object_reference r WHERE s.course_id = r.obj_id "; // old
 
         $query = array();
 
@@ -289,9 +289,11 @@ class MCFilter extends Logger
 //                    return array();
             }
 
-            $query[] = "s.course_id = ?";
+            $query[] = "r.ref_id = ?";
+            // $query[] = "s.course_id = ?";
             $this->types[] = "integer";
-            $this->values[] = $ctxtCourseID;
+            $this->values[] = $this->curScope["context.statement.id"];
+//            $this->values[] = $ctxtCourseID;
 
 //            $ctxtuser = new ilCourseParticipant($ctxtCourseID, $this->vle->getActiveUserId());
 
@@ -395,9 +397,11 @@ class MCFilter extends Logger
         }
 
         // process the results
+        $ers = 0;
         while ($record = $res->fetchRow(MDB2_FETCHMODE_ASSOC)){
             // $this->log(json_encode($record))
 
+            $ers++;
             // get the profile information for the agent
             $r = $this->dbh->queryF("SELECT usr_id FROM usr_data ".
                                     "WHERE usr_id= %s",
@@ -406,7 +410,7 @@ class MCFilter extends Logger
 
             if (!$this->dbh->fetchAssoc($r))
             {
-                // skip if the user does not exist.
+                $this->log("skip if the actor does not exist");
                 continue;
             }
 
@@ -434,7 +438,7 @@ class MCFilter extends Logger
                 }
                 else
                 {
-                    $pseudoStatement = "course.participate-" . $record["course_id"] . "-" . $record["user_id"];
+                    // $pseudoStatement = "course.participate-" . $record["course_id"] . "-" . $record["user_id"];
                     $ctxtDict[$record["user_id"] . $record["course_id"]] = array("statement" => array("objectType" => "StatementRef",
                                                                                  "id" => $pseudoStatement));
                 }
@@ -486,7 +490,7 @@ class MCFilter extends Logger
 
                 if(!$this->withTutor && ($cuser->isAdmin() || $cuser->isTutor()))
                 {
-                    $this->log('remove course admins');
+                    // $this->log('remove course admins');
                     $courseRole = "facilitate";
                     continue;
                 }
@@ -538,6 +542,8 @@ class MCFilter extends Logger
         }
 
         $sth->free();
+
+        $this->log('processed ' . $ers . ' records');
 
         return $rv;
     }
