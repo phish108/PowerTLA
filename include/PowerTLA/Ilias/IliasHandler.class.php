@@ -31,20 +31,22 @@ class IliasHandler extends VLEHandler
                 // $this->log("ilias file exists");
                 require_once($strVersionInit);
 
+
+                $this->log('init ' . $vstring);
                 // initialize Ilias
                 // unfortunately they change the initialization routine completely between releases
                 switch ($vstring)
                 {
                     case '4.2':
-                       $this->log('init ' . $vstring);
                        $ilInit = new ilRESTInitialisation();
                        $GLOBALS['ilInit'] = $ilInit;
                        $ilInit->initILIAS();
                        break;
                     case '4.3':
-                        $this->log('init ' . $vstring);
-
                         ilRESTInitialisation::initIlias(); // why oh why?!?
+                        break;
+                    case '4.4':
+                        ilRESTInitialisation::initILIAS(); // fake OOP again.
                         break;
                     default:
                         return;
