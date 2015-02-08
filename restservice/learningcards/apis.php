@@ -27,37 +27,38 @@ if ( !isset($service))
         "apis"   => array(),
         "language" => "en",
         "tlaversion" => "MBC.1.0",
+        "name"     => "TEST SERVER",
         "logolink" => $reqpath . "/icon.png" // should point to the correct logo URL, possibly from ILIAS!
     );
 }
 
-$service["apis"]["ch.isn.lms.auth"] = array(
+array_push($service["apis"], array(
     "name"   => "ch.isn.lms.auth",
     "link" => $pathprefix . "/authentication.php"
-);
+));
 
-$service["apis"]["ch.isn.lms.device"] = array(
+array_push($service["apis"], array(
     "name"   => "ch.isn.lms.device",
     "link" => $pathprefix . "/registration.php"
-);
+));
 
-$service["apis"]["ch.isn.lms.courses"] = array(
+array_push($service["apis"], array(
     "name"   => "ch.isn.lms.courses",
     "link" => $pathprefix . "/courses.php"
-);
+));
 
-$service["apis"]["ch.isn.lms.questions"] = array(
+array_push($service["apis"], array(
     "name"   => "ch.isn.lms.questions",
     "link" => $pathprefix . "/questions.php"
-);
+));
 
-$service["apis"]["ch.isn.lms.statistics"] = array(
+array_push($service["apis"], array(
     "name"   => "ch.isn.lms.statistics",
     "link" => $pathprefix . "/statistics.php"
-);
+));
 
-$service["apis"]["ch.isn.lms.tracking"] = array(
+array_push($service["apis"], array(
     "name"   => "ch.isn.lms.tracking",
     "link" => $pathprefix . "/tracking.php"
-);
+));
 ?>
