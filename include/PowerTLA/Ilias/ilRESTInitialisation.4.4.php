@@ -3,17 +3,6 @@
 
 require_once('Services/Init/classes/class.ilInitialisation.php');
 
-// needed for slow queries, etc.
-if(!isset($GLOBALS['ilGlobalStartTime']) || !$GLOBALS['ilGlobalStartTime'])
-{
-	$GLOBALS['ilGlobalStartTime'] = microtime();
-}
-
-include_once "Services/Context/classes/class.ilContext.php";
-
-/** @defgroup ServicesInit Services/Init
- */
-
 /**
 * ILIAS Initialisation Utility Class
 * perform basic setup: init database handler, load configuration file,
@@ -105,19 +94,19 @@ class ilRESTInitialisation extends ilInitialisation
 			if (ilContext::hasUser())
 			{
 				self::initUser();
-
-				if(ilContext::doAuthentication())
-				{
-					self::authenticate();
-				}
+//
+//				if(ilContext::doAuthentication())
+//				{
+//					self::authenticate();
+//				}
 			}
 
 			// init after Auth otherwise breaks CAS
 			self::includePhp5Compliance();
 
 			// language may depend on user setting
-			self::initLanguage();
-			$tree->initLangCode();
+//			self::initLanguage();
+//			$tree->initLangCode();
 		}
 	}
 
