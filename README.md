@@ -16,6 +16,17 @@ PowerTLA offers a REST service layer for
 
 PowerTLA builds on top of the existing LMS code and allows easy integration of mobile tools and services.
 
+## Install
+
+### ILIAS LMS
+
+On Ilias create a folder in the root directory called "tla".
+
+Then copy all powertla files into this directory. The rest will work like magik.
+
+### Moodle
+
+
 ## Documentation
 
 Find the documentation in the [docs folder](docs/).
