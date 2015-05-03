@@ -7,8 +7,14 @@ include_once("include/inc.ilias_version.php");
 $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
 
 if (!empty($aVersion)) {
+    error_log("Load Version " . implode(".", $aVersion));
     $vstring = $aVersion[0] . '.' . $aVersion[1];
-    $strVersionInit = 'include/PowerTLA/Ilias/ilRESTInitialisation.' . $vstring . '.php';
+
+    global $powertlapath;
+    error_log("powertlapath: " . $powertlapath);
+
+
+    $strVersionInit = $powertlapath . '/Ilias/ilRESTInitialisation.' . $vstring . '.php';
 
     if (file_exists($strVersionInit) )
     {
@@ -25,7 +31,8 @@ if (!empty($aVersion)) {
                 ilRESTInitialisation::initIlias(); // why oh why?!?
                 break;
             case '4.4':
-                ilRESTInitialisation::initILIAS(); // fake OOP again.
+                ilRESTInitialisation::initILIAS(); // fake OOP again,
+                                                   // but now all CAPS?
                 break;
             default:
                 return;
