@@ -48,23 +48,6 @@ class ilRESTInitialisation extends ilInitialisation
     //INHERIT: handleDevMode
 
 	/**
-	 * This method provides a global instance of class ilIniFile for the
-	 * client.ini.php file in variable $ilClientIniFile.
-	 *
-	 * It initializes a lot of constants accordingly to the settings in
-	 * the client.ini.php file.
-	 *
-	 * Preconditions: ILIAS_WEB_DIR and CLIENT_ID must be set.
-	 *
-	 * @return	boolean		true, if no error occured with client init file
-	 *						otherwise false
-	 */
-	protected static function initClientIniFile()
-	{
-		return true;
-	}
-
-	/**
 	 * Exit
 	 *
 	 * @param string $a_message
