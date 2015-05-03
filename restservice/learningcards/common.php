@@ -320,37 +320,26 @@ function calculateAnswerOtherTypes($assQuestion)
 function findIliasInstance()
 {
     $cwd = explode('/', getcwd());
-    array_pop($cwd);
-    $cdpath = "..";
 
-    $ipath = "";
+    $ipath = "/include";
 
-    while ($p = array_pop($cwd))
+    while (array_pop($cwd))
     {
-        if (empty($ipath) && file_exists($cdpath . "/include"))
-        {
-            $ipath = "include/";
-        }
-
-        if (file_exists($cdpath . "/include/inc.ilias_version.php"))
+        if (file_exists(implode('/', $cwd)  . "/include/inc.ilias_version.php"))
         {
             // got an ilias instance
             // set include paths
-            set_include_path($ipath . PATH_SEPARATOR .
-                             // $ipath . "PowerTLA/". PATH_SEPARATOR . // remove
+            set_include_path(implode('/', $cwd) . $ipath . PATH_SEPARATOR .
+                             implode('/', $cwd) . "/tla/include". PATH_SEPARATOR . // remove
+                             implode('/', $cwd) . "/tla/include/PowerTLA". PATH_SEPARATOR . // remove
                              get_include_path());
-            chdir($cdpath); // change to the Ilias directory
-            include_once("include/PowerTLA/tearupILIAS.php");
+            chdir(implode('/', $cwd)); // change to the Ilias directory
 
-            return $ipath;
+            require_once('PowerTLA/PowerTLA.auto.php');
+            require_once("tearupILIAS.php");
+
+            return implode('/', $cwd) . $ipath;
         }
-
-        if (!empty($ipath))
-        {
-            $ipath = $p . "/" . $ipath;
-        }
-
-        $cdpath .= "/..";
     }
     return "";
 }
