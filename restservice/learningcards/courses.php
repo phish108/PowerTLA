@@ -2,14 +2,16 @@
 /* 	THIS COMMENT MUST NOT BE REMOVED
 
 
-	Copyright (c) 2012 ETH Zürich, Affero GPL, see backend/ILIAS/AGPL_LICENSE.txt
-   	if you don't have a license file, then you can obtain it from the project΄s page
-   	 on github <https://github.com/ISN-Zurich/ISN-Learning-Cards/blob/master/backEnd/ILIAS/LICENSE.txt>
-
+Copyright (c) 2012 ETH Zürich, Affero GPL, see
+         backend/ILIAS/AGPL_LICENSE.txt
+   	if you don't have a license file, then you can obtain it from the projet's
+    page on github
+     <https://github.com/ISN-Zurich/ISN-Learning-Cards/blob/master/backEnd/ILIAS/LICENSE.txt>
 
 	This file is part of Mobler Cards ILIAS Backend.
 
-    Mobler Cards Ilias Backend is free software: you can redistribute this code and/or modify
+    Mobler Cards Ilias Backend is free software: you can redistribute this
+    code and/or modify
     it under the terms of the GNU Affero General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
@@ -42,9 +44,10 @@ require_once './common.php';
 $ilpath = findIliasInstance();
 if (!empty($ilpath))
 {
-    global $ilUser, $class_for_logging;
+    global $ilUser;
 
-    global $DEBUG;
+    global $DEBUG, $class_for_logging;
+
     $DEBUG = 1;
     $class_for_logging = "courses.php";
 
@@ -66,44 +69,54 @@ function getCourseList($userId) {
 	global $ilObjDataCache;
 
 	include_once 'Services/Membership/classes/class.ilParticipants.php';
-	require_once 'Modules/Course/classes/class.ilCourseItems.php';
+	//require_once 'Modules/Course/classes/class.ilCourseItems.php';
+
+    require_once 'Modules/Course/classes/class.ilObjCourse.php';
 	require_once 'Modules/TestQuestionPool/classes/class.ilObjQuestionPool.php';
 
 	//loads all courses in which the current user is a member
 	$items = ilParticipants::_getMembershipByType($userId, 'crs');
 	logging("items are ".json_encode($items));
 	$courses = array();
-	foreach($items as $key => $obj_id)	{
+	foreach($items as $obj_id)	{
 
-		//references are needed to get course items (= questionpools, tests, ...)
-		$item_references = ilObject::_getAllReferences($obj_id);
-		logging("items references are ".json_encode($item_references));
+        // NOTE
+        // we must never access a course through its object ID but through its reference ID.
+        // This has changed since the version 4.2 series
+
+        $item_references = ilObject::_getAllReferences($obj_id);
+
+        // NOTE: reset() returns the first value of the reference list
+        $crs = new ilObjCourse(reset($item_references), true);
+        logging('2');
+        // should return all item in the course
+
+        $courseItemList = $crs->getSubItems();
+
+        logging('3');
+        logging("subitems are ".json_encode($courseItemList));
+
+        // we should be able to fetch the items as following
+        // $qpl = $crs->items["qpl"]; // which returns a key -> obj array
+
 		//check if valid questionpool for the course exists
 		$validQuestionPool = false;
-		if(is_array($item_references) && count($item_references)) {
-			foreach($item_references as $ref_id) {
 
-				//get all course items for a course (= questionpools, tests, ...)
-				$courseItems = new ilCourseItems($ref_id);
-				$courseItemsList = $courseItems->getAllItems();
+        // NOTE, subitems returns an associative array since 4.3
+        foreach($courseItemList["_all"] as $courseItem) {
+            //the course item has to be of type "qpl" (= questionpool)
+            if (strcmp($courseItem["type"], "qpl") == 0) {
+                logging("course " . $obj_id . " has question pool");
 
-				foreach($courseItemsList as $courseItem) {
+                //get the question pool
+                $questionPool = new ilObjQuestionPool($courseItem["ref_id"]);
+                $questionPool->read();
 
-					//the course item has to be of type "qpl" (= questionpool)
-					if (strcmp($courseItem["type"], "qpl") == 0) {
-						logging("course " . $obj_id . " has question pool");
-
-						//get the question pool
-						$questionPool = new ilObjQuestionPool($courseItem["ref_id"]);
-						$questionPool->read();
-
-						//calls isValidQuestionPool in questions.php
-						if (isValidQuestionPool($questionPool)) {
-							logging("valid question pool");
-							$validQuestionPool = true;
-						}
-					}
-				}
+                //calls isValidQuestionPool in questions.php
+                if (isValidQuestionPool($questionPool)) {
+                    logging("valid question pool");
+                    $validQuestionPool = true;
+                }
 			}
 		}
 
@@ -114,11 +127,11 @@ function getCourseList($userId) {
 
 			array_push($courses,
 					array("id"             => $obj_id,
-							"title"        => $title,
-							"syncDateTime" => 0,
-							"syncState"    => false,
-							"isLoaded"     => false,
-							"description"  => $description));
+                          "title"        => $title,
+                          "syncDateTime" => 0,
+                          "syncState"    => false,
+                          "isLoaded"     => false,
+                          "description"  => $description));
 		}
 
 	}

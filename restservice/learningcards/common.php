@@ -183,6 +183,8 @@ function getQuestionList($questionList)
 {
 	$questions = array();
 
+    require_once 'Modules/TestQuestionPool/classes/class.assQuestion.php';
+
 	foreach ($questionList as $question)
     {
 
@@ -191,9 +193,12 @@ function getQuestionList($questionList)
 
 		//get the question type
 		$type = $question["type_tag"];
-		require_once 'Modules/TestQuestionPool/classes/class.' . $type . '.php';
-		$assQuestion = new $type();
-		$assQuestion->loadFromDb($question["question_id"]);
+// 		require_once 'Modules/TestQuestionPool/classes/class.' . $type . '.php';
+		$assQuestion = assQuestion::_instantiateQuestion($questionId); // new $type();
+//		$assQuestion->loadFromDb($question["question_id"]);
+
+        $jq = $assQuestion->toJSON();
+        array_push($questions, json_decode($jq));
 
 		//get the question
 		$questionText = $question["question_text"];
@@ -221,17 +226,17 @@ function getQuestionList($questionList)
 		}
 
 		//get feedback
-		$feedbackCorrect = $assQuestion->getFeedbackGeneric(1);
-		$feedbackError = $assQuestion->getFeedbackGeneric(0);
-
-		//add question into the question list
-		array_push($questions, array(
-		"id" => $questionId,
-		"type" => $type,
-		"question" => $questionText,
-		"answer" => $answerList,
-		"correctFeedback" => $feedbackCorrect,
-		"errorFeedback" => $feedbackError));
+//		$feedbackCorrect = $assQuestion->getFeedbackGeneric(1);
+//		$feedbackError = $assQuestion->getFeedbackGeneric(0);
+//
+//		//add question into the question list
+//		array_push($questions, array(
+//		"id" => $questionId,
+//		"type" => $type,
+//		"question" => $questionText,
+//		"answer" => $answerList,
+//		"correctFeedback" => $feedbackCorrect,
+//		"errorFeedback" => $feedbackError));
 	}
 	return $questions;
 }
@@ -333,6 +338,7 @@ function findIliasInstance()
                              implode('/', $cwd) . "/tla/include". PATH_SEPARATOR . // remove
                              implode('/', $cwd) . "/tla/include/PowerTLA". PATH_SEPARATOR . // remove
                              get_include_path());
+
             chdir(implode('/', $cwd)); // change to the Ilias directory
 
             require_once('PowerTLA/PowerTLA.auto.php');

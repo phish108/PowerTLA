@@ -31,16 +31,18 @@
  *
  * @author Isabella Nake
  * @author Evangelia Mitsopoulou
+ * @author Christian Glahn
  */
 
 
 require_once './common.php';
 
-
 $ilpath = findIliasInstance();
 if (!empty($ilpath))
 {
-    require_once 'Modules/Course/classes/class.ilCourseItems.php';
+    //require_once 'Modules/Course/classes/class.ilCourseItems.php';
+    require_once 'Modules/Course/classes/class.ilObjCourse.php';
+
     require_once 'Modules/TestQuestionPool/classes/class.ilObjQuestionPool.php';
     require_once 'Modules/TestQuestionPool/classes/class.assQuestion.php';
     require_once 'Modules/TestQuestionPool/classes/class.assClozeTest.php';
@@ -82,14 +84,19 @@ function getQuestions($courseId) {
 
 	if(is_array($item_references) && count($item_references)) {
 		foreach($item_references as $ref_id) {
+            $crs = new ilObjCourse(reset($item_references), true);
+            // should return all item in the course
 
-			//get all course items for a course (= questionpools, tests, ...)
-			$courseItems = new ilCourseItems($ref_id, 0, $userID);
-			$courseItemsList = $courseItems->getAllItems();
+            $courseItemList = $crs->getSubItems();
+            $courseItemList = $courseItemList["_all"];
+
+            //get all course items for a course (= questionpools, tests, ...)
+			// $courseItems = new ilCourseItems($ref_id, 0, $userID);
+            // $courseItemsList = $courseItems->getAllItems();
 
 			// logging("Questions: " . json_encode($courseItemsList));
 
-			foreach($courseItemsList as $courseItem) {
+			foreach($courseItemList as $courseItem) {
 
 				//the course item has to be of type "qpl" (= questionpool)
 				if (strcmp($courseItem["type"], "qpl") == 0) {
