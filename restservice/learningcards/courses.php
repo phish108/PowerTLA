@@ -48,7 +48,7 @@ if (!empty($ilpath))
 
     global $DEBUG, $class_for_logging;
 
-    $DEBUG = 1;
+    $DEBUG = 0;
     $class_for_logging = "courses.php";
 
     $userID = get_session_user_from_headers();

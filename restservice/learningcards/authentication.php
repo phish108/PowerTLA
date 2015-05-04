@@ -43,7 +43,7 @@ if (!empty($ilpath))
     global $ilUser, $class_for_logging;
 
     global $DEBUG;
-    $DEBUG = 1;
+    $DEBUG = 0;
 
     $class_for_logging = "authentication.php";
 

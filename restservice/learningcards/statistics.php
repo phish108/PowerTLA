@@ -38,7 +38,7 @@ $ilpath = findIliasInstance();
 if (!empty($ilpath)) {
 
     global $DEBUG;
-    $DEBUG = 1;
+    $DEBUG = 0;
 
     global $ilUser, $class_for_logging;
 

@@ -23,8 +23,6 @@
     along with Ilias Backend. If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 /**
  * This class stores the tracking data for the in the header specified user id in the ILIAS database
  * @author Isabella Nake
@@ -32,6 +30,7 @@
  * @author Christian Glahn
  */
 
+// NOTE THIS SERVICE IS UNUSED AND WILL GET REPLACED SOON
 
 require_once './common.php';
 
@@ -39,7 +38,7 @@ $ilpath = findIliasInstance();
 if (!empty($ilpath)) {
     global $DEBUG, $class_for_logging;
 
-    $DEBUG = 1;
+    $DEBUG = 0;
 
     $class_for_logging = "tracking.php";
 

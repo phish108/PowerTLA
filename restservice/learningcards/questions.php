@@ -48,7 +48,7 @@ if (!empty($ilpath))
     require_once 'Modules/TestQuestionPool/classes/class.assClozeTest.php';
 
     global $DEBUG;
-    $DEBUG = 1;
+    $DEBUG = 0;
 
     global $class_for_logging;
 

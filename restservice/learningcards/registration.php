@@ -38,7 +38,7 @@ require_once './common.php';
 $ilpath = findIliasInstance();
 if (!empty($ilpath)) {
     global $DEBUG;
-    $DEBUG = 1;
+    $DEBUG = 0;
 
     $class_for_logging = "registration.php";
 
