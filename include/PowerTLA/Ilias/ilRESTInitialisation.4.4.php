@@ -88,8 +88,9 @@ class ilRESTInitialisation extends ilInitialisation
 			self::includePhp5Compliance();
 
 			// language may depend on user setting
-//			self::initLanguage();
-//			$tree->initLangCode();
+            // Object selection breaks if the laguage is not set.
+			self::initLanguage();
+			$tree->initLangCode();
 		}
 	}
 
