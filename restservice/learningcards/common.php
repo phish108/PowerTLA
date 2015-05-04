@@ -55,9 +55,9 @@ function logging($message)
 		$DEBUG = 0;
 	}
 
-	$log_prefix = $class_for_logging . ": ";
-
 	if ($DEBUG == 1) {
+        $log_prefix = $class_for_logging . ": ";
+
 		error_log($log_prefix . $message, 0);
 	}
 }
