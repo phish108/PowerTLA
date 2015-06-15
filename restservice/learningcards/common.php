@@ -194,7 +194,7 @@ function getQuestionList($questionList)
 		//get the question type
 		$type = $question["type_tag"];
 // 		require_once 'Modules/TestQuestionPool/classes/class.' . $type . '.php';
-		$assQuestion = assQuestion::_instantiateQuestion($questionId); // new $type();
+		$assQuestion = assQuestion::_instanciateQuestion($questionId); // new $type();
 //		$assQuestion->loadFromDb($question["question_id"]);
 
         $jq = $assQuestion->toJSON();
