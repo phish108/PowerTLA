@@ -195,10 +195,12 @@ function getQuestionList($questionList)
 		$type = $question["type_tag"];
 // 		require_once 'Modules/TestQuestionPool/classes/class.' . $type . '.php';
 		$assQuestion = assQuestion::_instanciateQuestion($questionId); // new $type();
-//		$assQuestion->loadFromDb($question["question_id"]);
+     	$assQuestion->loadFromDb($question["question_id"]);
 
-        $jq = $assQuestion->toJSON();
-        array_push($questions, json_decode($jq));
+        // The following two lines would be the intuitive correct way
+        // unfortunately Ilias 4.2 is not OOP.
+     //   $jq = $assQuestion->toJSON();
+     //    array_push($questions, json_decode($jq));
 
 		//get the question
 		$questionText = $question["question_text"];
@@ -226,17 +228,17 @@ function getQuestionList($questionList)
 		}
 
 		//get feedback
-//		$feedbackCorrect = $assQuestion->getFeedbackGeneric(1);
-//		$feedbackError = $assQuestion->getFeedbackGeneric(0);
+		$feedbackCorrect = $assQuestion->getFeedbackGeneric(1);
+		$feedbackError = $assQuestion->getFeedbackGeneric(0);
 //
 //		//add question into the question list
-//		array_push($questions, array(
-//		"id" => $questionId,
-//		"type" => $type,
-//		"question" => $questionText,
-//		"answer" => $answerList,
-//		"correctFeedback" => $feedbackCorrect,
-//		"errorFeedback" => $feedbackError));
+		array_push($questions, array(
+		"id" => $questionId,
+		"type" => $type,
+		"question" => $questionText,
+		"answer" => $answerList,
+		"correctFeedback" => $feedbackCorrect,
+		"errorFeedback" => $feedbackError));
 	}
 	return $questions;
 }
