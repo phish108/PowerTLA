@@ -22,7 +22,7 @@ PowerTLA builds on top of the existing LMS code and allows easy integration of m
 
 On Ilias create a folder in the root directory called "tla".
 
-Then copy all powertla files into this directory. The rest will work like magik.
+Then copy all powertla files into this directory. The rest will work (hopefully) like magic.
 
 ### Moodle
 
