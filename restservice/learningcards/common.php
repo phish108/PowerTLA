@@ -195,7 +195,7 @@ function getQuestionList($questionList)
 		$type = $question["type_tag"];
 // 		require_once 'Modules/TestQuestionPool/classes/class.' . $type . '.php';
 		$assQuestion = assQuestion::_instanciateQuestion($questionId); // new $type();
-     	$assQuestion->loadFromDb($question["question_id"]);
+     	// $assQuestion->loadFromDb($question["question_id"]);
 
         // The following two lines would be the intuitive correct way
         // unfortunately Ilias 4.2 is not OOP.

@@ -22,29 +22,6 @@ class VLEService extends RESTling {
     {
         if ($vle) {
             $this->VLE = $vle;
-            $this->dbh = $vle->getDBHandler();
-        }
-    }
-
-    public function addPluginID($pluginid)
-    {
-        if (!empty($pluginid))
-        {
-            array_push($this->pluginList, $pluginid);
-        }
-    }
-
-    private function checkPlugins()
-    {
-        if ($this->status == RESTling::OK && !empty($this->pluginList))
-        {
-            foreach ($this->pluginList as $p)
-            {
-                if (!empty($p) && !$this->VLE->isPluginActive($p)) {
-                    $this->status = RESTling::UNINITIALIZED;
-                    break;
-                }
-            }
         }
     }
 
@@ -60,7 +37,6 @@ class VLEService extends RESTling {
         }
         else {
             parent::initializeRun();
-            $this->checkPlugins();
         }
     }
 }

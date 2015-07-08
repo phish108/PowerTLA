@@ -40,8 +40,8 @@ class XAPIService extends VLEService
             // the operands array keeps the sequence of the API part of the
             // REQUEST URI and can be therefore used for defining the API
             // functions.
-            $this->mode    = array_shift($this->path_info);
-            $this->feature = array_shift($this->path_info);
+            // $this->mode    = array_shift($this->path_info);
+            // $this->feature = array_shift($this->path_info);
 
             $this->log( $this->mode . ' ' . $this->feature);
 
