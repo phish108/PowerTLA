@@ -21,7 +21,8 @@ function findIliasInstance()
         {
             // got an ilias instance
             // set include paths
-            set_include_path("./". $ipath . PATH_SEPARATOR .
+            set_include_path("./". PATH_SEPARATOR .
+                             "./". $ipath . PATH_SEPARATOR .
                              "./". $ipath . "/PowerTLA". PATH_SEPARATOR .
                              get_include_path());
             chdir($cdpath); // change to the Ilias directory
