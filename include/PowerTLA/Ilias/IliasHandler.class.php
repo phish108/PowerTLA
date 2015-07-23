@@ -8,8 +8,13 @@ class IliasHandler extends VLEHandler
     protected $tlapath;
     protected $baseurl;
 
+    protected $iliasVersion;
+
     public function __construct($tp)
     {
+        global $optNoRedirect;
+        $optNoRedirect = true;
+
     	// assume that PowerTLA lives in the same include path.
         // We require a configuration variable that informs us about the LMS include path.
 
@@ -22,11 +27,13 @@ class IliasHandler extends VLEHandler
 
             $this->log("ilias version is  " . $vstring);
 
+            $this->iliasVersion = $vstring;
+
             $strVersionInit = 'PowerTLA/Ilias/ilRESTInitialisation.' . $vstring . '.php';
 
-            // $this->log("strVersionInit is ".$strVersionInit);
+            $this->log("strVersionInit is ".$strVersionInit);
 
-            if (file_exists($tp . $strVersionInit) )
+            if (file_exists($tp . '/' . $strVersionInit) )
             {
                 // $this->log("ilias file exists");
                 require_once($strVersionInit);
@@ -55,18 +62,20 @@ class IliasHandler extends VLEHandler
 
                 // now we can initialize the system internals
                 // We should always avoid to fall back into Ilias' GLOBAL mode
+                global $ilUser;
+
                 $this->tlapath = $tp;
                 $this->dbhandler    = $GLOBALS['ilDB'];
-                $this->user         = $GLOBALS['ilUser'];
+                $this->user         = $ilUser;
                 $this->setBasePath();
 
                 //$this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
                 //$this->log("ilias init done");
             }
-            // else
-            // {
-            //     $this->log("ilias file does not exist");
-            // }
+            else
+            {
+                 $this->log("ilias file does not exist");
+            }
         }
     }
 
@@ -81,22 +90,29 @@ class IliasHandler extends VLEHandler
         }
     }
 
-    public function isActiveUser()
+    public function setGuestUser($username)
     {
-        if($this->user->getLogin())
+        parent::setGuestUser($username);
+        global $ilUser;
+
+        if (!empty($this->guestuserid) &&
+            (!$ilUser->getId() || $ilUser->getLogin() == "anonymous"))
         {
-            return true;
+            $guid = $ilUser->getUserIdByLogin($this->guestuserid);
+
+            $ilUser->setId($guid);
+            $ilUser->read();
         }
-        return false;
     }
 
-    public function getActiveUserId()
+    public function getUserId()
     {
         return $this->user->getId();
     }
 
     private function setBasePath()
     {
+        return;
         $tp = explode('/', $this->tlapath);
         array_pop($tp);
         array_pop($tp);
@@ -110,6 +126,18 @@ class IliasHandler extends VLEHandler
     public function getBaseURL()
     {
         return $this->baseurl;
+    }
+
+    public function getCourseBroker()
+    {
+        require_once 'PowerTLA/Ilias/CourseBroker.class.php';
+        return new CourseBroker($this->iliasVersion);
+    }
+
+    public function getQTIPoolBroker()
+    {
+        require_once 'PowerTLA/Ilias/QTIPoolBroker.class.php';
+        return new QTIPoolBroker($this->iliasVersion);
     }
 }
 

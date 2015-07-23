@@ -5,10 +5,12 @@ class VLEHandler extends Logger
     protected $dbhandler;
     protected $user;
 
+    protected $guestuserid;
+
     public function __construct()
     {}
 
-    public function getUser()
+    public function getUserId()
     {
         return $this->user;
     }
@@ -26,6 +28,20 @@ class VLEHandler extends Logger
     public function isPluginActive($pname)
     {
         return false;
+    }
+
+    public function getCourseBroker()
+    {
+        return null;
+    }
+
+    public function setGuestUser($username)
+    {
+        if (isset($username) && !empty($username))
+        {
+            $this->log("set guestuser to ". $username);
+            $this->guestuserid = $username;
+        }
     }
 }
 
