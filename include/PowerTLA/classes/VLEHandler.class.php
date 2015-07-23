@@ -30,7 +30,24 @@ class VLEHandler extends Logger
         return false;
     }
 
+    // active()  should return true after validateSession() and initiateSession() succeeded
+    public function validateSession($sessionid)
+    {}
+
+    public function initiateSession($credentials)
+    {}
+
+    public function active()
+    {
+        return false;
+    }
+
     public function getCourseBroker()
+    {
+        return null;
+    }
+
+    public function getQTIPoolBroker()
     {
         return null;
     }

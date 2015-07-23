@@ -2,10 +2,9 @@
 
 class XAPIService extends VLEService
 {
-
     protected function validateOperation()
     {
-        if (!$this->VLESession->active())
+        if (!$this->VLE->active())
         {
             $this->status = RESTling::OPERATION_FORBIDDEN;
         }
