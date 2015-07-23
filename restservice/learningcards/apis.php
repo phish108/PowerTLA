@@ -106,4 +106,8 @@ array_push($service["apis"], array(
     "name"   => "ch.isn.lms.tracking",
     "link" => $pathprefix . "/tracking.php"
 ));
+
+$ap = explode("/", $pathprefix);
+array_pop($ap);
+$pathprefix = implode("/", $ap);
 ?>

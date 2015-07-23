@@ -1,7 +1,5 @@
 <?php
-
-$localpath = "/restservice";
-
+$localpath = "/content";
 if (!isset($pathprefix))
 {
     $pathprefix = "";
@@ -10,7 +8,7 @@ else {
     $pathprefix .= $localpath;
 }
 
-if ( !isset($service))
+if (!isset($service))
 {
     // find ilias instance to load the metadata
     $scwd = getcwd();
@@ -23,7 +21,6 @@ if ( !isset($service))
     }
     else
     {
-        error_log("find the detector");
         $cwd = explode('/', $scwd);
 
         $ipath = "/include";
@@ -32,7 +29,6 @@ if ( !isset($service))
         {
             if (file_exists(implode('/', $cwd) . $ipath . "/findVLE.php"))
             {
-                error_log("found detector");
                 set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .
                                  implode('/', $cwd). $ipath . "/PowerTLA". PATH_SEPARATOR .
                                  get_include_path());
@@ -49,12 +45,11 @@ if ( !isset($service))
     if (!empty($handlerCls)) {
         $type = "ILIAS";
 
-        require_once("PowerTLA/tearupILIAS.php");
+        include_once("PowerTLA/tearupILIAS.php");
         global $ilClientIniFile;
 
         $servername = $ilClientIniFile->readVariable('client', 'description');
     }
-
 
     $reqpath = "http";
     $reqpath .= !empty($_SERVER["HTTPS"]) ? "s://" : "://";
@@ -82,8 +77,15 @@ if ( !isset($service))
     );
 }
 
-include_once("learningcards/apis.php");
-include_once("content/apis.php");
+array_push($service["apis"], array(
+    "name"   => "powertla.content.imsqti",
+    "link" => $pathprefix . "/qti.php"
+));
+
+array_push($service["apis"], array(
+    "name"   => "powertla.content.courselist",
+    "link" => $pathprefix . "/course.php"
+));
 
 $ap = explode("/", $pathprefix);
 array_pop($ap);
