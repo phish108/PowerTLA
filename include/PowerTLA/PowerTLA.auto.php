@@ -15,7 +15,7 @@
     $prefixes = explode(PATH_SEPARATOR, get_include_path());
     foreach ( $prefixes as $p )
     {
-        if (file_exists($p .'/PowerTLA.auto.php' ))
+        if (file_exists($p .'/PowerTLA/PowerTLA.auto.php' ))
         {
             $powertlapath = $p;
             break;
@@ -25,11 +25,11 @@
     spl_autoload_register(function ($class) {
         global $powertlapath;
 
-    	$path = $powertlapath . '/classes/' . $class . '.class.php';
+    	$path = $powertlapath . '/PowerTLA/classes/' . $class . '.class.php';
 
         if (file_exists($path))
         {
-            include_once $p . '/' . $path;
+            include_once $path;
         }
     });
 ?>
