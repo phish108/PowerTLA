@@ -1,9 +1,10 @@
 <?php
 require_once("../../include/findVLE.php");
 
+
 $vleapi = findIliasInstance();
 if ($vleapi) {
-    $service = new QTIService();
+    $service = new CourseService();
 
     $service->setVLE($vleapi);
 
@@ -14,5 +15,4 @@ if ($vleapi) {
 
     $service->run();
 }
-
 ?>

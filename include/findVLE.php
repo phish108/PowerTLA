@@ -6,7 +6,7 @@ function findIliasInstance()
 {
     $cwd = explode('/', getcwd());
     array_pop($cwd);
-    $cdpath = "..";
+    $cdpath = implode("/", $cwd);
 
     $ipath = "";
 
@@ -21,23 +21,27 @@ function findIliasInstance()
         {
             // got an ilias instance
             // set include paths
-            set_include_path("./". PATH_SEPARATOR .
-                             "./". $ipath . PATH_SEPARATOR .
-                             "./". $ipath . "/PowerTLA". PATH_SEPARATOR .
+            set_include_path($cdpath . "/". $ipath . PATH_SEPARATOR .
+                             $cdpath. PATH_SEPARATOR .
+                             // $cdpath . "/". $ipath . "/PowerTLA". PATH_SEPARATOR .
                              get_include_path());
+
             chdir($cdpath); // change to the Ilias directory
 
             // now we can include the autoloaders
-            require_once('RESTling/contrib/Restling.auto.php');
-            require_once('PowerTLA/PowerTLA.auto.php');
+            include_once('RESTling/contrib/Restling.auto.php');
+            include_once('PowerTLA/PowerTLA.auto.php');
 
             global $powertlapath;
-            error_log("check the global path" . $powertlapath);
 
-                // and the ilias handler
+            // and the ilias handler
             require_once('PowerTLA/Ilias/IliasHandler.class.php');
+            include_once("PowerTLA/PowerTLA.ini");
 
-            return $ipath;
+            $VLEAPI  = new IliasHandler($cdpath . "/". $ipath );
+            $VLEAPI->setGuestUser($guestuser);
+
+            return $VLEAPI;
         }
 
         if (!empty($ipath))
@@ -45,9 +49,9 @@ function findIliasInstance()
             $ipath = $p . "/" . $ipath;
         }
 
-        $cdpath .= "/..";
+        $cdpath = implode("/", $cwd);
     }
-    return "";
+    return null;
 }
 
 ?>
