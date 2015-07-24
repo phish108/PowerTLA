@@ -56,7 +56,6 @@ class VLEHandler extends Logger
     {
         if (isset($username) && !empty($username))
         {
-            $this->log("set guestuser to ". $username);
             $this->guestuserid = $username;
         }
     }
