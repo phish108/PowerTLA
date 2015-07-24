@@ -21,7 +21,7 @@ class SessionValidator extends VLEValidator
         global $ilDB, $ilUser;
 
         $userId = 0;
-        $result = $ilDB->query("SELECT user_id FROM isnlc_auth_info WHERE session_key = " .
+        $result = $ilDB->query("SELECT user_id FROM pwrtla_tokens WHERE token_type='Bearer' AND token_id = " .
                                $ilDB->quote($this->token, "text"));
 		$userIdArray = $ilDB->fetchAssoc($result);
 		$userId = $userIdArray["user_id"];
@@ -50,7 +50,7 @@ class SessionValidator extends VLEValidator
         $id  = $token["id"];
         $nonce = $token["nonce"];
 
-        $result = $ilDB->query("SELECT user_id, mackey, device FROM isnlc_auth_mac_info WHERE keyid = " .
+        $result = $ilDB->query("SELECT user_id, token_key, device FROM pwrtla_tokens WHERE token_type = 'MAC' AND token_id = " .
                                $ilDB->quote($id, "text"));
 
         // we should verify that the nonce is not reused.
@@ -58,7 +58,7 @@ class SessionValidator extends VLEValidator
         $userIdArray = $ilDB->fetchAssoc($result);
 
         $userId = $userIdArray["user_id"];
-        $key = $userIdArray["mackey"];
+        $key = $userIdArray["token_key"];
         $duuid = $userIdArray["device"];
 
         $uri = "http" . ($_SERVER["HTTPS"]? "s": "") . "://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
