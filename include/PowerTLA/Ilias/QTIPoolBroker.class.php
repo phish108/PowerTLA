@@ -22,22 +22,19 @@ class QTIPoolBroker extends Logger
         global $ilUser, $ilObjDataCache;
 
         $retval = array();
-
-        // got all courses for the user
-
         $items = ilParticipants::_getMembershipByType($ilUser->getId(), 'crs');
-
-        // $items = ilParticipants::_getMembershipByType(12855, 'crs');
-
         $itemId = array_search($CourseID, $items);
+
         if ($itemId !== FALSE && $itemId >= 0)
         {
             $obj_id = $items[$itemId];
+
             $item_references = ilObject::_getAllReferences($obj_id);
             reset($item_references);
+
             if (strcmp($this->iliasVersion, "4.2") === 0)
             {
-                foreach($item_references as $ref_id)
+                foreach($item_references as $ref_id => $x)
                 {
                     // Antique Ilias
                     $courseItems = new ilCourseItems($ref_id,
@@ -50,9 +47,13 @@ class QTIPoolBroker extends Logger
             else
             {
                 // Modern Ilias
-                $crs = new ilObjCourse($item_references, true);
-                $courseItemList = $crs->getSubItems();
-                $retval = $this->mapItems($courseItemList["_all"]);
+                $crs = new ilObjCourse($item_references);
+                $courseItems = new ilCourseItems($crs->getRefId(), 0, $ilUser->getId());
+                $courseItemList = $courseItems->getAllItems();
+
+                $retval  = $this->mapItems($courseItemList);
+//                $courseItemList = $crs->getSubItems();
+//                $retval = $this->mapItems($courseItemList["_all"]);
             }
         }
 
@@ -141,12 +142,6 @@ class QTIPoolBroker extends Logger
         $retval = array();
         $curT = time();
 
-        $this->log("timing >> " .
-                   $curT . "::" .
-                   $qpItem["timing_start"] . "::" .
-                   $qpItem["timing_end"] . "::".
-                   $qpItem["timing_type"]);
-
         if (intval($qpItem["timing_type"]) == 0 &&
             (intval($curT) < intval($qpItem["timing_start"]) ||
              intval($curT) > intval($qpItem["timing_end"])))
@@ -155,12 +150,8 @@ class QTIPoolBroker extends Logger
             return $retval;
         }
 
-//        $this->log("fetch qeustion pool " . $qpItem["ref_id"]);
-
         $questionPool = new ilObjQuestionPool($qpItem["ref_id"]);
         $questionPool->read();
-
-//        $this->log("got questionpool");
 
         $questions = $questionPool->getQuestionList();
 

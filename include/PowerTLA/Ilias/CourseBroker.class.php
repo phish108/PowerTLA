@@ -24,13 +24,14 @@ class CourseBroker extends Logger
 
         $items = ilParticipants::_getMembershipByType($ilUser->getId(), 'crs');
 
-        // $items = ilParticipants::_getMembershipByType(12855, 'crs');
-
         foreach($items as $obj_id)
         {
             // 1 get course meta data
-            $title       = $ilObjDataCache->lookupTitle($obj_id);
-			$description = $ilObjDataCache->lookupDescription($obj_id);
+            $crs = new ilObjCourse($obj_id, false);
+            $crs->read();
+
+            $title       = $crs->getTitle();
+			$description = $crs->getDescription();
 
             $course = array("id" => $obj_id,
                             "title" => $title,
@@ -40,24 +41,33 @@ class CourseBroker extends Logger
             $item_references = ilObject::_getAllReferences($obj_id);
             reset($item_references);
 
-            $this->log($this->iliasVersion);
             if (strcmp($this->iliasVersion, "4.2") === 0)
             {
-                foreach($item_references as $ref_id) {
+                foreach($item_references as $ref_id => $x ) {
                     // Antique Ilias
-                    $courseItems = new ilCourseItems($ref_id);
+
+                    // For some strange reason remains the $crs->getRefId() remains empty
+                    $crs = new ilObjCourse($ref_id);
+
+                    $courseItems = new ilCourseItems($crs->getRefId(), 0, $ilUser->getId());
                     $courseItemList = $courseItems->getAllItems();
                     $course["content-type"] = $this->mapItems($courseItemList);
-                }
+                    break;
+                 }
             }
             else
             {
                 // Modern Ilias
-                $crs = new ilObjCourse($item_references, true);
-                $courseItemList = $crs->getSubItems();
-                $course["content-type"] = $this->mapItems($courseItemList["_all"]);
-            }
+                $crs = new ilObjCourse($item_references);
 
+                $courseItems = new ilCourseItems($crs->getRefId(), 0, $ilUser->getId());
+                $courseItemList = $courseItems->getAllItems();
+
+                $course["content-type"] = $this->mapItems($courseItemList);
+
+                // $courseItemList = $crs->getSubItems();
+                // $course["content-type"] = $this->mapItems($courseItemList["_all"]);
+            }
             array_push($retval, $course);
         }
         return $retval;
