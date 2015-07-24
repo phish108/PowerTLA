@@ -11,6 +11,11 @@ class VLEService extends RESTling {
 
     protected $pluginList;
 
+    public static function apiDefinition($prefix, $callprefix)
+    {
+        return null;
+    }
+
     public function __construct()
     {
         parent::__construct();
@@ -20,8 +25,27 @@ class VLEService extends RESTling {
 
     public function setVLE($vle)
     {
-        if ($vle) {
+        if (isset($vle)) {
             $this->VLE = $vle;
+
+            $validator = $vle->getValidator();
+            if (isset($validator))
+            {
+                $myheaders = getallheaders();
+
+
+                if (array_key_exists("Authorization", $myheaders) &&
+                    isset($myheaders["Authorization"]) &&
+                    !empty($myheaders["Authorization"]))
+                {
+                    $authheader = $myheaders["Authorization"];
+                    $aHeadElems = explode(' ', $authheader);
+
+                    $validator->setTokenType($aHeadElems[0]);
+                    $validator->setToken($aHeadElems[1]);
+                }
+                $this->addValidator($validator);
+            }
         }
     }
 
