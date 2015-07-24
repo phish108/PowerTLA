@@ -4,6 +4,13 @@
  */
 class QTIService extends VLEService
 {
+    public static function apiDefinition($prefix)
+    {
+        return array(
+            "name"   => "powertla.content.imsqti",
+            "link" => $prefix . "/qti.php"
+        );
+    }
     protected function findOperation($method, $path)
     {
         $ops = array("course", "questionpool");

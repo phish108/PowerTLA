@@ -1,7 +1,14 @@
 <?php
-
 class CourseService extends VLEService
 {
+    public static function apiDefinition($prefix)
+    {
+        return array(
+            "name"   => "powertla.content.courselist",
+            "link" => $prefix . "/course.php"
+        );
+    }
+
     /**
      * @protected @function get()
      *
@@ -24,6 +31,5 @@ class CourseService extends VLEService
             $this->data = $cbH->getCourseList();
         }
     }
-
 }
 ?>
