@@ -1,5 +1,5 @@
 <?php
-$localpath = "learningcards";
+$localpath = "identity";
 if (!isset($pathprefix))
 {
     $pathprefix = ".";
@@ -21,6 +21,7 @@ if (!isset($service))
         while ($p = array_pop($cwd))
         {
             array_unshift($xpath, $p);
+
             if (file_exists(implode('/', $cwd) . $ipath . "/findVLE.php"))
             {
                 set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .
@@ -36,35 +37,10 @@ if (!isset($service))
     $service = getVLEInstanceInformation(implode('/', $xpath));
 }
 
-array_push($service["apis"], array(
-    "name"   => "ch.isn.lms.auth",
-    "link" => $pathprefix . "/authentication.php"
-));
+//array_push($service["apis"], ProfileService::apiDefinition($pathprefix));
+//array_push($service["apis"], ClientService::apiDefinition($pathprefix));
 
-array_push($service["apis"], array(
-    "name"   => "ch.isn.lms.device",
-    "link" => $pathprefix . "/registration.php"
-));
-
-array_push($service["apis"], array(
-    "name"   => "ch.isn.lms.courses",
-    "link" => $pathprefix . "/courses.php"
-));
-
-array_push($service["apis"], array(
-    "name"   => "ch.isn.lms.questions",
-    "link" => $pathprefix . "/questions.php"
-));
-
-array_push($service["apis"], array(
-    "name"   => "ch.isn.lms.statistics",
-    "link" => $pathprefix . "/statistics.php"
-));
-
-array_push($service["apis"], array(
-    "name"   => "ch.isn.lms.tracking",
-    "link" => $pathprefix . "/tracking.php"
-));
+foreach ()
 
 $ap = explode("/", $pathprefix);
 array_pop($ap);

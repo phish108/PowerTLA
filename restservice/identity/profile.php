@@ -17,10 +17,9 @@ while (count($cwd))
 
 require_once("findVLE.php");
 
-
 $vleapi = detectLMS();
 if ($vleapi) {
-    $service = new CourseService();
+    $service = new ProfileService();
 
     $service->setVLE($vleapi);
 
@@ -31,4 +30,5 @@ if ($vleapi) {
 
     $service->run();
 }
+
 ?>

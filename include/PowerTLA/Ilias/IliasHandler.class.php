@@ -9,6 +9,103 @@ class IliasHandler extends VLEHandler
     protected $baseurl;
 
     protected $iliasVersion;
+    protected $validator;
+
+    public static function init($tp)
+    {
+        $retval = FALSE;
+        include_once("include/inc.ilias_version.php");
+
+        $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
+        if (!empty($aVersion))
+        {
+            $vstring = $aVersion[0] . '.' . $aVersion[1];
+
+            $strVersionInit = 'PowerTLA/Ilias/ilRESTInitialisation.' . $vstring . '.php';
+
+            if (file_exists($tp.'/'.$strVersionInit) )
+            {
+                // $this->log("ilias file exists");
+                require_once($strVersionInit);
+                switch ($vstring)
+                {
+                    case '4.2':
+                        $ilInit = new ilRESTInitialisation();
+                        $GLOBALS['ilInit'] = $ilInit;
+                        $ilInit->initILIAS();
+                        $retval = TRUE;
+                        break;
+                    case '4.3':
+                        ilRESTInitialisation::initIlias(); // why oh why?!?
+                        $retval = TRUE;
+                        break;
+                    case '4.4':
+                        ilRESTInitialisation::initILIAS(); // fake OOP again,
+                                                           // but now all CAPS?
+                        $retval = TRUE;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return $retval;
+    }
+
+    public static function apiDefinition($tp, $cp)
+    {
+        $retval = null;
+
+        if (self::init($tp))
+        {
+            global $ilClientIniFile;
+
+            $servername = $ilClientIniFile->readVariable('client',   'description');
+            $lang =       $ilClientIniFile->readVariable('language', 'default');
+
+            $aPath = explode('/', $cp);
+            $lPath = explode('/', $tp);
+            array_pop($lPath);   // remove include directory
+            while (count($lPath)) {
+                array_unshift($aPath, array_pop($lPath));
+            }
+            //error_log("path length " . count($aPath));
+
+            $reqpath = $_SERVER["REQUEST_URI"];
+
+            // get rid of any query string garbage
+            $reqpath = preg_replace('/\?.*$/',"", $reqpath);
+
+            // get rid of the rsd section
+            $reqpath = preg_replace('/\/[\w\d]+\.php$/',"", $reqpath);
+
+            // find the external server root
+            $aReq = explode("/", $reqpath);
+            foreach ($aPath as $a)
+            {
+                array_pop($aReq);
+            }
+
+            $requrl = "http";
+            $requrl .= !empty($_SERVER["HTTPS"]) ? "s://" : "://";
+            $requrl .= $_SERVER["SERVER_NAME"];
+            $requrl .= implode('/',$aReq);
+
+            $retval = array(
+                "engine" => array(
+                    "version" => ILIAS_VERSION_NUMERIC,
+                    "type"=> "ILIAS",
+                    "link"=> $requrl, // official link
+                    "servicelink" => $requrl . "/". implode("/", $aPath)
+                ),
+                "language" => $lang,
+                "tlaversion" => "0.6",
+                "logolink" => $requrl . TLA_ICON,
+                "name"     => $servername
+            );
+        }
+        return $retval;
+    }
 
     public function __construct($tp)
     {
@@ -17,65 +114,22 @@ class IliasHandler extends VLEHandler
 
     	// assume that PowerTLA lives in the same include path.
         // We require a configuration variable that informs us about the LMS include path.
+        if (self::init($tp))
+        {
 
-        include_once("include/inc.ilias_version.php");
+            $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
+            $this->iliasVersion  = $aVersion[0] . '.' . $aVersion[1];
+            // now we can initialize the system internals
+            // We should always avoid to fall back into Ilias' GLOBAL mode
+            global $ilUser;
 
-        $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
+            $this->tlapath = $tp;
+            $this->dbhandler    = $GLOBALS['ilDB'];
+            $this->user         = $ilUser;
+            $this->setBasePath();
 
-        if (!empty($aVersion)) {
-            $vstring = $aVersion[0] . '.' . $aVersion[1];
-
-            $this->log("ilias version is  " . $vstring);
-
-            $this->iliasVersion = $vstring;
-
-            $strVersionInit = 'PowerTLA/Ilias/ilRESTInitialisation.' . $vstring . '.php';
-
-            $this->log("strVersionInit is ".$strVersionInit);
-
-            if (file_exists($tp . '/' . $strVersionInit) )
-            {
-                // $this->log("ilias file exists");
-                require_once($strVersionInit);
-
-
-                $this->log('init ' . $vstring);
-                // initialize Ilias
-                // unfortunately they change the initialization routine completely between releases
-                switch ($vstring)
-                {
-                    case '4.2':
-                       $ilInit = new ilRESTInitialisation();
-                       $GLOBALS['ilInit'] = $ilInit;
-                       $ilInit->initILIAS();
-                       break;
-                    case '4.3':
-                        ilRESTInitialisation::initIlias(); // why oh why?!?
-                        break;
-                    case '4.4':
-                        ilRESTInitialisation::initILIAS(); // fake OOP again.
-                        break;
-                    default:
-                        return;
-                        break;
-                }
-
-                // now we can initialize the system internals
-                // We should always avoid to fall back into Ilias' GLOBAL mode
-                global $ilUser;
-
-                $this->tlapath = $tp;
-                $this->dbhandler    = $GLOBALS['ilDB'];
-                $this->user         = $ilUser;
-                $this->setBasePath();
-
-                //$this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
-                //$this->log("ilias init done");
-            }
-            else
-            {
-                 $this->log("ilias file does not exist");
-            }
+            //$this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
+            //$this->log("ilias init done");
         }
     }
 
@@ -138,6 +192,16 @@ class IliasHandler extends VLEHandler
     {
         require_once 'PowerTLA/Ilias/QTIPoolBroker.class.php';
         return new QTIPoolBroker($this->iliasVersion);
+    }
+
+    public function getValidator()
+    {
+        if (!isset($this->validator))
+        {
+            require_once 'PowerTLA/Ilias/SessionValidator.class.php';
+            $this->validator = new SessionValidator();
+        }
+        return $this->validator;
     }
 }
 
