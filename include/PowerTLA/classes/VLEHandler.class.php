@@ -15,6 +15,11 @@ class VLEHandler extends Logger
         return $this->user;
     }
 
+    public function isGuestUser()
+    {
+        return TRUE;
+    }
+
     public function getDBHandler()
     {
         return $this->dbhandler;

@@ -28,11 +28,10 @@ class VLEService extends RESTling {
         if (isset($vle)) {
             $this->VLE = $vle;
 
-            $validator = $vle->getValidator();
+            $validator = $vle->getAuthValidator();
             if (isset($validator))
             {
                 $myheaders = getallheaders();
-
 
                 if (array_key_exists("Authorization", $myheaders) &&
                     isset($myheaders["Authorization"]) &&
@@ -47,6 +46,18 @@ class VLEService extends RESTling {
                 $this->addValidator($validator);
             }
         }
+    }
+
+    /**
+     * @public
+     * @method getAuthValidator()
+     * @returns {OBJECT}
+     *
+     * The auth validator is used for the Authorization Headers.
+     */
+    public function getAuthValidator()
+    {
+        return null;
     }
 
     /**

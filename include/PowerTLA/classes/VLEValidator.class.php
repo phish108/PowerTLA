@@ -66,7 +66,7 @@ class VLEValidator extends RESTlingValidator
         // reject forbidden tokens BEFORE we test for public APIs
         if (isset($this->rejectTypes))
         {
-            $id = array_find($this->tokenType, $this->rejectTypes);
+            $id = array_search($this->tokenType, $this->rejectTypes);
             if  ($id !== FALSE)
             {
                 return FALSE;
