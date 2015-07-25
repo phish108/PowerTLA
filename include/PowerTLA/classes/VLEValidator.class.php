@@ -24,12 +24,22 @@ class VLEValidator extends RESTlingValidator
 {
     protected $token;
     protected $tokenType;
+    protected $rejectTypes;
+
+    public function rejectTokenType($tokenType)
+    {
+        if (!isset($this->rejectTypes))
+        {
+            $this->rejectTypes = array();
+        }
+        $this->rejectTypes[] = $tokenType;
+    }
 
     public function setToken($token)
     {
         if (isset($token) && !empty($token))
         {
-            $this->accessToken = $token;
+            $this->token = $token;
         }
     }
 
@@ -49,6 +59,20 @@ class VLEValidator extends RESTlingValidator
             return TRUE;
         }
         return $this->validateLocalSession();
+    }
+
+    public function run()
+    {
+        // reject forbidden tokens BEFORE we test for public APIs
+        if (isset($this->rejectTypes))
+        {
+            $id = array_find($this->tokenType, $this->rejectTypes);
+            if  ($id !== FALSE)
+            {
+                return FALSE;
+            }
+        }
+        return parent::run();
     }
 
     protected function validateToken()
@@ -90,7 +114,7 @@ class VLEValidator extends RESTlingValidator
         return TRUE;
     }
 
-    protected function extractMACToken()
+    protected function extractToken()
     {
         $retval = array();
 
