@@ -11,6 +11,12 @@ class QTIService extends VLEService
             "link" => $prefix . "/qti.php"
         );
     }
+
+    protected function initializeRun()
+    {
+        $this->VLE->getAuthValidator()->rejectTokenType("Client");
+    }
+
     protected function findOperation($method, $path)
     {
         $ops = array("course", "questionpool");

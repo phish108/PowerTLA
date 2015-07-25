@@ -9,6 +9,11 @@ class CourseService extends VLEService
         );
     }
 
+    protected function initializeRun()
+    {
+        $this->VLE->getAuthValidator()->rejectTokenType("Client");
+    }
+
     /**
      * @protected @function get()
      *
