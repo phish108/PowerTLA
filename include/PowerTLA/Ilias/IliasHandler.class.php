@@ -177,9 +177,29 @@ class IliasHandler extends VLEHandler
         $this->baseurl = substr(ILIAS_HTTP_PATH, 0, $pos);
     }
 
-    public function getBaseURL()
+    public function getAuthValidator()
     {
-        return $this->baseurl;
+        if (!isset($this->validator))
+        {
+            require_once 'PowerTLA/Ilias/SessionValidator.class.php';
+            $this->validator = new SessionValidator();
+        }
+        return $this->validator;
+    }
+
+    public function isGuestUser()
+    {
+        global $ilUser;
+        if ($ilUser->getId() &&
+            $ilUser->getLogin() != "anonymous" &&
+            isset($this->guestuser) &&
+            !empty($this->guestuser) &&
+            $ilUser->getLogin() != $this->guestuser)
+        {
+            return FALSE;
+        }
+
+        return TRUE;
     }
 
     public function getCourseBroker()
@@ -194,14 +214,16 @@ class IliasHandler extends VLEHandler
         return new QTIPoolBroker($this->iliasVersion);
     }
 
-    public function getValidator()
+    public function getClientProvider()
     {
-        if (!isset($this->validator))
-        {
-            require_once 'PowerTLA/Ilias/SessionValidator.class.php';
-            $this->validator = new SessionValidator();
-        }
-        return $this->validator;
+        require_once 'PowerTLA/Ilias/ClientProvider.class.php';
+        return new ClientProvider();
+    }
+
+    public function getIdentityProvider()
+    {
+        require_once 'PowerTLA/Ilias/IdentityProvider.class.php';
+        return new IdentityProvider($this->guestuserid);
     }
 }
 

@@ -37,10 +37,8 @@ if (!isset($service))
     $service = getVLEInstanceInformation(implode('/', $xpath));
 }
 
-//array_push($service["apis"], ProfileService::apiDefinition($pathprefix));
-//array_push($service["apis"], ClientService::apiDefinition($pathprefix));
-
-foreach ()
+array_push($service["apis"], ProfileService::apiDefinition($pathprefix));
+array_push($service["apis"], ClientService::apiDefinition($pathprefix));
 
 $ap = explode("/", $pathprefix);
 array_pop($ap);
