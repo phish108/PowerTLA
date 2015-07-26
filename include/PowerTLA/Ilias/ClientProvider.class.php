@@ -18,7 +18,7 @@ class ClientProvider extends Logger
         global $ilDB;
 
         $ilDB->insert("pwrtla_tokens", array(
-            "token_type" => array("text", "Client"),
+            "token_type" => array("text", "Request"),
             "domain"     => array("text", $appId),
             "token_id"   => array("text", $tokenid),
             "token_key"  => array("text", $tokenkey),
@@ -26,13 +26,13 @@ class ClientProvider extends Logger
         ));
 
         return array(
-            "token_type"   => "Client",
+            "token_type"   => "Request",
             "domain"       => $appId,
             "token"        => $tokenkey,
             "id"           => $tokenid,
             "algorithm"    => "SHA1",
             "sequence"     => array("client", "token", "domain", "url", "nonce"),
-            "parameters"   => array("key", "id", "domain", "nonce")
+            "parameter"    => array("key", "id", "domain", "nonce")
         );
     }
 
@@ -50,7 +50,7 @@ class ClientProvider extends Logger
         if (!empty($clientId) && !empty($appId))
         {
             global $ilDB;
-            $q = "DELETE FROM pwrtla_tokens WHERE token_type = 'Client' AND client = %s AND domain = %s";
+            $q = "DELETE FROM pwrtla_tokens WHERE token_type = 'Request' AND client = %s AND domain = %s";
             $ilDB->manipulateF($q, array("text", "text"), array($clientId, $appId));
         }
     }
@@ -68,7 +68,7 @@ class ClientProvider extends Logger
         if (!empty($clientId) && !empty($appId))
         {
             $data = json_encode($extraObject);
-            $q    = "UPDATE TABLE pwrtla_tokens SET extra = %s WHERE token_type = 'Client' AND domain = %s AND client = %s";
+            $q    = "UPDATE TABLE pwrtla_tokens SET extra = %s WHERE token_type = 'Request' AND domain = %s AND client = %s";
 
             $ilDB->manipulateF($q, array("text", "text", "text"), array($data, $clientId, $appId));
         }

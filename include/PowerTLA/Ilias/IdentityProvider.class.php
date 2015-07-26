@@ -147,7 +147,7 @@ class IdentityProvider extends Logger
             "id"           => $tokenid,
             "algorithm"    => "SHA1",
             "sequence"     => array("client", "token", "domain", "url", "nonce"),
-            "parameters"   => array("key", "id", "domain", "nonce")
+            "parameter"    => array("key", "id", "domain", "nonce")
         );
     }
 
@@ -160,7 +160,7 @@ class IdentityProvider extends Logger
         $tokenid  = substr($tid, $startid, 7);
 
         $ilDB->insert("pwrtla", array(
-            "user_id" => array("int", $ilUser->getId()),
+            "user_id"    => array("int", $ilUser->getId()),
             "user_token" => array("text", $tokenid)
         ));
     }

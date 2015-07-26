@@ -115,7 +115,7 @@ class SessionValidator extends VLEValidator
 
         $uri = "http" . ($_SERVER["HTTPS"]? "s": "") . "://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
 
-        $q = "SELECT token_type, token_id, token_key, client, domain, extra FROM pwrtla_tokens WHERE token_type = 'Client' AND domain = %s AND token_id = %s";
+        $q = "SELECT token_type, token_id, token_key, client, domain, extra FROM pwrtla_tokens WHERE token_type = 'Request' AND domain = %s AND token_id = %s";
 
         global $ilDB;
         $res = $ilDB->queryF($q, array("text","text"), array($hToken["domain"], $hToken["id"]));

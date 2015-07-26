@@ -85,7 +85,7 @@ class VLEValidator extends RESTlingValidator
             case "MAC":
                 return $this->validateMACToken();
                 break;
-            case "Client":
+            case "Request":
                 return $this->validateClientToken();
                 break;
             default:
