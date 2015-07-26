@@ -98,6 +98,9 @@ function detectLMS()
 
 function getVLEInstanceInformation($path)
 {
+    include_once("PowerTLA/PowerTLA.ini");
+    date_default_timezone_set(TLA_TIMEZONE);
+
     // we can include the autoloaders, cos the rsd scripts set the include path
     include_once('RESTling/contrib/Restling.auto.php');
     include_once('PowerTLA/PowerTLA.auto.php');
