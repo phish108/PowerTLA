@@ -31,7 +31,7 @@ class ClientProvider extends Logger
             "token"        => $tokenkey,
             "id"           => $tokenid,
             "algorithm"    => "SHA1",
-            "sequence"     => array("client", "token", "domain", "url", "nonce"),
+            "sequence"     => array("client", "token", "domain", "method", "url", "nonce"),
             "parameter"    => array("key", "id", "domain", "nonce")
         );
     }
