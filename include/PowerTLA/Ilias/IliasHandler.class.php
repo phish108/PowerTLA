@@ -65,11 +65,12 @@ class IliasHandler extends VLEHandler
 
             $aPath = explode('/', $cp);
             $lPath = explode('/', $tp);
-            array_pop($lPath);   // remove include directory
-            while (count($lPath)) {
-                array_unshift($aPath, array_pop($lPath));
+            array_pop($lPath);          // remove include directory
+            if (!empty($aPath)) {
+                while (count($lPath)) {
+                    array_unshift($aPath, array_pop($lPath));
+                }
             }
-            //error_log("path length " . count($aPath));
 
             $reqpath = $_SERVER["REQUEST_URI"];
 
@@ -81,10 +82,20 @@ class IliasHandler extends VLEHandler
 
             // find the external server root
             $aReq = explode("/", $reqpath);
+
+            $aPath = array_reverse($aPath);
             foreach ($aPath as $a)
             {
-                array_pop($aReq);
+                if (!empty($a))
+                {
+                    $x = array_pop($aReq);
+                    if ($a != $x)
+                    {
+                        array_push($aReq, $x);
+                    }
+                }
             }
+            $aPath = array_reverse($aPath);
 
             $requrl = "http";
             $requrl .= !empty($_SERVER["HTTPS"]) ? "s://" : "://";
