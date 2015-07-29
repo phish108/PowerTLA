@@ -22,7 +22,7 @@ class ClientProvider extends Logger
             "domain"     => array("text", $appId),
             "token_id"   => array("text", $tokenid),
             "token_key"  => array("text", $tokenkey),
-            "client"     => array("text", $clientId)
+            "client_id"  => array("text", $clientId)
         ));
 
         return array(
@@ -50,7 +50,7 @@ class ClientProvider extends Logger
         if (!empty($clientId) && !empty($appId))
         {
             global $ilDB;
-            $q = "DELETE FROM pwrtla_tokens WHERE token_type = 'Request' AND client = %s AND domain = %s";
+            $q = "DELETE FROM pwrtla_tokens WHERE token_type = 'Request' AND client_id = %s AND domain = %s";
             $ilDB->manipulateF($q, array("text", "text"), array($clientId, $appId));
         }
     }
@@ -68,7 +68,7 @@ class ClientProvider extends Logger
         if (!empty($clientId) && !empty($appId))
         {
             $data = json_encode($extraObject);
-            $q    = "UPDATE TABLE pwrtla_tokens SET extra = %s WHERE token_type = 'Request' AND domain = %s AND client = %s";
+            $q    = "UPDATE TABLE pwrtla_tokens SET extra = %s WHERE token_type = 'Request' AND domain = %s AND client_id = %s";
 
             $ilDB->manipulateF($q, array("text", "text", "text"), array($data, $clientId, $appId));
         }
