@@ -123,7 +123,7 @@ class IliasHandler extends VLEHandler
         global $optNoRedirect;
         $optNoRedirect = true;
 
-    	// assume that PowerTLA lives in the same include path.
+        // assume that PowerTLA lives in the same include path.
         // We require a configuration variable that informs us about the LMS include path.
         if (self::init($tp))
         {

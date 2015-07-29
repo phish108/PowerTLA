@@ -27,7 +27,6 @@ if ($vleapi) {
     // In production code we need to have additional access control for CORS Sites
     $service->allowCORS();
     $service->addCORSHost('*', array('GET', 'POST', 'PUT', 'DELETE'));
-
     $service->run();
 }
 

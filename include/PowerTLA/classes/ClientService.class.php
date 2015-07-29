@@ -13,6 +13,7 @@ class ClientService extends VLEService
 
     protected function initializeRun()
     {
+        $this->log("service started");
         $this->provider = $this->VLE->getClientProvider();
         // PUT is a public interface!
         $this->VLE->getAuthValidator()->setMethods(array("put" => false));
@@ -42,6 +43,7 @@ class ClientService extends VLEService
      */
     protected function validateData()
     {
+        $this->log("validate data");
         if ($this->operation == "put" &&
             isset($this->inputData) &&
             ($this->inputDataType == "application/json" ||
@@ -51,6 +53,7 @@ class ClientService extends VLEService
               !empty($this->inputData["client"]) &&
               !empty($this->inputData["domain"])))
         {
+            $this->log("missing data " . json_encode($this->inputData));
             $this->status = RESTling::BAD_DATA;
             $this->data = array("message" => "Missing Data");
         }
