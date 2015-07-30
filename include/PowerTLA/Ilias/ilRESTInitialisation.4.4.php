@@ -8,13 +8,22 @@ require_once('Services/Init/classes/class.ilInitialisation.php');
 * perform basic setup: init database handler, load configuration file,
 * init user authentification & error handler, load object type definitions
 *
-* @author Alex Killing <alex.killing@gmx.de>
-* @author Sascha Hofmann <shofmann@databay.de>
-
 * @version $Id: class.ilInitialisation.php 52681 2014-08-27 08:21:21Z jluetzen $
 *
 * @ingroup ServicesInit
 */
+
+/**
+ * IMPORTANT FOR NEW VERSIONS!
+ *
+ * Because this class is only used for the TLA REST services, it needs to
+ * run in the ilContext::CONTEXT_REST mode to avoid redirects etc.
+ *
+ * ilContext::CONTEXT_REST is available since ilias 4.3!
+ */
+include_once "Services/Context/classes/class.ilContext.php";
+ilContext::init(ilContext::CONTEXT_REST);
+
 class ilRESTInitialisation extends ilInitialisation
 {
 

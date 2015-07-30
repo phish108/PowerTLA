@@ -7,7 +7,16 @@ if(!isset($GLOBALS['ilGlobalStartTime']) || !$GLOBALS['ilGlobalStartTime'])
     $GLOBALS['ilGlobalStartTime'] = microtime();
 }
 
+/**
+ * IMPORTANT FOR NEW VERSIONS!
+ *
+ * Because this class is only used for the TLA REST services, it needs to
+ * run in the ilContext::CONTEXT_REST mode to avoid redirects etc.
+ *
+ * ilContext::CONTEXT_REST is available since ilias 4.3!
+ */
 include_once "Services/Context/classes/class.ilContext.php";
+ilContext::init(ilContext::CONTEXT_REST);
 
 class ilRESTInitialisation extends ilInitialisation
 {
@@ -67,15 +76,8 @@ class ilRESTInitialisation extends ilInitialisation
         {
             static::initClient();
 
-            if (ilContext::hasUser())
-            {
-                static::initUser();
-
-                if(ilContext::doAuthentication())
-                {
-                    static::authenticate();
-                }
-            }
+            // we always need a user!
+            static::initUser();
 
             // init after Auth otherwise breaks CAS
             static::includePhp5Compliance();

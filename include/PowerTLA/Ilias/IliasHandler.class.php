@@ -27,12 +27,13 @@ class IliasHandler extends VLEHandler
             {
                 // $this->log("ilias file exists");
                 require_once($strVersionInit);
+
                 switch ($vstring)
                 {
                     case '4.2':
                         $ilInit = new ilRESTInitialisation();
                         $GLOBALS['ilInit'] = $ilInit;
-                        $ilInit->initILIAS();
+                        $ilInit->initILIAS("rest");
                         $retval = TRUE;
                         break;
                     case '4.3':
@@ -40,6 +41,7 @@ class IliasHandler extends VLEHandler
                         $retval = TRUE;
                         break;
                     case '4.4':
+                    case '5.0':
                         ilRESTInitialisation::initILIAS(); // fake OOP again,
                                                            // but now all CAPS?
                         $retval = TRUE;
