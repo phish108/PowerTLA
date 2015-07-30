@@ -131,11 +131,7 @@ class ilRESTInitialisation extends ilInitialisation
 		{
 			self::initClient();
 
-			if (ilContext::hasUser())
-			{
-				self::initUser();
-                // AUTHENTICATION is handled by the OAuth Session Classes
-            }
+            self::initUser();
 
 			// init after Auth otherwise breaks CAS
 			self::includePhp5Compliance();

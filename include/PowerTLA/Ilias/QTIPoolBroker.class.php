@@ -2,7 +2,6 @@
 
 include_once 'Services/Membership/classes/class.ilParticipants.php';
 
-require_once 'Modules/Course/classes/class.ilCourseItems.php';
 require_once 'Modules/Course/classes/class.ilObjCourse.php';
 require_once 'Modules/TestQuestionPool/classes/class.ilObjQuestionPool.php';
 require_once 'Modules/TestQuestionPool/classes/class.assQuestion.php';
@@ -37,6 +36,8 @@ class QTIPoolBroker extends Logger
                 foreach($item_references as $ref_id => $x)
                 {
                     // Antique Ilias
+                    require_once 'Modules/Course/classes/class.ilCourseItems.php';
+
                     $courseItems = new ilCourseItems($ref_id,
                                                      0,
                                                      $ilUser->getId());
@@ -46,12 +47,21 @@ class QTIPoolBroker extends Logger
             }
             else
             {
-                // Modern Ilias
-                $crs = new ilObjCourse($item_references);
-                $courseItems = new ilCourseItems($crs->getRefId(), 0, $ilUser->getId());
-                $courseItemList = $courseItems->getAllItems();
+                foreach($item_references as $ref_id => $x ) {
+                    $crs = new ilObjCourse($ref_id);
+                    $courseItemList = $crs->getSubItems();
 
-                $retval  = $this->mapItems($courseItemList);
+                    // TODO check with Ilias 4.4 and 4.3
+                    // $this->log(">>> IL >>> " . json_encode($courseItemList));
+                    $retval = $this->mapItems($courseItemList["_all"]);
+                }
+                // Modern Ilias
+//                $crs = new ilObjCourse($item_references);
+//                $courseItems = new ilCourseItems($crs->getRefId(), 0, $ilUser->getId());
+//                $courseItemList = $courseItems->getAllItems();
+//
+//                $retval  = $this->mapItems($courseItemList);
+
 //                $courseItemList = $crs->getSubItems();
 //                $retval = $this->mapItems($courseItemList["_all"]);
             }
@@ -79,6 +89,8 @@ class QTIPoolBroker extends Logger
 
             if (strcmp($this->iliasVersion, "4.2") === 0)
             {
+                require_once 'Modules/Course/classes/class.ilCourseItems.php';
+
                 foreach($item_references as $ref_id)
                 {
                     // Antique Ilias
@@ -209,13 +221,21 @@ class QTIPoolBroker extends Logger
             //get the question type
             $type = $question["type_tag"];
 
+            $this->log(">> ". $type);
             require_once 'Modules/TestQuestionPool/classes/class.' . $type . '.php';
 
             $assQuestion = new $type();
+            if ($assQuestion)
+            {
             $assQuestion->loadFromDb($question["question_id"]);
 
         		  //add question into the question list
             array_push($questions, $this->calculateQUestion($question, $assQuestion));
+            }
+            else
+            {
+                $this->log("fail to load type " . $type);
+            }
         }
         return $questions;
     }
@@ -250,9 +270,16 @@ class QTIPoolBroker extends Logger
         }
 
         //get feedback
-        $feedbackCorrect = $assQuestion->getFeedbackGeneric(1);
-        $feedbackError  = $assQuestion->getFeedbackGeneric(0);
-
+        if ($this->iliasVersion != "4.2")
+        {
+            $feedbackCorrect = $assQuestion->feedbackOBJ->getGenericFeedbackContent($assQuestion->getId(), true);
+            $feedbackError  = $assQuestion->feedbackOBJ->getGenericFeedbackContent($assQuestion->getId(), false);;
+        }
+        else
+        {
+            $feedbackCorrect = $assQuestion->getFeedbackGeneric(1);
+            $feedbackError  = $assQuestion->getFeedbackGeneric(0);
+        }
         $questionId = $question["question_id"];
 
         return array(
