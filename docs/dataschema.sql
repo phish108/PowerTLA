@@ -57,5 +57,6 @@ create table if not exists pwrtla_xapifilterindex (
 
 create table if not exists pwrtla_xapifilters (
     filter_id    varchar(255) primary key,         -- filter id
-    filter       text not null                    -- the filter definition
+    filter       text         not null,            -- the filter definition
+    created      int          not null
 );
