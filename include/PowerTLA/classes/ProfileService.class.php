@@ -103,11 +103,16 @@ class ProfileService extends VLEService
         $this->data = $this->provider->getUserDetails();
     }
 
+    /**
+     * @method get_user()
+     *
+     * returns the user information by token
+     */
     protected function get_user()
     {
         $this->mark("get_user()");
         // load an ID token
-        $this->data = $this->provider->getIdentity($this->path_info[0]);
+        $this->data = $this->provider->getIdentityByToken($this->path_info[0]);
     }
 
     // login

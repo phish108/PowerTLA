@@ -109,7 +109,7 @@ class IdentityProvider extends Logger
             "token_type" => array("text", "Bearer"),
             "token_id"   => array("text", $tokenkey),
             "user_id"    => array("int", $ilUser->getID()),
-            "client"     => array("int", $clientToken["client"]),
+            "client_id"     => array("int", $clientToken["client"]),
             "domain"     => array("int", $clientToken["domain"]),
         ));
 
@@ -136,7 +136,7 @@ class IdentityProvider extends Logger
             "token_key"  => array("text", $tokenkey),
             "token_id"   => array("text", $tokenid),
             "domain"     => array("text", $clientToken["domain"]),
-            "client"     => array("text", $clientToken["client"]),
+            "client_id"     => array("text", $clientToken["client"]),
             "user_id"    => array("int", $ilUser->getID())
         ));
 
@@ -159,7 +159,7 @@ class IdentityProvider extends Logger
         $startid = rand(0, strlen($tid) - 7);
         $tokenid  = substr($tid, $startid, 7);
 
-        $ilDB->insert("pwrtla", array(
+        $ilDB->insert("pwrtla_usertokens", array(
             "user_id"    => array("int", $ilUser->getId()),
             "user_token" => array("text", $tokenid)
         ));
@@ -198,17 +198,53 @@ class IdentityProvider extends Logger
         return $retval;
     }
 
-    public function getIdentity($idToken)
+    public function getIdentityByToken($idToken)
     {
         global $ilUser, $ilDB;
 
         $retval = null;
-        $q = "SELECT user_id FROM pwrtla_ipd WHERE user_token = %s ";
+        $q = "SELECT user_id FROM pwrtla_usertokens WHERE user_token = %s ";
         $types = array("text");
-        $values = array($login);
+        $values = array($ilUser->getLogin());
         $res = $ilDB->queryF($q,
                              array("text"),
                              array($idToken));
+        $row = $ilDB->fetchAssoc($res);
+        if (isset($row) && intval($row["user_id"]))
+        {
+            $ilUser->setId($row["user_id"]);
+            $ilUser->read();
+            $retval = $this->getUserDetails();
+        }
+        return $retval;
+    }
+
+    public function getIdentityById($userid=0)
+    {
+        global $ilUser, $ilDB;
+
+        if ($userid)
+        {
+            $oUser = new ilObjUser($userid);
+            $oUser->read();
+
+            if (!$oUser->getLogin())
+            {
+                return null;
+            }
+        }
+        else
+        {
+            $oUser = $ilUser;
+        }
+
+        $retval = null;
+        $q = "SELECT user_id FROM pwrtla_usertokens WHERE user_id = %s ";
+        $types = array("int");
+        $values = array($oUser->getId());
+        $res = $ilDB->queryF($q,
+                             $types,
+                             $values);
         $row = $ilDB->fetchAssoc($res);
         if (isset($row) && intval($row["user_id"]))
         {
