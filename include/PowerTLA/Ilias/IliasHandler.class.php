@@ -136,7 +136,6 @@ class IliasHandler extends VLEHandler
 
             $this->dbhandler    = $ilDB;
             $this->user         = $ilUser;
-            $this->setBasePath();
 
             //$this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
             //$this->log("ilias init done");
