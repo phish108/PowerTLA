@@ -207,7 +207,7 @@ class QTIPoolBroker extends Logger
             //get the question type
             $assQuestion = assQuestion::_instanciateQuestion($question["question_id"]);
 
-            array_push($questions, $this->calculateQUestion($question, $assQuestion));
+            array_push($questions, $this->calculateQuestion($question, $assQuestion));
         }
         return $questions;
     }
@@ -366,9 +366,12 @@ class QTIPoolBroker extends Logger
      */
     private function calculateAnswerOtherTypes($assQuestion)
     {
-        $answerList = $assQuestion->getAnswers();
-        // $this->log("answerList for other types of Question".json_encode($answerList));
-        return $answerList;
+        $answers = $assQuestion->toJSON();
+
+        $this->log("answerList for other types of Question".$answers);
+
+        $answerList = json_decode($answers);
+        return $answerList->answers;
     }
 }
 ?>
