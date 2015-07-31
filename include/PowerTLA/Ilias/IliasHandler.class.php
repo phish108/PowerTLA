@@ -5,9 +5,6 @@ class IliasHandler extends VLEHandler
     protected $pluginAdmin;
     protected $plugins;
 
-    protected $tlapath;
-    protected $baseurl;
-
     protected $iliasVersion;
     protected $validator;
 
@@ -129,15 +126,15 @@ class IliasHandler extends VLEHandler
         // We require a configuration variable that informs us about the LMS include path.
         if (self::init($tp))
         {
+            parent::__construct($tp);
 
             $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
             $this->iliasVersion  = $aVersion[0] . '.' . $aVersion[1];
             // now we can initialize the system internals
             // We should always avoid to fall back into Ilias' GLOBAL mode
-            global $ilUser;
+            global $ilUser, $ilDB;
 
-            $this->tlapath = $tp;
-            $this->dbhandler    = $GLOBALS['ilDB'];
+            $this->dbhandler    = $ilDB;
             $this->user         = $ilUser;
             $this->setBasePath();
 
@@ -174,20 +171,8 @@ class IliasHandler extends VLEHandler
 
     public function getUserId()
     {
-        return $this->user->getId();
-    }
-
-    private function setBasePath()
-    {
-        return;
-        $tp = explode('/', $this->tlapath);
-        array_pop($tp);
-        array_pop($tp);
-        $tp = implode('/', $tp);
-        // strip include suffix
-        $pos = strpos(ILIAS_HTTP_PATH, $tp);
-        // now strip everything from that position to the end
-        $this->baseurl = substr(ILIAS_HTTP_PATH, 0, $pos);
+        global $ilUser;
+        return $ilUser->getId();
     }
 
     public function getAuthValidator()
@@ -237,6 +222,18 @@ class IliasHandler extends VLEHandler
     {
         require_once 'PowerTLA/Ilias/IdentityProvider.class.php';
         return new IdentityProvider($this->guestuserid);
+    }
+
+    public function getXAPIStatement()
+    {
+        require_once 'PowerTLA/Ilias/VleXAPIStatement.class.php';
+        return new VleXAPIStatement();
+    }
+
+    public function getXAPIDocument()
+    {
+        require_once 'PowerTLA/Ilias/VleXAPIDocument.class.php';
+        return new VleXAPIDocument();
     }
 }
 
