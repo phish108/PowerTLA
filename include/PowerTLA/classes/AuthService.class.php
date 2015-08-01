@@ -1,7 +1,7 @@
 <?php
 
 /**
- *
+ * REMOVE
  */
 class AuthService extends VLEService
 {
