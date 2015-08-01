@@ -46,9 +46,8 @@ if (!isset($service))
     $service = getVLEInstanceInformation(implode('/', $xpath));
 }
 
-include_once("learningcards/apis.php");
-include_once("content/apis.php");
-include_once("identity/apis.php");
+array_push($service["apis"], XAPIService::apiDefinition($pathprefix));
+// array_push($service["apis"], XAPIFilterService::apiDefinition($pathprefix));
 
 $ap = explode("/", $pathprefix);
 array_pop($ap);
