@@ -49,6 +49,7 @@ if (!isset($service))
 include_once("learningcards/apis.php");
 include_once("content/apis.php");
 include_once("identity/apis.php");
+include_once("xapi/apis.php");
 
 $ap = explode("/", $pathprefix);
 array_pop($ap);

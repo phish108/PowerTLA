@@ -1,6 +1,6 @@
 <?php
 
-$localpath = "restservice";
+$localpath = "xapi";
 
 if (!isset($pathprefix))
 {
