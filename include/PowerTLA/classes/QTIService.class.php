@@ -6,10 +6,7 @@ class QTIService extends VLEService
 {
     public static function apiDefinition($prefix)
     {
-        return array(
-            "name"   => "powertla.content.imsqti",
-            "link" => $prefix . "/qti.php"
-        );
+        return parent::apiDefinition($prefix, "powertla.content.imsqti", "qti.php");
     }
 
     protected function initializeRun()

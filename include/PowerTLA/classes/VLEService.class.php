@@ -11,9 +11,15 @@ class VLEService extends RESTling {
 
     protected $pluginList;
 
-    public static function apiDefinition($prefix, $callprefix)
+    public static function apiDefinition($prefix, $name, $link)
     {
-        return null;
+        // trim all leading slashes
+        $prefix = preg_replace("/^\/+/", "", $prefix);
+
+        return array(
+            "name"   => $name,
+            "link" => $prefix . "/" . $link
+        );
     }
 
     public function __construct()

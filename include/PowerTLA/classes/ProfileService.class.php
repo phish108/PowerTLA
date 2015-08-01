@@ -5,10 +5,7 @@ class ProfileService extends VLEService
 
     public static function apiDefinition($prefix)
     {
-        return array(
-            "name"   => "org.ieee.papi",
-            "link" => $prefix . "/profile.php"
-        );
+        return parent::apiDefinition($prefix, "org.ieee.papi", "profile.php");
     }
 
     protected function initializeRun()

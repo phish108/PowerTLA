@@ -36,6 +36,8 @@ if (!isset($service))
     $service = getVLEInstanceInformation(implode('/', $xpath));
 }
 
+$pathprefix = preg_replace("/^\/+/", "", $pathprefix);
+
 array_push($service["apis"], array(
     "name"   => "ch.isn.lms.auth",
     "link" => $pathprefix . "/authentication.php"
