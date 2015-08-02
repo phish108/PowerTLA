@@ -9,10 +9,10 @@ Currently the ILIAS LMS (www.ilias.de) is supported.
 
 PowerTLA offers a REST service layer for
 
-* Authentication using OAuth 1 (TODO)
+* Session and Token based Authentication (OAuth2 Bearer and MAC tokens)
 * Experience API (in progress)
-* IMS QTI JSON binding (TODO)
-* Learner profile service (TODO)
+* IMS QTI JSON binding (in progress)
+* Learner profile service
 
 PowerTLA builds on top of the existing LMS code and allows easy integration of mobile tools and services.
 
@@ -26,14 +26,13 @@ Then copy all powertla files into this directory. The rest will work (hopefully)
 
 ### Moodle
 
+The moodle integration is presently in progress and will become available in Autumn 2015. 
 
 ## Documentation
 
 Find the documentation in the [docs folder](docs/).
 
 ## Contribute
-
-
 
 ## LICENSE
 
@@ -42,5 +41,6 @@ PowerTLA is licensed under the GNU Affero License.
 ## Contributors
 
 * Christian Glahn (ISN, ETH Zurich)
+
 * Evangelia Mitsopoulou (ISN, ETH Zurich)
 
