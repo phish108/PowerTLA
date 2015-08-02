@@ -40,7 +40,7 @@ PowerTLA is licensed under the GNU Affero License.
 
 ## Contributors
 
-* Christian Glahn (ISN, ETH Zurich)
+* Christian Glahn (HTW Chur and Mobinaut.IO)
 
-* Evangelia Mitsopoulou (ISN, ETH Zurich)
+* Evangelia Mitsopoulou (ISN, ETH Zurich, until 2014)
 
