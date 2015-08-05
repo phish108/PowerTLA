@@ -98,11 +98,29 @@ class IdentityProvider extends Logger
         return null;
     }
 
+    private function randomString($length=0)
+    {
+        if ($length == 0)
+        {
+            $length = 10;
+        }
+        $resstring = "";
+        $chars = "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLNOPQRSTUVWXYZ.1234567890";
+        $len = strlen($chars);
+        for ($i = 0; i < $length; i++)
+        {
+            $x = rand(0, $len-1);
+            $resstr .= substr($chars, $x, 1);
+        }
+        return $resstring;
+    }
+
+
     private function generateBearerToken($clientToken)
     {
         global $ilUser, $ilDB;
 
-        $randomseed = random_bytes(10);
+        $randomseed = $this->randomString();
         $tokenkey = sha1($clientToken["client"] . $clientToken["domain"] . $randomseed);
 
         $ilDB->insert("pwrtla_tokens", array(
@@ -124,8 +142,8 @@ class IdentityProvider extends Logger
     {
         global $ilUser, $ilDB;
 
-        $randomseed = random_bytes(10);
-        $tid = sha1(random_bytes(10));
+        $randomseed = $this->randomString(10);
+        $tid = sha1($this->randomString(10));
         $startid = rand(0, strlen($tid) - 7);
 
         $tokenid  = substr($tid, $startid, 7);
@@ -155,7 +173,7 @@ class IdentityProvider extends Logger
     {
         global $ilUser, $ilDB;
 
-        $tid = sha1($ilUser->getLogin() . random_bytes(10));
+        $tid = sha1($ilUser->getLogin() . $this->randomString(10));
         $startid = rand(0, strlen($tid) - 7);
         $tokenid  = substr($tid, $startid, 7);
 
@@ -289,7 +307,7 @@ class IdentityProvider extends Logger
             !empty($this->guestuser) &&
             $ilUser->getLogin() != $this->guestuser)
         {
-            $tid = sha1(random_bytes(25));
+            $tid = sha1($this->randomString(10));
             $startid = rand(0, strlen($tid) - 4);
             $accessPin  = substr($tid, $startid, 4);
 

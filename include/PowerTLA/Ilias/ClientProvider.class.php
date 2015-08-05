@@ -5,10 +5,27 @@ class ClientProvider extends Logger
     private $clientId;
     private $appId;
 
+    private function randomString($length=0)
+    {
+        if ($length == 0)
+        {
+            $length = 10;
+        }
+        $resstring = "";
+        $chars = "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLNOPQRSTUVWXYZ.1234567890";
+        $len = strlen($chars);
+        for ($i = 0; i < $length; i++)
+        {
+            $x = rand(0, $len-1);
+            $resstr .= substr($chars, $x, 1);
+        }
+        return $resstring;
+    }
+
     public function addClient($clientId, $appID)
     {
-        $randomseed = random_bytes(10);
-        $tid = sha1(random_bytes(10));
+        $randomseed = $this->randomString();
+        $tid = sha1($this->randomString());
         $startid = rand(0, strlen($tid) - 7);
 
         $tokenid  = substr($tid, $startid, 7);
