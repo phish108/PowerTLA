@@ -344,7 +344,7 @@ function findIliasInstance()
             chdir(implode('/', $cwd)); // change to the Ilias directory
 
             require_once('PowerTLA/PowerTLA.auto.php');
-            require_once("tearupILIAS.php");
+            require_once("findVLE.php");
 
             return implode('/', $cwd) . $ipath;
         }
