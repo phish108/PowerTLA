@@ -132,7 +132,7 @@ class IdentityProvider extends Logger
         ));
 
         return array(
-            "token_type"   => "Bearer",
+            "type"   => "Bearer",
             "domain"       => $clientToken["domain"],
             "token"        => $tokenkey
         );
@@ -159,7 +159,7 @@ class IdentityProvider extends Logger
         ));
 
         return array(
-            "token_type"   => "MAC",
+            "type"   => "MAC",
             "domain"       => $clientToken["domain"],
             "token"        => $tokenkey,
             "id"           => $tokenid,
