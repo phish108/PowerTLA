@@ -7,7 +7,7 @@ create table if not exists pwrtla_tokens (         -- OAUTH Token store
     token_key    varchar(255),                     -- private key (only shared once)
     client_id    varchar(255),                     -- client identifier, e.g., device UUID
     user_id      INT,                              -- internal user id if type = Bearer or MAC
-    doamin       varchar(255),                     -- reverse identifier of the app
+    domain       varchar(255),                     -- reverse identifier of the app
     extra        TEXT                              -- extra token settings
 );
 

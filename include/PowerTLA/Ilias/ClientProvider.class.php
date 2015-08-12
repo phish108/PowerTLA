@@ -5,16 +5,16 @@ class ClientProvider extends Logger
     private $clientId;
     private $appId;
 
-    private function randomString($length=0)
+    private function randomString($length=10)
     {
-        if ($length == 0)
+        if ($length <= 0)
         {
             $length = 10;
         }
         $resstring = "";
         $chars = "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLNOPQRSTUVWXYZ.1234567890";
         $len = strlen($chars);
-        for ($i = 0; i < $length; i++)
+        for ($i = 0; $i < $length; $i++)
         {
             $x = rand(0, $len-1);
             $resstr .= substr($chars, $x, 1);
@@ -30,21 +30,21 @@ class ClientProvider extends Logger
 
         $tokenid  = substr($tid, $startid, 7);
 
-        $tokenkey = sha1($clientId . $appId . $randomseed);
+        $tokenkey = sha1($clientId . $appID . $randomseed);
 
         global $ilDB;
 
         $ilDB->insert("pwrtla_tokens", array(
             "token_type" => array("text", "Request"),
-            "domain"     => array("text", $appId),
+            "domain"     => array("text", $appID),
             "token_id"   => array("text", $tokenid),
             "token_key"  => array("text", $tokenkey),
             "client_id"  => array("text", $clientId)
         ));
 
         return array(
-            "token_type"   => "Request",
-            "domain"       => $appId,
+            "type"   => "Request",
+            "domain"       => $appID,
             "token"        => $tokenkey,
             "id"           => $tokenid,
             "algorithm"    => "SHA1",
