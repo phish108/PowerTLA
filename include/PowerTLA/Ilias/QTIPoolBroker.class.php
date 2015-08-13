@@ -221,7 +221,7 @@ class QTIPoolBroker extends Logger
             //get the question type
             $type = $question["type_tag"];
 
-            $this->log(">> ". $type);
+            // $this->log(">> ". $type);
             require_once 'Modules/TestQuestionPool/classes/class.' . $type . '.php';
 
             $assQuestion = new $type();
@@ -252,7 +252,7 @@ class QTIPoolBroker extends Logger
         //get answers
         $type       = $question["type_tag"];
 
-        $this->log($type);
+        // $this->log($type);
         switch ($type)
         {
             case "assNumeric":
@@ -368,7 +368,7 @@ class QTIPoolBroker extends Logger
     {
         $answers = $assQuestion->toJSON();
 
-        $this->log("answerList for other types of Question".$answers);
+        // $this->log("answerList for other types of Question".$answers);
 
         $answerList = json_decode($answers);
         return $answerList->answers;
