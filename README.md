@@ -26,13 +26,25 @@ Then copy all powertla files into this directory. The rest will work (hopefully)
 
 ### Moodle
 
-The moodle integration is presently in progress and will become available in Autumn 2015. 
+The moodle integration is presently in progress and will become available in Autumn 2015.
 
 ## Documentation
 
 Find the documentation in the [docs folder](docs/).
 
 ## Contribute
+
+Committing is easy.
+
+1. Create a new branch for your fixes, changes and additions using ```git branch __yourBranchName__```
+
+2. Implement and test you changes.
+
+3. Check if you code contains only valid PHP. Pull-requests that do not pass PHP lint will not get accepted.
+
+4. Commt your changes to your branch.
+
+5. Create a pull request.
 
 ## LICENSE
 
