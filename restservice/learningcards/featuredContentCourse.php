@@ -40,8 +40,8 @@ $GLOBALS['WEB_ACCESS_WITHOUT_SESSION'] = (session_id() == "");
 
 require_once './common.php';
 
-$ilpath = findIliasInstance();
-if (!empty($ilpath))
+$ilpath = findIliasInstanceLegat();
+if (isset($ilpath))
 {
     //to get the anonymous user id
     require_once 'Services/Utilities/classes/class.ilUtil.php';

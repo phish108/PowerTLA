@@ -37,8 +37,8 @@
 
 require_once './common.php';
 
-$ilpath = findIliasInstance();
-if (!empty($ilpath))
+$ilpath = findIliasInstanceLegat();
+if (isset($ilpath))
 {
     //require_once 'Modules/Course/classes/class.ilCourseItems.php';
     require_once 'Modules/Course/classes/class.ilObjCourse.php';

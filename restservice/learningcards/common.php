@@ -324,32 +324,27 @@ function calculateAnswerOtherTypes($assQuestion)
 	return $answerList;
 }
 
-function findIliasInstance()
+function findIliasInstanceLegat()
 {
-    $cwd = explode('/', getcwd());
-
+    $scwd = getcwd();
+    $cwd = explode('/', $scwd);
     $ipath = "/include";
 
-    while (array_pop($cwd))
+    while (count($cwd))
     {
-        if (file_exists(implode('/', $cwd)  . "/include/inc.ilias_version.php"))
+        if (file_exists(implode('/', $cwd) . $ipath . "/findVLE.php"))
         {
-            // got an ilias instance
-            // set include paths
-            set_include_path(implode('/', $cwd) . $ipath . PATH_SEPARATOR .
-                             implode('/', $cwd) . "/tla/include". PATH_SEPARATOR . // remove
-                             implode('/', $cwd) . "/tla/include/PowerTLA". PATH_SEPARATOR . // remove
+            set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .
+                             implode('/', $cwd). $ipath . "/PowerTLA". PATH_SEPARATOR .
                              get_include_path());
-
-            chdir(implode('/', $cwd)); // change to the Ilias directory
-
-            require_once('PowerTLA/PowerTLA.auto.php');
-            require_once("findVLE.php");
-
-            return implode('/', $cwd) . $ipath;
+            break;
         }
+        array_pop($cwd);
     }
-    return "";
+
+    require_once("findVLE.php");
+
+    $vleapi = detectLMS();
 }
 
 ?>

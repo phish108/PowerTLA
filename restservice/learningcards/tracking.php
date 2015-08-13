@@ -34,8 +34,8 @@
 
 require_once './common.php';
 
-$ilpath = findIliasInstance();
-if (!empty($ilpath)) {
+$ilpath = findIliasInstanceLegat();
+if (isset($ilpath)) {
     global $DEBUG, $class_for_logging;
 
     $DEBUG = 0;
