@@ -40,7 +40,7 @@ class AuthService extends VLEService
                 $this->mode = $pathArray[0];
             }
             else {
-                this->status = RESTling::BAD_URI;
+                $this->status = RESTling::BAD_URI;
             }
         }
     }

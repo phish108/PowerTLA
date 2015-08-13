@@ -107,7 +107,7 @@ class IdentityProvider extends Logger
         $resstring = "";
         $chars = "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLNOPQRSTUVWXYZ.1234567890";
         $len = strlen($chars);
-        for ($i = 0; i < $length; i++)
+        for ($i = 0; $i < $length; $i++)
         {
             $x = rand(0, $len-1);
             $resstr .= substr($chars, $x, 1);
