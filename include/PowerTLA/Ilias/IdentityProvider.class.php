@@ -12,7 +12,7 @@ class IdentityProvider extends Logger
     public function authenticate($credentials, $clientToken)
     {
         global $ilUser, $ilDB;
-        $userId = $ilUser->getUserIdByLogin($credentials["login"]);
+        $userId = $ilUser->getUserIdByLogin($credentials["username"]);
 
         $retval = null;
 
@@ -24,11 +24,11 @@ class IdentityProvider extends Logger
             $passwordHash = $ilUser->getPasswd(); //returns md5-hashed password
 
             // however, we continue to use SHA1
-            $validate = sha1($credentials["login"].
+            $validate = sha1($credentials["username"].
                              $passwordHash .
                              $clientToken["token"]);
 
-            if ($credentials["accesskey"] == $validate)
+            if ($credentials["challenge"] == $validate)
             {
                 $retval = $this->generateAccessToken($clientToken);
             }
@@ -41,14 +41,14 @@ class IdentityProvider extends Logger
                 $pin = $this->checkAuthPin($now - $dtime);
                 if (isset($pin))
                 {
-                    $validate = sha1($credentials["login"].
+                    $validate = sha1($credentials["username"].
                                      $pin .
                                      $clientToken["token"]);
-                    if ($credentials["accesskey"] == $validate)
+                    if ($credentials["challenge"] == $validate)
                     {
                         // invalidate the pin
                         $q = "DELETE FROM pwrtla_authpins WHERE login =  %s";
-                        $ilDB->manipulateF($q, array("text"), array($credentials["login"]));
+                        $ilDB->manipulateF($q, array("text"), array($credentials["username"]));
 
                         $retval = $this->generateAccessToken($clientToken);
                     }
@@ -93,6 +93,7 @@ class IdentityProvider extends Logger
                 return $this->generateMACToken($clientToken);
                 break;
             default:
+                $this->log("bad token type? " . TLA_TOKENTYPE);
                 break;
         }
         return null;
@@ -125,9 +126,9 @@ class IdentityProvider extends Logger
         $ilDB->insert("pwrtla_tokens", array(
             "token_type" => array("text", "Bearer"),
             "token_id"   => array("text", $tokenkey),
-            "user_id"    => array("int", $ilUser->getID()),
-            "client_id"     => array("int", $clientToken["client"]),
-            "domain"     => array("int", $clientToken["domain"]),
+            "user_id"    => array("integer", $ilUser->getID()),
+            "client_id"  => array("text", $clientToken["client"]),
+            "domain"     => array("text", $clientToken["domain"]),
         ));
 
         return array(
@@ -149,8 +150,8 @@ class IdentityProvider extends Logger
             "token_key"  => array("text", $tokenkey),
             "token_id"   => array("text", $tokenid),
             "domain"     => array("text", $clientToken["domain"]),
-            "client_id"     => array("text", $clientToken["client"]),
-            "user_id"    => array("int", $ilUser->getID())
+            "client_id"  => array("text", $clientToken["client"]),
+            "user_id"    => array("integer", $ilUser->getID())
         ));
 
         return array(
