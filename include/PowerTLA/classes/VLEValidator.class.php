@@ -86,7 +86,7 @@ class VLEValidator extends RESTlingValidator
                 return $this->validateMACToken();
                 break;
             case "Request":
-                return $this->validateClientToken();
+                return $this->validateRequestToken();
                 break;
             default:
                 break;
@@ -109,7 +109,7 @@ class VLEValidator extends RESTlingValidator
         return TRUE;
     }
 
-    protected function validateClientToken()
+    protected function validateRequestToken()
     {
         return TRUE;
     }

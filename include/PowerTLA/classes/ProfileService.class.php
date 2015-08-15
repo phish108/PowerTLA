@@ -60,18 +60,20 @@ class ProfileService extends VLEService
 
     private function validatePut($token)
     {
-        if ($token["type"] != "Client")
+        if ($token["type"] != "Request")
         {
+            $this->log("wrong type: ". $token["type"]);
+
             $this->status = RESTling::OPERATION_FORBIDDEN;
             $this->data = array("message" => "Bad Token");
         }
         else if (isset($this->inputData) &&
             ($this->inputDataType == "application/json" ||
              $this->inputDataType == "application/x-www-form-urlencoded") &&
-            !(array_key_exists("login", $this->inputData) &&
-              array_key_exists("accesskey", $this->inputData) &&
-              !empty($this->inputData["login"]) &&
-              !empty($this->inputData["accesskey"])))
+            !(array_key_exists("username", $this->inputData) &&
+              array_key_exists("challenge", $this->inputData) &&
+              !empty($this->inputData["username"]) &&
+              !empty($this->inputData["challenge"])))
         {
             $this->status = RESTling::BAD_DATA;
             $this->data = array("message" => "Missing Data");
@@ -81,9 +83,8 @@ class ProfileService extends VLEService
     private function validateGet($token)
     {
         if ($this->VLE->isGuestUser() ||
-            $token["type"] == "Client")
+            $token["type"] == "Request")
         {
-            $this->log("GET FORBIDDEN!?");
             $this->status = RESTling::OPERATION_FORBIDDEN;
             $this->data = array("message" => "Bad Token");
         }
@@ -117,6 +118,11 @@ class ProfileService extends VLEService
     {
         $token = $this->VLE->getAuthValidator()->getTokenInformation();
         $this->data = $this->provider->authenticate($this->inputData, $token);
+
+        if (!isset($this->data))
+        {
+            $this->authentication_required();
+        }
     }
 
     // logout if we run on a Bearer or MAC Token
@@ -124,6 +130,7 @@ class ProfileService extends VLEService
     {
         $token = $this->VLE->getAuthValidator()->getTokenInformation();
         $this->data = $this->provider->logout($token);
+        $this->authentication_required();
     }
 }
 ?>
