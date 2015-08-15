@@ -3,6 +3,7 @@
 class IdentityProvider extends Logger
 {
     private $guestuser;
+    private $idToken;
 
     public function __construct($guestuserid)
     {
@@ -177,6 +178,8 @@ class IdentityProvider extends Logger
             "user_id"    => array("integer", $ilUser->getId()),
             "user_token" => array("text", $tokenid)
         ));
+
+        $this->idToken = $tokenid;
     }
 
     private function checkAuthPin($expirytime=0) {
@@ -253,7 +256,7 @@ class IdentityProvider extends Logger
         }
 
         $retval = null;
-        $q = "SELECT user_id FROM pwrtla_usertokens WHERE user_id = %s ";
+        $q = "SELECT user_id, user_token FROM pwrtla_usertokens WHERE user_id = %s ";
         $types = array("integer");
         $values = array($oUser->getId());
         $res = $ilDB->queryF($q,
@@ -262,6 +265,7 @@ class IdentityProvider extends Logger
         $row = $ilDB->fetchAssoc($res);
         if (isset($row) && intval($row["user_id"]))
         {
+            $this->idToken = $row["user_token"];
             $ilUser->setId($row["user_id"]);
             $ilUser->read();
             $retval = $this->getUserDetails();
@@ -271,7 +275,7 @@ class IdentityProvider extends Logger
 
     public function getUserDetails()
     {
-        global $ilUser;
+        global $ilUser, $ilDB;
         $retval = null;
 
         if ($ilUser->getId() &&
@@ -280,9 +284,30 @@ class IdentityProvider extends Logger
             !empty($this->guestuser) &&
             $ilUser->getLogin() != $this->guestuser)
         {
+            // get idToken
+            if (!isset($this->idToken))
+            {
+                $q = "SELECT user_id, user_token FROM pwrtla_usertokens WHERE user_id = %s ";
+                $types = array("integer");
+                $values = array($ilUser->getId());
+                $res = $ilDB->queryF($q,
+                                     $types,
+                                     $values);
+                $row = $ilDB->fetchAssoc($res);
+                if (isset($row))
+                {
+                    $this->idToken = $row["user_token"];
+                }
+                else
+                {
+                    // create a new userToken
+                    $this->createIdentityToken();
+                }
+            }
+
             $retval = array(
                 "name"       => $ilUser->getFullname(),
-                "id"         => $idToken,
+                "id"         => $this->idToken,
                 "login"      => $ilUser->getLogin(),
                 "email"      => $ilUser->getEmail(),
                 "givenname"  => $ilUser->getFirstName(),
