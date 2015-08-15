@@ -75,7 +75,7 @@ class IdentityProvider extends Logger
         }
 
         $ilDB->manipulateF($q,
-                           array("int", "text"),
+                           array("integer", "text"),
                            array(
                                $ilUser->getId(),
                                $token
@@ -174,7 +174,7 @@ class IdentityProvider extends Logger
         $tokenid  = substr($tid, $startid, 7);
 
         $ilDB->insert("pwrtla_usertokens", array(
-            "user_id"    => array("int", $ilUser->getId()),
+            "user_id"    => array("integer", $ilUser->getId()),
             "user_token" => array("text", $tokenid)
         ));
     }
@@ -254,7 +254,7 @@ class IdentityProvider extends Logger
 
         $retval = null;
         $q = "SELECT user_id FROM pwrtla_usertokens WHERE user_id = %s ";
-        $types = array("int");
+        $types = array("integer");
         $values = array($oUser->getId());
         $res = $ilDB->queryF($q,
                              $types,
@@ -324,7 +324,7 @@ class IdentityProvider extends Logger
             // now create the new pin
             $ilDB->insert("pwrtla_authpins", array(
                 "login"     => array("text", $ilUser->getLogin()),
-                "created"   => array("int", $now),
+                "created"   => array("integer", $now),
                 "pinhash"   => array("text", $pinhash)
             ));
             $retval = $accessPin;
