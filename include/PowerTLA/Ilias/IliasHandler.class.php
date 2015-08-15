@@ -187,11 +187,12 @@ class IliasHandler extends VLEHandler
     public function isGuestUser()
     {
         global $ilUser;
+
         if ($ilUser->getId() &&
             $ilUser->getLogin() != "anonymous" &&
-            isset($this->guestuser) &&
-            !empty($this->guestuser) &&
-            $ilUser->getLogin() != $this->guestuser)
+            !isset($this->guestuser) ||
+            (!empty($this->guestuser) &&
+            $ilUser->getLogin() != $this->guestuser))
         {
             return FALSE;
         }

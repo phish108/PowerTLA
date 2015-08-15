@@ -287,7 +287,7 @@ class IdentityProvider extends Logger
                 "email"      => $ilUser->getEmail(),
                 "givenname"  => $ilUser->getFirstName(),
                 "familyname" => $ilUser->getLastName(),
-                "language"   => $ilUser->getLaguage()
+                "language"   => $ilUser->getLanguage()
             );
         }
 

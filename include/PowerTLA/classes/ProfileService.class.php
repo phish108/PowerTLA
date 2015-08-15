@@ -34,7 +34,7 @@ class ProfileService extends VLEService
                         empty($this->path_info))
                     {
                         $this->status = RESTling::BAD_DATA;
-                        $this->data = array("message" => "Missing User Token");
+                        $this->data = array("message" => "Missing UserId Token");
                     }
                     break;
                 case "delete":
@@ -97,7 +97,6 @@ class ProfileService extends VLEService
      */
     protected function get()
     {
-        $this->mark("get()");
         $this->data = $this->provider->getUserDetails();
     }
 
