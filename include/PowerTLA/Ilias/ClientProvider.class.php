@@ -17,20 +17,17 @@ class ClientProvider extends Logger
         for ($i = 0; $i < $length; $i++)
         {
             $x = rand(0, $len-1);
-            $resstr .= substr($chars, $x, 1);
+            $resstring .= substr($chars, $x, 1);
         }
         return $resstring;
     }
 
     public function addClient($clientId, $appID)
     {
-        $randomseed = $this->randomString();
-        $tid = sha1($this->randomString());
-        $startid = rand(0, strlen($tid) - 7);
+        $tokenid = $this->randomString(7);
 
-        $tokenid  = substr($tid, $startid, 7);
-
-        $tokenkey = sha1($clientId . $appID . $randomseed);
+        $tokenkey = $this->randomString(128);
+        // $tokenkey = sha1($clientId . $appID . $randomseed);
 
         global $ilDB;
 

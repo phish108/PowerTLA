@@ -110,7 +110,7 @@ class IdentityProvider extends Logger
         for ($i = 0; $i < $length; $i++)
         {
             $x = rand(0, $len-1);
-            $resstr .= substr($chars, $x, 1);
+            $resstring .= substr($chars, $x, 1);
         }
         return $resstring;
     }
@@ -120,8 +120,7 @@ class IdentityProvider extends Logger
     {
         global $ilUser, $ilDB;
 
-        $randomseed = $this->randomString();
-        $tokenkey = sha1($clientToken["client"] . $clientToken["domain"] . $randomseed);
+        $tokenkey = $this->randomString(10);
 
         $ilDB->insert("pwrtla_tokens", array(
             "token_type" => array("text", "Bearer"),
@@ -142,12 +141,8 @@ class IdentityProvider extends Logger
     {
         global $ilUser, $ilDB;
 
-        $randomseed = $this->randomString(10);
-        $tid = sha1($this->randomString(10));
-        $startid = rand(0, strlen($tid) - 7);
-
-        $tokenid  = substr($tid, $startid, 7);
-        $tokenkey = sha1($clientToken["device"] . $clientToken["domain"] . $randomseed);
+        $tokenid = $this->randomString(10);
+        $tokenkey = $this->randomString(128);
 
         $ilDB->insert("pwrtla_tokens", array(
             "token_type" => array("text", "MAC"),
