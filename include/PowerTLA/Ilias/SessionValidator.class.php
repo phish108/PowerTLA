@@ -41,7 +41,7 @@ class SessionValidator extends VLEValidator
         global $ilDB, $ilUser;
 
         $userId = 0;
-        $result = $ilDB->query("SELECT user_id, domain, client FROM pwrtla_tokens WHERE token_type='Bearer' AND token_id = " .
+        $result = $ilDB->query("SELECT user_id, domain, client_id FROM pwrtla_tokens WHERE token_type='Bearer' AND token_id = " .
                                $ilDB->quote($this->token, "text"));
 		$userIdArray = $ilDB->fetchAssoc($result);
 		$userId = $userIdArray["user_id"];
@@ -53,7 +53,7 @@ class SessionValidator extends VLEValidator
 
             if($ilUser->getLogin())
             {
-                $this->clientId = $userIdArray["client"];
+                $this->clientId = $userIdArray["client_id"];
                 $this->tokenKey = $this->token;
                 $this->domain   = $userIdArray["domain"];
                 return TRUE;
@@ -73,7 +73,7 @@ class SessionValidator extends VLEValidator
         $id  = $token["id"];
         $nonce = $token["nonce"];
 
-        $q = "SELECT user_id, token_key, client, domain FROM pwrtla_tokens WHERE token_type = 'MAC' AND token_id = %s AND domain = %s";
+        $q = "SELECT user_id, token_key, client_id, domain FROM pwrtla_tokens WHERE token_type = 'MAC' AND token_id = %s AND domain = %s";
         $result = $ilDB->queryF($q, array("text", "text"), array($id, $token["domain"]));
 
         // we should verify that the nonce is not reused.
@@ -82,7 +82,7 @@ class SessionValidator extends VLEValidator
 
         $userId = $userIdArray["user_id"];
         $key = $userIdArray["token_key"];
-        $duuid = $userIdArray["client"];
+        $duuid = $userIdArray["client_id"];
         $domain = $userIdArray["domain"];
 
         $uri = "http" . ($_SERVER["HTTPS"]? "s": "") . "://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
@@ -90,7 +90,7 @@ class SessionValidator extends VLEValidator
         // remove potential query string
         // $uri =
 
-        $tmac = sha1(implode("", array($duuid, $key, $domain, $uri, $nonce)));
+        $tmac = sha1(implode("", array($duuid, $key, $domain, $_SERVER['REQUEST_METHOD'], $uri, $nonce)));
         if ($mac == $tmac && isset($userId) && intval($userId))
         {
             $ilUser->setId($userId);
@@ -104,35 +104,51 @@ class SessionValidator extends VLEValidator
                 return TRUE;
             }
         }
+
         $this->log("bad MAC token");
 
         return FALSE;
     }
 
-    protected function validateClientToken()
+    protected function validateRequestToken()
     {
         $hToken = $this->extractToken();
 
         $uri = "http" . ($_SERVER["HTTPS"]? "s": "") . "://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
 
-        $q = "SELECT token_type, token_id, token_key, client, domain, extra FROM pwrtla_tokens WHERE token_type = 'Request' AND domain = %s AND token_id = %s";
+        $q = "SELECT token_type, token_id, token_key, client_id, domain, extra FROM pwrtla_tokens WHERE token_type = 'Request' AND domain = %s AND token_id = %s";
 
         global $ilDB;
         $res = $ilDB->queryF($q, array("text","text"), array($hToken["domain"], $hToken["id"]));
         $token = $ilDB->fetchAssoc($res);
 
-        $verify = sha1($token["client"] . $token["token_key"] . $hToken["domain"] . $url . $nonce);
+        $this->log(json_encode($token));
 
-        if ($token["token_key"] == $verify)
+        $verify = sha1(urlencode($token["client_id"]) .
+                       urlencode($token["token_key"]) .
+                       urlencode($token["domain"]) .
+                       urlencode($_SERVER['REQUEST_METHOD']) .
+                       urlencode($uri) .
+                       urlencode($hToken["nonce"]));
+
+        $this->log($hToken["key"]);
+        $this->log($verify);
+
+        $this->log($uri);
+        $this->log($_SERVER['REQUEST_METHOD']);
+        $this->log($hToken["nonce"]);
+
+
+        if ($hToken["key"] == $verify)
         {
             // match the client
-            $this->clientId = $token["client"];
+            $this->clientId = $token["client_id"];
             $this->tokenKey = $token["token_key"];
             $this->domain   = $token["domain"];
             return TRUE;
         }
         // used during authentication
-        $this->log("bad Client token");
+        $this->log("bad Request token");
         return FALSE;
     }
 }
