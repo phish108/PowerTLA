@@ -339,20 +339,43 @@ class QTIPoolBroker extends Logger
      */
     private function calculateClozeAnswer($assQuestion)
     {
-        $gaps= $assQuestion->getGaps();
-        $clozeText= $assQuestion->getClozeText();
-        //$this->log("cloze text for answer view in cloze question is ".$clozeText);
-        $pattern="/\[gap\].*?\[\/gap\]/";
-        for($gapid =0; $gapid<= count($gaps); $gapid++ ){
-            $replacement="<gap identifier=\"gap_".$gapid."\"></gap>";
-            $clozeText = preg_replace($pattern,$replacement,$clozeText,1);
+
+        $gaps = $assQuestion->getGaps();
+
+        $this->log(json_encode($gaps));
+
+        $oGaps = array();
+
+        foreach ($gaps as $gap)
+        {
+            $thegap = new stdClass();
+            $thegap->type = $gap->type;
+
+            $tItems = array();
+            foreach ($gap->items as $item)
+            {
+                $tItems[] = array("text" => $item->getAnswertext(),
+                                  "points"=> $item->getPoints());
+            }
+
+            $thegap->items = $tItems;
+
+            $oGaps[] = $thegap;
         }
+
+        $clozeText = $assQuestion->getClozeText();
+        //$this->log("cloze text for answer view in cloze question is ".$clozeText);
+        // $pattern="/\[gap\].*?\[\/gap\]/";
+//        for($gapid =0; $gapid<= count($gaps); $gapid++ ){
+//            $replacement="<gap identifier=\"gap_".$gapid."\"></gap>";
+//            $clozeText = preg_replace($pattern,$replacement,$clozeText,1);
+//        }
 
         // the clozeText will be displayed in answer view
         // we need also the gaps for the calculation of the score
         $answerList = array(
                 "clozeText"  => $clozeText,
-                "correctGaps" => $gaps
+                "correctGaps" => $oGaps
         );
         //$this->log("answerList for close questions".json_encode($answerList));
         return $answerList;
