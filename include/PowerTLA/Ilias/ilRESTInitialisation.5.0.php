@@ -134,7 +134,12 @@ class ilRESTInitialisation extends ilInitialisation
 			self::initClient();
 
             self::initUser();
-            self::initUserAccount(); // ensure that web users have access to the services
+
+             if (ilSession::get("AccountId"))
+             {
+                 // ensure that web users have access to the services
+                 self::initUserAccount();
+             }
 
 			// init after Auth otherwise breaks CAS
 			self::includePhp5Compliance();
