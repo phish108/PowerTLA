@@ -122,21 +122,12 @@ class SessionValidator extends VLEValidator
         $res = $ilDB->queryF($q, array("text","text"), array($hToken["domain"], $hToken["id"]));
         $token = $ilDB->fetchAssoc($res);
 
-        $this->log(json_encode($token));
-
         $verify = sha1(urlencode($token["client_id"]) .
                        urlencode($token["token_key"]) .
                        urlencode($token["domain"]) .
                        urlencode($_SERVER['REQUEST_METHOD']) .
                        urlencode($uri) .
                        urlencode($hToken["nonce"]));
-
-        $this->log($hToken["key"]);
-        $this->log($verify);
-
-        $this->log($uri);
-        $this->log($_SERVER['REQUEST_METHOD']);
-        $this->log($hToken["nonce"]);
 
 
         if ($hToken["key"] == $verify)

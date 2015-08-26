@@ -113,6 +113,8 @@ class ilRESTInitialisation extends ilInitialisation
 
 	/**
 	 * ilias initialisation
+	 *
+	 * This needs to be overwritten because Ilias would ignore several settings
 	 */
 	public static function initILIAS()
 	{
@@ -132,6 +134,7 @@ class ilRESTInitialisation extends ilInitialisation
 			self::initClient();
 
             self::initUser();
+            self::initUserAccount(); // ensure that web users have access to the services
 
 			// init after Auth otherwise breaks CAS
 			self::includePhp5Compliance();
@@ -173,10 +176,10 @@ class ilRESTInitialisation extends ilInitialisation
 	 *
 	 * @return boolean
 	 */
-	protected static function blockedAuthentication($a_current_script)
-	{
-        return true;
-    }
+//	protected static function blockedAuthentication($a_current_script)
+//	{
+//        return true;
+//    }
 
 	/**
 	 * Is current view the login form?
