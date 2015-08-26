@@ -2,41 +2,35 @@
 
 function findIliasInstance()
 {
-    $cwd = explode('/', getcwd());
-    // array_pop($cwd);
+    $cwd = dirname(__FILE__);
 
-    $apath = array();
+    // Power TLA paths
+    $apath = "";
 
-    while (count($cwd))
+    while (!empty($cwd) && $cwd !== "/")
     {
-        $cdpath = implode("/", $cwd);
+//        $cdpath = implode("/", $cwd);
 
-        if (empty($apath) && file_exists($cdpath . "/include"))
+        if (empty($apath) && file_exists($cwd . "/include"))
         {
-            array_push($apath, "include");
+            $apath = $cwd . "/include";
         }
 
-        if (file_exists($cdpath . "/include/inc.ilias_version.php"))
+        if (file_exists($cwd . "/include/inc.ilias_version.php"))
         {
             // got an ilias instance
-            // set include paths
-            $ipath = implode("/", $apath);
-            set_include_path($cdpath . "/". $ipath . PATH_SEPARATOR .
-                             $cdpath. PATH_SEPARATOR .
+            // set include PowerTLA and Ilias paths
+
+            set_include_path($apath . PATH_SEPARATOR .
+                             $cwd . PATH_SEPARATOR .
                              // $cdpath . "/". $ipath . "/PowerTLA". PATH_SEPARATOR .
                              get_include_path());
 
-            chdir($cdpath); // change to the LMS directory
-            return $ipath;
+            chdir($cwd); // change to the LMS directory
+            return $apath;
         }
 
-        $p = array_pop($cwd);
-        if (!empty($apath))
-        {
-            array_unshift($apath, $p);
-        }
-
-        $cdpath = implode("/", $cwd);
+        $cwd = dirname($cwd);
     }
     return null;
 }
