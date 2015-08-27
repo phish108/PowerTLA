@@ -1,6 +1,6 @@
 <?php
 
-class IliasHandler extends VLEHandler
+class SystemHandler extends VLEHandler
 {
     protected $pluginAdmin;
     protected $plugins;

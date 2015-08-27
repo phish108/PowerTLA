@@ -1,90 +1,101 @@
 <?php
 
-function findIliasInstance()
+function initCoreSystem($pwrtlaPath, $lmspath)
 {
+    set_include_path(pwrtlaPath . PATH_SEPARATOR .
+                     $lmspath   . PATH_SEPARATOR .
+                     get_include_path());
+
+    // include PowerTLA's classes via their autoloaders
+    include_once('RESTling/contrib/Restling.auto.php');
+    include_once('PowerTLA/PowerTLA.auto.php');
+
+    include_once("PowerTLA/PowerTLA.ini");
+    date_default_timezone_set(TLA_TIMEZONE);
+}
+
+function findVLEInstance()
+{
+    $result = array();
+
     $cwd = dirname(__FILE__);
+
+    $result["rootpath"] = $cwd;
 
     // Power TLA paths
     $apath = "";
 
     while (!empty($cwd) && $cwd !== "/")
     {
-//        $cdpath = implode("/", $cwd);
-
+        // found PowerTLA include path
         if (empty($apath) && file_exists($cwd . "/include"))
         {
             $apath = $cwd . "/include";
+            $result["tlapath"] = $apath;
         }
 
         if (file_exists($cwd . "/include/inc.ilias_version.php"))
         {
             // got an ilias instance
             // set include PowerTLA and Ilias paths
+            initCoreSystem($apath, $cwd);
 
-            set_include_path($apath . PATH_SEPARATOR .
-                             $cwd . PATH_SEPARATOR .
-                             // $cdpath . "/". $ipath . "/PowerTLA". PATH_SEPARATOR .
-                             get_include_path());
-
-            chdir($cwd); // change to the LMS directory
-            return $apath;
+            $result["lmspath"] = $cwd;
+            $result["lmstype"] = "Ilias";
+            break;
         }
 
+        if (file_exists($cwd . "/lib/moodlelib.php"))
+        {
+            // got a moodle instance
+            initCoreSystem($apath, $cwd);
+
+            $result["lmspath"] = $cwd;
+            $result["lmstype"] = "Moodle";
+            break;
+        }
+
+        // nothin found, move an directory up.
         $cwd = dirname($cwd);
     }
-    return null;
+
+    return $result;
 }
 
-function findMoodleInstance()
+function initError($msg)
 {
-    return null;
-}
-
-function tearUpIlias()
-{
-    $lmsPath = findIliasInstance();
-    if (isset($lmsPath) && !empty($lmsPath))
+    if (!isset($msg))
     {
-        require_once('PowerTLA/Ilias/IliasHandler.class.php');
-
-        $VLEAPI  = new IliasHandler($lmsPath);
-        $VLEAPI->setGuestUser(TLA_GUESTUSER);
-
-        return $VLEAPI;
+        $msg = "";
     }
-    return null;
-}
-
-function tearUpMoodle()
-{
-    $lmsPath = findMoodleInstance();
-    if (isset($lmsPath) && !empty($lmsPath))
-    {
-        require_once('PowerTLA/Moodle/MoodleHandler.class.php');
-
-        $VLEAPI  = new MoodleHandler($lmsPath);
-        $VLEAPI->setGuestUser($guestuser);
-
-        return $VLEAPI;
-    }
-    return null;
+    error_log("PowerTLA Init Error: " . $msg);
 }
 
 function detectLMS()
 {
-    include_once("PowerTLA/PowerTLA.ini");
-    date_default_timezone_set(TLA_TIMEZONE);
+    $vle      = null;
+    $vleinfo  = findVLEInstance();
 
-    $vle = null;
-
-    // now we must include the autoloaders
-    include_once('RESTling/contrib/Restling.auto.php');
-    include_once('PowerTLA/PowerTLA.auto.php');
-
-    $vle = tearUpIlias();
-    if (!isset($vle))
+    if ($vleinfo &&
+        array_key_exists("lmstype", $vleinfo) &&
+        array_key_exists("tlapath", $vleinfo))
     {
-        $vle = tearUpMoodle();
+        chdir($vleinfo["lmspath"]); // change to the LMS directory
+
+        // load the VLE specific SystemHandler class.
+        require_once('PowerTLA/' . $vleinfo["lmstype"] . '/SystemHandler.class.php');
+
+        $vle  = new SystemHandler($lmsPath);
+        $vle->setGuestUser(TLA_GUESTUSER);
+
+        if (!isset($vle))
+        {
+            initError("Cannot initialize Virtual Learning Environment");
+        }
+    }
+    else
+    {
+        initError("Cannot find Virtual Learning Environment");
     }
 
     return $vle;
@@ -92,18 +103,34 @@ function detectLMS()
 
 function getVLEInstanceInformation($path)
 {
-    include_once("PowerTLA/PowerTLA.ini");
-    date_default_timezone_set(TLA_TIMEZONE);
+    $iInfo    = null;
+    $vleinfo  = findVLEInstance();
 
-    // we can include the autoloaders, cos the rsd scripts set the include path
-    include_once('RESTling/contrib/Restling.auto.php');
-    include_once('PowerTLA/PowerTLA.auto.php');
-
-    $iInfo = getIliasInstanceInformation($path);
-    if (!isset($iInfo))
+    if ($vleinfo &&
+        array_key_exists("lmstype", $vleinfo) &&
+        array_key_exists("tlapath", $vleinfo))
     {
-        $iInfo = getMoodleInstanceInformation($path);
+
+        $lmsPath = $vleinfo["vlepath"];
+        if (isset($lmsPath) &&
+            !empty($lmsPath))
+        {
+            require_once('PowerTLA/' .
+                         $vleinfo["lmstype"] .
+                         '/SystemHandler.class.php');
+            $iInfo = SystemHandler::apiDefinition($lmsPath, $path);
+        }
+
+        if (!isset($iInfo))
+        {
+            initError("Cannot initialize Virtual Learning Environment");
+        }
     }
+    else
+    {
+        initError("Cannot find Virtual Learning Environment");
+    }
+
     if (!isset($iInfo))
     {
         $iInfo = array();
@@ -112,22 +139,6 @@ function getVLEInstanceInformation($path)
     $iInfo["apis"] = array();
 
     return $iInfo;
-}
-
-function getIliasInstanceInformation($path)
-{
-    $lmsPath = findIliasInstance();
-    if (isset($lmsPath) && !empty($lmsPath))
-    {
-        require_once('PowerTLA/Ilias/IliasHandler.class.php');
-        return IliasHandler::apiDefinition($lmsPath, $path);
-    }
-    return null;
-}
-
-function getMoodleInstanceInformation($path)
-{
-    return null;
 }
 
 ?>
