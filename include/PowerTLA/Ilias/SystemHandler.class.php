@@ -10,15 +10,17 @@ class SystemHandler extends VLEHandler
 
     public static function init($tp)
     {
+
+        error_log($tp);
         $retval = FALSE;
-        include_once("include/inc.ilias_version.php");
+        include_once($tp . "/include/inc.ilias_version.php");
 
         $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
         if (!empty($aVersion))
         {
             $vstring = $aVersion[0] . '.' . $aVersion[1];
 
-            $strVersionInit = 'PowerTLA/Ilias/ilRESTInitialisation.' . $vstring . '.php';
+            $strVersionInit = 'tla/include/PowerTLA/Ilias/ilRESTInitialisation.' . $vstring . '.php';
 
             if (file_exists($tp.'/'.$strVersionInit) )
             {
@@ -62,15 +64,6 @@ class SystemHandler extends VLEHandler
             $servername = $ilClientIniFile->readVariable('client',   'description');
             $lang =       $ilClientIniFile->readVariable('language', 'default');
 
-            $aPath = explode('/', $cp);
-            $lPath = explode('/', $tp);
-            array_pop($lPath);          // remove include directory
-            if (!empty($aPath)) {
-                while (count($lPath)) {
-                    array_unshift($aPath, array_pop($lPath));
-                }
-            }
-
             $reqpath = $_SERVER["REQUEST_URI"];
 
             // get rid of any query string garbage
@@ -79,34 +72,21 @@ class SystemHandler extends VLEHandler
             // get rid of the rsd section
             $reqpath = preg_replace('/\/[\w\d]+\.php$/',"", $reqpath);
 
-            // find the external server root
-            $aReq = explode("/", $reqpath);
-
-            $aPath = array_reverse($aPath);
-            foreach ($aPath as $a)
-            {
-                if (!empty($a))
-                {
-                    $x = array_pop($aReq);
-                    if ($a != $x)
-                    {
-                        array_push($aReq, $x);
-                    }
-                }
-            }
-            $aPath = array_reverse($aPath);
+            // strip the tla root
+            $rcp = preg_replace('/\//', '\\/', $cp);
+            $reqpath = preg_replace('/' . $rcp . '\/?$/',"", $reqpath);
 
             $requrl = "http";
             $requrl .= !empty($_SERVER["HTTPS"]) ? "s://" : "://";
             $requrl .= $_SERVER["SERVER_NAME"];
-            $requrl .= implode('/',$aReq);
+            $requrl .= $reqpath;
 
             $retval = array(
                 "engine" => array(
                     "version" => ILIAS_VERSION_NUMERIC,
                     "type"=> "ILIAS",
                     "link"=> $requrl, // official link
-                    "servicelink" => $requrl . "/". implode("/", $aPath)
+                    "servicelink" => $requrl . $cp
                 ),
                 "language" => $lang,
                 "tlaversion" => "0.6",

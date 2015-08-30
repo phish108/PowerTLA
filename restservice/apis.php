@@ -14,15 +14,19 @@ if (!isset($service))
 {
     // find ilias instance to load the metadata
     $scwd = getcwd();
+
     $cwd = explode('/', $scwd);
+
+    $rwd = dirname($_SERVER["REQUEST_URI"]);
+
     $ipath = "/include";
-    $xpath = array();
 
     if (!file_exists("include/findVLE.php"))
     {
         while ($p = array_pop($cwd))
         {
-            array_unshift($xpath, $p);
+            $rwd = dirname($rwd);
+
             if (file_exists(implode('/', $cwd) . $ipath . "/findVLE.php"))
             {
                 set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .
@@ -43,7 +47,7 @@ if (!isset($service))
 
     require_once("findVLE.php");
 
-    $service = getVLEInstanceInformation(implode('/', $xpath));
+    $service = getVLEInstanceInformation($rwd);
 }
 
 include_once("learningcards/apis.php");
