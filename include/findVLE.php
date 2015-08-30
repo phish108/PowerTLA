@@ -59,6 +59,18 @@ function findVLEInstance()
         $cwd = dirname($cwd);
     }
 
+    if (array_key_exists("lmstype", $result))
+    {
+        chdir($cwd); // change to the LMS directory
+
+        // load the VLE specific SystemHandler class.
+        require_once('PowerTLA/' . $result["lmstype"] . '/SystemHandler.class.php');
+    }
+    else
+    {
+        initError("Cannot find Virtual Learning Environment");
+    }
+
     return $result;
 }
 
@@ -71,36 +83,38 @@ function initError($msg)
     error_log("PowerTLA Init Error: " . $msg);
 }
 
+function detectLMS()
+{
+    $vle      = null;
+    $vleinfo  = findVLEInstance();
+
+    if ($vleinfo)
+    {
+        $vle  = new SystemHandler($vleinfo["lmspath"]);
+        $vle->setGuestUser(TLA_GUESTUSER);
+
+        if (!isset($vle))
+        {
+            initError("Cannot initialize Virtual Learning Environment");
+        }
+    }
+
+    return $vle;
+}
+
 function getVLEInstanceInformation($path)
 {
     $iInfo    = null;
     $vleinfo  = findVLEInstance();
 
-    if ($vleinfo &&
-        array_key_exists("lmstype", $vleinfo) &&
-        array_key_exists("tlapath", $vleinfo))
+    if ($vleinfo)
     {
-        chdir($vleinfo["lmspath"]);
-
-        $lmsPath = $vleinfo["lmspath"];
-        if (isset($lmsPath) &&
-            !empty($lmsPath))
-        {
-            require_once('PowerTLA/' .
-                         $vleinfo["lmstype"] .
-                         '/SystemHandler.class.php');
-
-            $iInfo = SystemHandler::apiDefinition($lmsPath, $path);
-        }
+        $iInfo = SystemHandler::apiDefinition($vleinfo["lmspath"], $path);
 
         if (!isset($iInfo))
         {
             initError("Cannot initialize Virtual Learning Environment");
         }
-    }
-    else
-    {
-        initError("Cannot find Virtual Learning Environment");
     }
 
     if (!isset($iInfo))

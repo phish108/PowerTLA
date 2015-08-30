@@ -86,7 +86,7 @@ class SystemHandler extends VLEHandler
                     "version" => ILIAS_VERSION_NUMERIC,
                     "type"=> "ILIAS",
                     "link"=> $requrl, // official link
-                    "servicelink" => $requrl . $cp
+                    "servicelink" => $requrl . $cp . "/"
                 ),
                 "language" => $lang,
                 "tlaversion" => "0.6",
