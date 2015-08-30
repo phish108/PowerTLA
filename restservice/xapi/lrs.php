@@ -1,8 +1,6 @@
 <?php
 $cwd = dirname(__FILE__);
 
-$scwd = getcwd();
-$cwd = explode('/', $scwd);
 $ipath = "/include";
 
 while ($cwd != "/")
@@ -20,14 +18,11 @@ while ($cwd != "/")
 require_once("findVLE.php");
 
 
-require_once("../include/findVLE.php");
-$tlapath = findIliasInstance();
-if (!empty($tlapath)) {
-
+$vleapi = detectLMS();
+if ($vleapi) {
     $service = new XAPIService();
 
-    $VLEAPI  = new IliasHandler($tlapath);
-    $service->setVLE($VLEAPI);
+    $service->setVLE($vleapi);
 
     // CORS should be OK for the testing.
     // In production code we need to have additional access control for CORS Sites

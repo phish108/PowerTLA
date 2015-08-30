@@ -36,7 +36,7 @@ class VleXAPIStatement extends XAPIStatement
         ));
     }
 
-    protected function validateNewId()
+    public function validateNewId()
     {
         global $ilDB;
         $r = $ilDB->queryF("SELECT id FROM pwrtla_xapistatements WHERE id = %s",

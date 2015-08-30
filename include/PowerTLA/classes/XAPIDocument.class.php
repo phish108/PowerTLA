@@ -9,11 +9,6 @@ class XAPIDocument extends Logger
     protected $document;
     protected $stateId;
 
-    public function __construct($dbh)
-    {
-        $this->dbh = $dbh;
-    }
-
     /** *************************************
      * SUBCLASSES MUST IMPLEMENT THESE FUNCTIONS
      */

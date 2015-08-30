@@ -84,7 +84,7 @@ class XAPIStatement extends Logger
 
     public function setSince($sinceTime)
     {
-        $since = new DataTime($sinceTime);
+        $since = new DateTime($sinceTime);
         $since = $since->getTimestamp();
         if ($since > 0) {
             $this->since = $since;

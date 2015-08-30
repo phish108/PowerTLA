@@ -138,7 +138,7 @@ class VleXAPIDocument extends XAPIDocument
         return true;
     }
 
-    protected function remove()
+    public function remove()
     {
         global $ilDB;
 
