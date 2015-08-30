@@ -1,7 +1,5 @@
 <?php
-
 $localpath = "xapi";
-
 if (!isset($pathprefix))
 {
     $pathprefix = "";
@@ -15,7 +13,6 @@ if (!isset($service))
     // find ilias instance to load the metadata
     $scwd = getcwd();
     $cwd = explode('/', $scwd);
-
     $rwd = dirname($_SERVER["REQUEST_URI"]);
 
     $ipath = "/include";
@@ -34,14 +31,6 @@ if (!isset($service))
                 break;
             }
         }
-    }
-    else
-    {
-        // array_unshift($xpath, $localpath);
-        // because THIS script might run via our root rsd.php
-        set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .
-                         implode('/', $cwd). $ipath . "/PowerTLA". PATH_SEPARATOR .
-                         get_include_path());
     }
 
     require_once("findVLE.php");
