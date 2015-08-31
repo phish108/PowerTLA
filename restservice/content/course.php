@@ -1,18 +1,18 @@
 <?php
-$scwd = getcwd();
-$cwd = explode('/', $scwd);
+$cwd = dirname(__FILE__);
+
 $ipath = "/include";
 
-while (count($cwd))
+while ($cwd != "/")
 {
-    if (file_exists(implode('/', $cwd) . $ipath . "/findVLE.php"))
+    if (file_exists($cwd . $ipath . "/findVLE.php"))
     {
-        set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .
-                         implode('/', $cwd). $ipath . "/PowerTLA". PATH_SEPARATOR .
+        set_include_path($cwd . $ipath . PATH_SEPARATOR .
+                         $cwd . $ipath . "/PowerTLA". PATH_SEPARATOR .
                          get_include_path());
         break;
     }
-    array_pop($cwd);
+    $cwd = dirname($cwd);
 }
 
 require_once("findVLE.php");

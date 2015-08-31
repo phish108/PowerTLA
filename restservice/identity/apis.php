@@ -10,10 +10,8 @@ else {
 
 if (!isset($service))
 {
-    // find ilias instance to load the metadata
-    $scwd = getcwd();
-    $cwd = explode('/', $scwd);
     $rwd = dirname($_SERVER["REQUEST_URI"]);
+    $cwd = dirname(__FILE__);
 
     $ipath = "/include";
 
@@ -21,8 +19,6 @@ if (!isset($service))
     {
         while ($p = array_pop($cwd))
         {
-            $rwd = dirname($rwd);
-
             if (file_exists(implode('/', $cwd) . $ipath . "/findVLE.php"))
             {
                 set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .

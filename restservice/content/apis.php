@@ -11,28 +11,21 @@ else {
 
 if (!isset($service))
 {
-    // find ilias instance to load the metadata
-    $scwd = getcwd();
-    $cwd = explode('/', $scwd);
-
     $rwd = dirname($_SERVER["REQUEST_URI"]);
+    $cwd = dirname(__FILE__);
 
     $ipath = "/include";
 
-    if (!file_exists("include/findVLE.php"))
+    while ($cwd != "/")
     {
-        while ($p = array_pop($cwd))
+        if (file_exists($cwd . $ipath . "/findVLE.php"))
         {
-            $rwd = dirname($rwd);
-
-            if (file_exists(implode('/', $cwd) . $ipath . "/findVLE.php"))
-            {
-                set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .
-                                 implode('/', $cwd). $ipath . "/PowerTLA". PATH_SEPARATOR .
-                                 get_include_path());
-                break;
-            }
+            set_include_path($cwd . $ipath . PATH_SEPARATOR .
+                             $cwd . $ipath . "/PowerTLA". PATH_SEPARATOR .
+                             get_include_path());
+            break;
         }
+        $cwd = dirname($cwd);
     }
 
     require_once("findVLE.php");

@@ -12,37 +12,24 @@ else {
 
 if (!isset($service))
 {
-    // find ilias instance to load the metadata
-    $scwd = getcwd();
-
-    $cwd = explode('/', $scwd);
-
+    // find vle instance to load the metadata
     $rwd = dirname($_SERVER["REQUEST_URI"]);
 
     $ipath = "/include";
+    $cwd = dirname(__FILE__);
 
-    if (!file_exists("include/findVLE.php"))
+    $ipath = "/include";
+
+    while ($cwd != "/")
     {
-        while ($p = array_pop($cwd))
+        if (file_exists($cwd . $ipath . "/findVLE.php"))
         {
-            $rwd = dirname($rwd);
-
-            if (file_exists(implode('/', $cwd) . $ipath . "/findVLE.php"))
-            {
-                set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .
-                                 implode('/', $cwd). $ipath . "/PowerTLA". PATH_SEPARATOR .
-                                 get_include_path());
-                break;
-            }
+            set_include_path($cwd . $ipath . PATH_SEPARATOR .
+                             $cwd . $ipath . "/PowerTLA". PATH_SEPARATOR .
+                             get_include_path());
+            break;
         }
-    }
-    else
-    {
-        // array_unshift($xpath, $localpath);
-        // because THIS script might run via our root rsd.php
-        set_include_path(implode('/', $cwd). $ipath . PATH_SEPARATOR .
-                         implode('/', $cwd). $ipath . "/PowerTLA". PATH_SEPARATOR .
-                         get_include_path());
+        $cwd = dirname($cwd);
     }
 
     require_once("findVLE.php");
