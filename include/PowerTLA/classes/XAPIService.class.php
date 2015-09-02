@@ -16,7 +16,7 @@ class XAPIService extends VLEService
     {
         parent::initializeRun();
 
-        $this->VLE->getAuthValidator()->rejectTokenType("Client");
+        $this->VLE->getSessionValidator()->rejectTokenType("Client");
 
         $this->statement = $this->VLE->getXAPIStatement();
         $this->document  = $this->VLE->getXAPIDocument();

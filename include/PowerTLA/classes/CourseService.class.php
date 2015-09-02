@@ -8,7 +8,7 @@ class CourseService extends VLEService
 
     protected function initializeRun()
     {
-        $this->VLE->getAuthValidator()->rejectTokenType("Client");
+        $this->VLE->getSessionValidator()->rejectTokenType("Client");
     }
 
     /**

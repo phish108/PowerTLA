@@ -11,7 +11,7 @@ class QTIService extends VLEService
 
     protected function initializeRun()
     {
-        $this->VLE->getAuthValidator()->rejectTokenType("Client");
+        $this->VLE->getSEssionValidator()->rejectTokenType("Client");
     }
 
     protected function findOperation($method, $path)

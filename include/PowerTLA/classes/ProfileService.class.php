@@ -20,7 +20,7 @@ class ProfileService extends VLEService
      */
     protected function validateData()
     {
-        $token = $this->VLE->getAuthValidator()->getTokenInformation();
+        $token = $this->VLE->getSessionValidator()->getTokenInformation();
         if (isset($token))
         {
             switch ($this->operation)
@@ -115,7 +115,7 @@ class ProfileService extends VLEService
     // login
     protected function put()
     {
-        $token = $this->VLE->getAuthValidator()->getTokenInformation();
+        $token = $this->VLE->getSessionValidator()->getTokenInformation();
         $this->data = $this->provider->authenticate($this->inputData, $token);
 
         if (!isset($this->data))
@@ -127,7 +127,7 @@ class ProfileService extends VLEService
     // logout if we run on a Bearer or MAC Token
     protected function delete()
     {
-        $token = $this->VLE->getAuthValidator()->getTokenInformation();
+        $token = $this->VLE->getSessionValidator()->getTokenInformation();
         $this->data = $this->provider->logout($token);
         $this->authentication_required();
     }

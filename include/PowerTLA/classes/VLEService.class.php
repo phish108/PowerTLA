@@ -1,5 +1,4 @@
 <?php
-require_once("findVLE.php");
 
 class VLEService extends RESTling {
 
@@ -41,7 +40,7 @@ class VLEService extends RESTling {
         if (isset($vle)) {
             $this->VLE = $vle;
 
-            $validator = $vle->getAuthValidator();
+            $validator = $vle->getSessionValidator();
             if (isset($validator))
             {
                 $myheaders = getallheaders();
@@ -59,18 +58,6 @@ class VLEService extends RESTling {
                 $this->addValidator($validator);
             }
         }
-    }
-
-    /**
-     * @public
-     * @method getAuthValidator()
-     * @returns {OBJECT}
-     *
-     * The auth validator is used for the Authorization Headers.
-     */
-    public function getAuthValidator()
-    {
-        return null;
     }
 
     /**

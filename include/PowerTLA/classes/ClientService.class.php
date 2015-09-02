@@ -13,12 +13,12 @@ class ClientService extends VLEService
         $this->log("service started");
         $this->provider = $this->VLE->getClientProvider();
         // PUT is a public interface!
-        $this->VLE->getAuthValidator()->setMethods(array("put" => false));
+        $this->VLE->getSessionValidator()->setMethods(array("put" => false));
 
         // The client service forbids access using bearer or MAC tokens
         // NOTE: the reject is not performed for the PUT request.
-        $this->VLE->getAuthValidator()->rejectTokenType("Bearer");
-        $this->VLE->getAuthValidator()->rejectTokenType("MAC");
+        $this->VLE->getSessionValidator()->rejectTokenType("Bearer");
+        $this->VLE->getSessionValidator()->rejectTokenType("MAC");
     }
 
     /**
