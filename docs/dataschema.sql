@@ -23,7 +23,7 @@ create table if not exists pwrtla_usertokens(      -- used for public profile to
 );
 
 create table if not exists pwrtla_xapistatements ( -- XAPI LRS
-    id           VARCHAR(255) PRIMARY KEY,         -- statement id
+    uuid           VARCHAR(255) PRIMARY KEY,         -- statement id
     statement    TEXT NOT NULL,                    -- the actual statement JSON
     stored       INT NOT NULL,                     -- the timestamp of arrival
     tsyear       INT NOT NULL,                     -- stream partitioning
@@ -42,7 +42,7 @@ create table if not exists pwrtla_xapistatements ( -- XAPI LRS
 
 
 create table if not exists pwrtla_xapicontexts (   -- for fast context retrieval
-    id           varchar(255) not null,            -- reference to a LRS statement.id
+    uuid           varchar(255) not null,            -- reference to a LRS statement.id
     context_type varchar(255) not null,            -- the name of the context (e.g., "parent")
     context_id   varchar(255) not null             -- the IRI/UUID value of the context
 );
@@ -50,26 +50,13 @@ create table if not exists pwrtla_xapicontexts (   -- for fast context retrieval
 -- THE SETTINGS ARE STORED AS A SPECIAL DOCUMENT
 -- id = agent = agenthash = "PowerTLA Settings"
 create table if not exists pwrtla_xapidocuments ( -- XAPI Document Repository
-    id           VARCHAR(255) PRIMARY KEY,        -- document id
+    uuid           VARCHAR(255) PRIMARY KEY,        -- document id
     document     TEXT         NOT NULL,           -- the document JSON
     doctype      varchar(255) NOT NULL,           -- type in [agents_profile, actitites_profile, activities_state]
     agent        TEXT         NOT NULL,           -- the agent/actor JSON string
-    agentid      varchar(255) NOT NULL,           -- agent hash (for faster retrieval)
-    activityid   varchar(255),                    -- reference to a LRS statement.id
+    agent_id      varchar(255) NOT NULL,           -- agent hash (for faster retrieval)
+    activity_id   varchar(255),                    -- reference to a LRS statement.id
     stored       INT NOT NULL,                     -- implement since
     object_id    varchar(255),
     verb_id      varchar(255)
-);
-
--- HELPER RELATIONS FOR FILTERS
-create table if not exists pwrtla_xapifilterindex (
-    id           varchar(255) not null,            -- reference to a LRS statement.id
-    filter_id    varchar(255) not null,            -- reference to a xapi filter
-    propertyhash varchar(255)                      -- hash for the combined filter variables for the statement
-);
-
-create table if not exists pwrtla_xapifilters (
-    filter_id    varchar(255) primary key,         -- filter id
-    filter       text         not null,            -- the filter definition
-    created      int          not null
 );
