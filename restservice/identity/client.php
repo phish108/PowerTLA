@@ -15,6 +15,8 @@ while ($cwd != "/")
     $cwd = dirname($cwd);
 }
 
+require_once("findVLE.php");
+
 $service = new ClientService();
 
 $service->run();

@@ -1,14 +1,14 @@
 <?php
 
+include_once('RESTling/contrib/Restling.auto.php');
+include_once('PowerTLA.auto.php');
+
 function initCoreSystem($pwrtlaPath, $lmspath)
 {
-    set_include_path($pwrtlaPath . PATH_SEPARATOR .
-                     $lmspath   . PATH_SEPARATOR .
+    set_include_path($lmspath   . PATH_SEPARATOR .
                      get_include_path());
 
     // include PowerTLA's classes via their autoloaders
-    include_once('RESTling/contrib/Restling.auto.php');
-    include_once('PowerTLA/PowerTLA.auto.php');
 
     include_once("PowerTLA/PowerTLA.ini");
     date_default_timezone_set(TLA_TIMEZONE);
@@ -66,7 +66,7 @@ function findVLEInstance()
         // load the VLE specific SystemHandler class.
         require_once('PowerTLA/' . $result["lmstype"] . '/SystemHandler.class.php');
 
-        $vle  = new SystemHandler($vleinfo["lmspath"]);
+        $vle  = new SystemHandler($cwd);
         $vle->setGuestUser(TLA_GUESTUSER);
 
         if (!isset($vle))
