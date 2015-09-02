@@ -8,9 +8,9 @@ class CourseBroker extends Logger
 {
     private $iliasVersion;
 
-    public function __construct($iV)
+    public function __construct($system)
     {
-        $this->iliasVersion = $iV;
+        $this->iliasVersion = $system->getVersion();
     }
 
     public function getCourseList()
@@ -145,7 +145,7 @@ class CourseBroker extends Logger
                     case "file":
                     case "ass":
                         // Images or Files
-                        $type = "x-application/assest";
+                        $type = "x-application/asset";
                         if (array_search($type, $ctList) === FALSE)
                         {
                             array_push($ctList, $type);

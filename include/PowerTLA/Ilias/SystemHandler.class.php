@@ -2,11 +2,7 @@
 
 class SystemHandler extends VLEHandler
 {
-    protected $pluginAdmin;
-    protected $plugins;
-
     protected $iliasVersion;
-    protected $validator;
 
     protected function initLMS($tp)
     {
@@ -19,6 +15,7 @@ class SystemHandler extends VLEHandler
 
             $strVersionInit = 'tla/include/PowerTLA/Ilias/ilRESTInitialisation.' . $vstring . '.php';
 
+            $this->iliasVersion  = $aVersion[0] . '.' . $aVersion[1];
             if (file_exists($tp.'/'.$strVersionInit) )
             {
                 // $this->log("ilias file exists");
@@ -54,33 +51,15 @@ class SystemHandler extends VLEHandler
 
         // assume that PowerTLA lives in the same include path.
         // We require a configuration variable that informs us about the LMS include path.
-        if (self::init($tp))
-        {
-            parent::__construct($tp, 'Ilias');
 
-            $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
-            $this->iliasVersion  = $aVersion[0] . '.' . $aVersion[1];
-            // now we can initialize the system internals
-            // We should always avoid to fall back into Ilias' GLOBAL mode
-            global $ilUser, $ilDB;
+        parent::__construct($tp, 'Ilias');
 
-            $this->dbhandler    = $ilDB;
-            $this->user         = $ilUser;
 
-            //$this->pluginAdmin  = $GLOBALS['ilPluginAdmin'];
-            //$this->log("ilias init done");
-        }
     }
 
-    public function isPluginActive($pName)
+    public function getVersion()
     {
-        if (!empty($pName) && array_key_exists($pName, $this->plugins))
-        {
-            return $this->pluginAdmin->isActive(IL_COMP_SERVICE,
-                                                $this->plugins[$pName][0],
-                                                $this->plugins[$pName][1],
-                                                $this->plugins[$pName][2]);
-        }
+        return $this->iliasVersion;
     }
 
     public function setGuestUser($username)

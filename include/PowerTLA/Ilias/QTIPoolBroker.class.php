@@ -11,9 +11,9 @@ class QTIPoolBroker extends Logger
 {
     private $iliasVersion;
 
-    public function __construct($iV)
+    public function __construct($system)
     {
-        $this->iliasVersion = $iV;
+        $this->iliasVersion = $system->getVersion();
     }
 
     public function getPoolList($CourseID)
