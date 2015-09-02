@@ -29,7 +29,6 @@ if (!isset($service))
     }
 
     require_once("findVLE.php");
-
     $service = getVLEInstanceInformation($rwd);
 }
 

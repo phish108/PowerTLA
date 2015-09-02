@@ -15,20 +15,8 @@ while ($cwd != "/")
     $cwd = dirname($cwd);
 }
 
-require_once("findVLE.php");
+$service = new CourseService();
 
+$service->run();
 
-$vleapi = detectLMS();
-if ($vleapi) {
-    $service = new CourseService();
-
-    $service->setVLE($vleapi);
-
-    // CORS should be OK for the testing.
-    // In production code we need to have additional access control for CORS Sites
-    $service->allowCORS();
-    $service->addCORSHost('*', array('GET', 'POST', 'PUT', 'DELETE'));
-
-    $service->run();
-}
 ?>

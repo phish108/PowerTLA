@@ -1,7 +1,5 @@
 <?php
-
 $localpath = "restservice";
-
 if (!isset($pathprefix))
 {
     $pathprefix = "";
@@ -12,10 +10,7 @@ else {
 
 if (!isset($service))
 {
-    // find vle instance to load the metadata
     $rwd = dirname($_SERVER["REQUEST_URI"]);
-
-    $ipath = "/include";
     $cwd = dirname(__FILE__);
 
     $ipath = "/include";
@@ -33,7 +28,6 @@ if (!isset($service))
     }
 
     require_once("findVLE.php");
-
     $service = getVLEInstanceInformation($rwd);
 }
 

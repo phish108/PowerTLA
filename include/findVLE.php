@@ -65,6 +65,17 @@ function findVLEInstance()
 
         // load the VLE specific SystemHandler class.
         require_once('PowerTLA/' . $result["lmstype"] . '/SystemHandler.class.php');
+
+        $vle  = new SystemHandler($vleinfo["lmspath"]);
+        $vle->setGuestUser(TLA_GUESTUSER);
+
+        if (!isset($vle))
+        {
+            initError("Cannot initialize Virtual Learning Environment");
+        }
+        else {
+            $result["vle"] = $vle;
+        }
     }
     else
     {
@@ -87,18 +98,10 @@ function detectLMS()
 {
     $vle      = null;
     $vleinfo  = findVLEInstance();
-
     if ($vleinfo)
     {
-        $vle  = new SystemHandler($vleinfo["lmspath"]);
-        $vle->setGuestUser(TLA_GUESTUSER);
-
-        if (!isset($vle))
-        {
-            initError("Cannot initialize Virtual Learning Environment");
-        }
+        $vle = $vleinfo["vle"];
     }
-
     return $vle;
 }
 
@@ -107,9 +110,9 @@ function getVLEInstanceInformation($path)
     $iInfo    = null;
     $vleinfo  = findVLEInstance();
 
-    if ($vleinfo)
+    if ($vleinfo && $vleinfo["vle"])
     {
-        $iInfo = SystemHandler::apiDefinition($vleinfo["lmspath"], $path);
+        $iInfo =$vleinfo["vle"]->apiDefinition($path);
 
         if (!isset($iInfo))
         {

@@ -1,4 +1,5 @@
 <?php
+require_once("findVLE.php");
 
 class VLEService extends RESTling {
 
@@ -7,9 +8,6 @@ class VLEService extends RESTling {
      *
      */
     public    $VLE;
-    protected $dbh;
-
-    protected $pluginList;
 
     public static function apiDefinition($prefix, $name, $link)
     {
@@ -25,12 +23,21 @@ class VLEService extends RESTling {
     public function __construct()
     {
         parent::__construct();
+        $this->setVLE();
 
-        $this->pluginList = array(); // setthe the plugins to test
+        // CORS should be OK for the testing.
+        // In production code we need to have additional access control
+        // for CORS Sites
+
+        // $service->allowCORS();
+        // $service->addCORSHost('*', array('GET', 'POST', 'PUT'));
+
     }
 
-    public function setVLE($vle)
+    public function setVLE()
     {
+        $vle = detectLMS();
+
         if (isset($vle)) {
             $this->VLE = $vle;
 
@@ -73,7 +80,7 @@ class VLEService extends RESTling {
     {
         $this->response_type = "json";
 
-        if (!$this->dbh && !$this->VLE) {
+        if (!$this->VLE) {
             $this->status = RESTling::UNINITIALIZED;
         }
         else {

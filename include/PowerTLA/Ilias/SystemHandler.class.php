@@ -8,11 +8,8 @@ class SystemHandler extends VLEHandler
     protected $iliasVersion;
     protected $validator;
 
-    public static function init($tp)
+    protected function initLMS($tp)
     {
-
-        error_log($tp);
-        $retval = FALSE;
         include_once($tp . "/include/inc.ilias_version.php");
 
         $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
@@ -33,68 +30,21 @@ class SystemHandler extends VLEHandler
                         $ilInit = new ilRESTInitialisation();
                         $GLOBALS['ilInit'] = $ilInit;
                         $ilInit->initILIAS("rest");
-                        $retval = TRUE;
                         break;
                     case '4.3':
                         ilRESTInitialisation::initIlias(); // why oh why?!?
-                        $retval = TRUE;
                         break;
                     case '4.4':
                     case '5.0':
                         ilRESTInitialisation::initILIAS(); // fake OOP again,
                                                            // but now all CAPS?
-                        $retval = TRUE;
                         break;
                     default:
+                        $this->fatal("Unsupported Ilias Version " . $vstring);
                         break;
                 }
             }
         }
-        return $retval;
-    }
-
-    public static function apiDefinition($tp, $cp)
-    {
-        $retval = null;
-
-        if (self::init($tp))
-        {
-            global $ilClientIniFile;
-
-            $servername = $ilClientIniFile->readVariable('client',   'description');
-            $lang =       $ilClientIniFile->readVariable('language', 'default');
-
-            $reqpath = $_SERVER["REQUEST_URI"];
-
-            // get rid of any query string garbage
-            $reqpath = preg_replace('/\?.*$/',"", $reqpath);
-
-            // get rid of the rsd section
-            $reqpath = preg_replace('/\/[\w\d]+\.php$/',"", $reqpath);
-
-            // strip the tla root
-            $rcp = preg_replace('/\//', '\\/', $cp);
-            $reqpath = preg_replace('/' . $rcp . '\/?$/',"", $reqpath);
-
-            $requrl = "http";
-            $requrl .= !empty($_SERVER["HTTPS"]) ? "s://" : "://";
-            $requrl .= $_SERVER["SERVER_NAME"];
-            $requrl .= $reqpath;
-
-            $retval = array(
-                "engine" => array(
-                    "version" => ILIAS_VERSION_NUMERIC,
-                    "type"=> "ILIAS",
-                    "link"=> $requrl, // official link
-                    "servicelink" => $requrl . $cp . "/"
-                ),
-                "language" => $lang,
-                "tlaversion" => "0.6",
-                "logolink" => $requrl . TLA_ICON,
-                "name"     => $servername
-            );
-        }
-        return $retval;
     }
 
     public function __construct($tp)
@@ -106,7 +56,7 @@ class SystemHandler extends VLEHandler
         // We require a configuration variable that informs us about the LMS include path.
         if (self::init($tp))
         {
-            parent::__construct($tp);
+            parent::__construct($tp, 'Ilias');
 
             $aVersion   = explode('.', ILIAS_VERSION_NUMERIC);
             $this->iliasVersion  = $aVersion[0] . '.' . $aVersion[1];
@@ -154,15 +104,6 @@ class SystemHandler extends VLEHandler
         return $ilUser->getId();
     }
 
-    public function getAuthValidator()
-    {
-        if (!isset($this->validator))
-        {
-            require_once 'PowerTLA/Ilias/SessionValidator.class.php';
-            $this->validator = new SessionValidator();
-        }
-        return $this->validator;
-    }
 
     public function isGuestUser()
     {
@@ -178,30 +119,6 @@ class SystemHandler extends VLEHandler
         }
 
         return TRUE;
-    }
-
-    public function getCourseBroker()
-    {
-        require_once 'PowerTLA/Ilias/CourseBroker.class.php';
-        return new CourseBroker($this->iliasVersion);
-    }
-
-    public function getQTIPoolBroker()
-    {
-        require_once 'PowerTLA/Ilias/QTIPoolBroker.class.php';
-        return new QTIPoolBroker($this->iliasVersion);
-    }
-
-    public function getClientProvider()
-    {
-        require_once 'PowerTLA/Ilias/ClientProvider.class.php';
-        return new ClientProvider();
-    }
-
-    public function getIdentityProvider()
-    {
-        require_once 'PowerTLA/Ilias/IdentityProvider.class.php';
-        return new IdentityProvider($this->guestuserid);
     }
 
     public function getXAPIStatement()

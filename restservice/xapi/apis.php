@@ -10,7 +10,6 @@ else {
 
 if (!isset($service))
 {
-    // find ilias instance to load the metadata
     $rwd = dirname($_SERVER["REQUEST_URI"]);
     $cwd = dirname(__FILE__);
 
