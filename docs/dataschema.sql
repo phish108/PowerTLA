@@ -26,6 +26,16 @@ create table if not exists pwrtla_xapistatements ( -- XAPI LRS
     id           VARCHAR(255) PRIMARY KEY,         -- statement id
     statement    TEXT NOT NULL,                    -- the actual statement JSON
     stored       INT NOT NULL,                     -- the timestamp of arrival
+    tsyear       INT NOT NULL,                     -- stream partitioning
+    tsmonth      INT NOT NULL,
+    tsday        INT NOT NULL,
+    tshour       INT NOT NULL,                     -- clustering
+    tsminute     INT NOT NULL,
+    verb_id      varchar(255),
+    agent_id     varchar(255),
+    object_id    varchar(255),
+    score        INT,
+    duration     INT,                              -- stats
     user_id      INT NOT NULL,                     -- the internal user id of the actor
     registration varchar(255)                      -- registration context (if set)
 );
@@ -44,8 +54,11 @@ create table if not exists pwrtla_xapidocuments ( -- XAPI Document Repository
     document     TEXT         NOT NULL,           -- the document JSON
     doctype      varchar(255) NOT NULL,           -- type in [agents_profile, actitites_profile, activities_state]
     agent        TEXT         NOT NULL,           -- the agent/actor JSON string
-    agenthash    varchar(255) NOT NULL,           -- agent hash (for faster retrieval)
-    activityid   varchar(255)                     -- reference to a LRS statement.id
+    agentid      varchar(255) NOT NULL,           -- agent hash (for faster retrieval)
+    activityid   varchar(255),                    -- reference to a LRS statement.id
+    stored       INT NOT NULL,                     -- implement since
+    object_id    varchar(255),
+    verb_id      varchar(255)
 );
 
 -- HELPER RELATIONS FOR FILTERS

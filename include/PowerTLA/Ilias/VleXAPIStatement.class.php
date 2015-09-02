@@ -25,15 +25,95 @@ class VleXAPIStatement extends XAPIStatement
         return false;
     }
 
+    // generalise the processing into parent class.
     protected function storeStatement()
     {
         global $ilDB;
-        $ilDB->insert("pwrtla_xapistatements", array(
-            "id" => array("text", $this->statement["id"]),
+
+        $dbstatement = array(
+            "id" => array("text", $this->statement["ID"]),
             "statement"  => array("text", json_encode($this->statement)),
-            "stored"   => array("text", $this->stored),
             "user_id"     => array("text", $this->userid)
-        ));
+        );
+
+        // note the stored time contains an ISO String
+
+        // get the timestamp
+        $ts = $this->statement["timestamp"];
+        if (isset($ts) && !empty($ts))
+        {
+            $aTS = preg_split('/[\w:-]+/ ');
+            // pop seconds
+            array_pop($aTS);
+
+            $dbstatement["year"]    = $aTS[0];
+            $dbstatement["month"]   = $aTS[0] . $aTS[1];
+            $dbstatement["day"]     = $aTS[0] . $aTS[1] . $aTS[2];
+            $dbstatement["hour"]    = $aTS[3];
+            $dbstatement["minute"]  = $aTS[4];
+        }
+
+        $ts = $this->statement["stored"];
+        if (isset($ts) && !empty($ts))
+        {
+            $aTS = preg_split('/[\w:-.]+/ ');
+            // pop milliseconds
+            array_pop($aTS);
+            $dbstatement["stored"]    = implode("", $aTS);
+        }
+
+        $dbstatement["verb_id"] = $this->statement["verb"]["id"];
+
+        if (isset($this->statement["object"]))
+        {
+            $dbstatement["object_id"]  = $this->statement["object"]["id"];
+        }
+
+        if (isset($this->statement["actor"]))
+        {
+            if (isset($this->statement["actor"]["mbox"]))
+            {
+                $dbstatement["agent_id"] = $this->statement["actor"]["mbox"];
+            }
+            else if (isset($this->statement["actor"]["mboxsha1hash"]))
+            {
+                $dbstatement["agent_id"] = $this->statement["actor"]["mboxsha1hash"];
+            }
+            else if (isset($this->statement["actor"]["openid"]))
+            {
+                $dbstatement["agent_id"] = $this->statement["actor"]["openid"];
+            }
+
+            // TODO: implement all the other ID variants.
+        }
+
+        if (isset($this->statement["result"]))
+        {
+            if (isset($this->statement["result"]["score"]))
+            {
+                $dbstatement["score"] = $this->statement["result"]["score"];
+            }
+
+            if (isset($this->statement["result"]["duration"]))
+            {
+                $duration = $this->statement["result"]["duration"];
+                $nDuration = 0;
+                // process the duration string
+
+                $dbstatement["duration"] = $nDuration;
+            }
+        }
+
+        if (isset($this->statement["context"]))
+        {
+            if (isset($this->statement["context"]["registration"]))
+            {
+                $dbstatement["registration"] = $this->statement["context"]["registration"];
+            }
+
+        }
+
+        $ilDB->insert("pwrtla_xapistatements", $dbstatement);
     }
 
     public function validateNewId()
