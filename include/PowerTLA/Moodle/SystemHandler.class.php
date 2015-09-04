@@ -16,8 +16,6 @@ class SystemHandler extends VLEHandler
         require('config.php');
         // tons of black magic is happening now
     }
-
-
 }
 
 ?>

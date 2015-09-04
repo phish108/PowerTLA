@@ -23,23 +23,23 @@ create table if not exists pwrtla_usertokens(      -- used for public profile to
 );
 
 create table if not exists pwrtla_xapistatements ( -- XAPI LRS
-    uuid           VARCHAR(255) PRIMARY KEY,         -- statement id
+    uuid         VARCHAR(255) PRIMARY KEY,         -- statement id
     statement    TEXT NOT NULL,                    -- the actual statement JSON
     stored       INT NOT NULL,                     -- the timestamp of arrival
+    voided       varchar(255),                     -- a reference to the voiding statement
     tsyear       INT NOT NULL,                     -- stream partitioning
     tsmonth      INT NOT NULL,
     tsday        INT NOT NULL,
     tshour       INT NOT NULL,                     -- clustering
     tsminute     INT NOT NULL,
     verb_id      varchar(255),
-    agent_id     varchar(255),
+    actor_id     varchar(255),
     object_id    varchar(255),
     score        INT,
     duration     INT,                              -- stats
     user_id      INT NOT NULL,                     -- the internal user id of the actor
     registration varchar(255)                      -- registration context (if set)
 );
-
 
 create table if not exists pwrtla_xapicontexts (   -- for fast context retrieval
     uuid           varchar(255) not null,            -- reference to a LRS statement.id
@@ -55,8 +55,9 @@ create table if not exists pwrtla_xapidocuments ( -- XAPI Document Repository
     doctype      varchar(255) NOT NULL,           -- type in [agents_profile, actitites_profile, activities_state]
     agent        TEXT         NOT NULL,           -- the agent/actor JSON string
     agent_id      varchar(255) NOT NULL,           -- agent hash (for faster retrieval)
-    activity_id   varchar(255),                    -- reference to a LRS statement.id
+    statement_id  varchar(255),                    -- reference to a LRS statement.id
     stored       INT NOT NULL,                     -- implement since
     object_id    varchar(255),
-    verb_id      varchar(255)
+    verb_id      varchar(255),
+    registration: varchar(255)
 );

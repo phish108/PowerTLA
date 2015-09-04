@@ -150,17 +150,6 @@ class VLEHandler extends Logger
         return $this->handler->client;
     }
 
-    public function getXAPIStatement()
-    {
-
-        return new XAPIStatement();
-    }
-
-    public function getXAPIDocument()
-    {
-        return new XAPIDocument;
-    }
-
     public function setGuestUser($username)
     {
         if (isset($username) && !empty($username))

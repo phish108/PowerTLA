@@ -59,11 +59,12 @@
         <FIELD NAME="tsmonth" TYPE="int" LENGTH="16" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="tsday" TYPE="int" LENGTH="16" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="verb_id" TYPE="char" LENGTH="1024" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="agent_id" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="actor_id" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="object_id" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="score" TYPE="int" LENGTH="16" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="dureation" TYPE="int" LENGTH="16" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="user_id" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="voided" TYPE="text" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="registration" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
@@ -79,9 +80,10 @@
         <FIELD NAME="agent" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="agent_id" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="stored" TYPE="int" LENGTH="16" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="activity_id" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="statement_id" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="verb_id" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="object_id" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="registration" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
