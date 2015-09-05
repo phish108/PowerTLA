@@ -20,7 +20,7 @@ class PluginConfig extends Logger
 
         // strip the tla root
         $rcp = preg_replace('/\//', '\\/', $tlapath);
-        $reqpath = preg_replace('/' . $rcp . '\/?$/',"", $reqpath);
+        $reqpath = preg_replace('/' . $rcp . '$/',"", $reqpath);
 
         $requrl = "http";
         $requrl .= !empty($_SERVER["HTTPS"]) ? "s://" : "://";
@@ -32,7 +32,7 @@ class PluginConfig extends Logger
                 "version" => ILIAS_VERSION_NUMERIC,
                 "type"=> "ILIAS",
                 "link"=> $requrl, // official link
-                "servicelink" => $requrl . $tlapath
+                "servicelink" => $requrl . $tlapath . "/"
             ),
             "language" => $lang,
             "tlaversion" => "0.6",
