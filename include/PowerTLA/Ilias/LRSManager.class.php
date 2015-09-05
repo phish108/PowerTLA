@@ -8,6 +8,28 @@ class LRSManager extends LRSBase
 {
     private $db;
 
+    static public $types = array(
+        "uuid"          => "text",
+        "statement_id"  => "text",
+        "document"      => "text",
+        "doctype"       => "text",
+        "statement"     => "text",
+        "object_id"     => "text",
+        "agent"         => "text",
+        "agent_id"      => "text",
+        "registration"  => "text",
+        "user_id"       => "integer",
+        "stored"        => "integer",
+        "duration"      => "integer",
+        "score"         => "integer",
+        "verb_id"       => "text",
+        "tsyear"        => "integer",
+        "tsmonth"       => "integer",
+        "tsday"         => "integer",
+        "tshour"        => "integer",
+        "tsminute"      => "integer"
+    );
+
     public function __construct()
     {
         global $ilDB;
@@ -75,7 +97,7 @@ class LRSManager extends LRSBase
         if (isset($uuid) && !empty($uuid))
         {
             $r = $this->db->queryF("SELECT statement FROM pwrtla_xapistatements WHERE uuid = %s",
-                                   array(self::$StatementTypes["uuid"]),
+                                   array("text"),
                                    array($uuid));
 
             if ($data = $this->db->fetchAssoc($r))
@@ -91,9 +113,9 @@ class LRSManager extends LRSBase
         $dbstatement = array();
         foreach ($aLRSStatement as $col => $val)
         {
-            if (array_key_exists($col, self::$StatementTypes))
+            if (array_key_exists($col, self::$types))
             {
-                $dbstatement[$col] = array(self::$StatementTypes[$col],
+                $dbstatement[$col] = array(self::$types[$col],
                                            $aLRSStatement[$col]);
             }
         }
@@ -111,9 +133,9 @@ class LRSManager extends LRSBase
             $dbset   = array();
             foreach ($aLRSStatement as $col => $val)
             {
-                if (array_key_exists($col, self::$StatementTypes))
+                if (array_key_exists($col, self::$types))
                 {
-                    $dbtypes[] = self::$StatementTypes[$col];
+                    $dbtypes[] = self::$types[$col];
                     $dbvals[]  = $aLRSStatement[$col];
                     $dbset[]   = $col . " = %s";
                 }
@@ -134,17 +156,18 @@ class LRSManager extends LRSBase
         {
             $uuid   = $this->quote($uuid);
             $vuuid  = $this->quote($vuuid);
-            $sql = "UPDATE TABLE pwrtla_xapistatements SET voided = " . $vuuid . " WHERE uuid = " . $uuid;
+            $sql = "UPDATE TABLE pwrtla_xapistatements SET voided = %s  WHERE uuid = %s";
 
-            $this->db->manipulateF($sql);
+            $this->db->manipulateF($sql,
+                                   array("text", "text"),
+                                   array($vuuid, $uuid));
         }
     }
 
     protected function deleteStatement($uuid)
     {
-        $sql = "DELETE FROM pwrtla_xapistatements WHERE uuid = "
-             . $this->quote($uuid);
-        $this->db->manipulateF($sql);
+        $sql = "DELETE FROM pwrtla_xapistatements WHERE uuid = %s";
+        $this->db->manipulateF($sql, array("text"), array($uuid));
     }
 
     protected function readActivityStream($aOptions = [])
@@ -158,7 +181,7 @@ class LRSManager extends LRSBase
             $sql .= "WHERE voided is null AND " . $where;
         }
 
-        $r = $this->db->queryF($sql);
+        $r = $this->db->queryF($sql, array(), array());
         while ($data = $this->db->fetchAssoc($r))
         {
             // fixme: use a callback
@@ -177,7 +200,7 @@ class LRSManager extends LRSBase
             $sql .= "WHERE voided is null AND " . $where;
         }
 
-        $r = $this->db->queryF($sql);
+        $r = $this->db->queryF($sql, array(), array());
         while ($data = $this->db->fetchAssoc($r))
         {
             call_user_func($cb, $data["statement"]);
@@ -196,7 +219,7 @@ class LRSManager extends LRSBase
         if (isset($uuid) && !empty($uuid))
         {
             $r = $this->db->queryF("SELECT statement FROM pwrtla_xapidocuments WHERE uuid = %s",
-                                   array(self::$DocumentTypes["uuid"]),
+                                   array(self::$types["uuid"]),
                                    array($uuid));
 
             if ($data = $this->db->fetchAssoc($r))
@@ -218,9 +241,9 @@ class LRSManager extends LRSBase
 
         foreach ($aOptions as $col => $val)
         {
-            if (array_key_exists($col, self::$DocumentTypes))
+            if (array_key_exists($col, self::$types))
             {
-                $dbstatement[$col] = array(self::$DocumentTypes[$col],
+                $dbstatement[$col] = array(self::$types[$col],
                                            $aOptions[$col]);
             }
         }
@@ -235,7 +258,7 @@ class LRSManager extends LRSBase
         {
             $aDocs = array();
             $sql = "SELECT document FROM pwrtla_xapidocuments WHERE " . $where;
-            $r = $this->db->queryF($sql);
+            $r = $this->db->queryF($sql, array(), array());
             while ($data = $this->db->fetchAssoc($r))
             {
                 // fixme: use a callback
@@ -253,7 +276,7 @@ class LRSManager extends LRSBase
         {
             $sql = "UPDATE TABLE pwrtla_xapidocument SET document = " . $dbDoc . " WHERE ";
             $sql .= $where;
-            $this->db->manipulateF($sql);
+            $this->db->manipulateF($sql , array(), array());
         }
     }
 
@@ -263,7 +286,7 @@ class LRSManager extends LRSBase
         if (!isset($where) && !empty($where))
         {
             $sql = "DELETE FROM pwrtla_xapidocument WHERE " . $where;
-            $this->db->manipulateF($sql);
+            $this->db->manipulateF($sql, array(), array());
         }
     }
 }

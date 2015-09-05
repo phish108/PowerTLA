@@ -267,7 +267,17 @@ abstract class LRSBase extends Logger
                     {
                         $lrsOpts["stored"] = array();
                     }
-                    $lrsOpts["stored"][] = array($value);
+                    // strip characters, dashes and colons from the timestamp
+                    $ats = preg_split("/\D/", $value);
+
+                    array_splice($ats, 5);
+
+                    $value = implode("", $ats);
+                    if (!array_key_exists("since", $getOpts))
+                    {
+                        $lrsOpts[] = 0;
+                    }
+                    $lrsOpts["stored"][] = $value;
                     break;
                 case "agent":
                     $jV = json_decode($value, true);
@@ -392,10 +402,10 @@ abstract class LRSBase extends Logger
                         $statement["timestamp"] = $ts;
                     }
 
-                    $aTS = preg_split('/[\w:-]+/ ', $ts);
+                    $aTS = preg_split('/\D/ ', $ts);
 
                     // pop seconds
-                    array_pop($aTS);
+                    array_splice($aTS, 5);
 
                     // Check if this is a voiding statement
 
@@ -429,16 +439,16 @@ abstract class LRSBase extends Logger
                         $lrsStatement["duration"] = $statement["result"]["duration"];
                     }
                     $this->addStatement($lrsStatement);
+
                     if ($lrsStatement["verb_id"] == LRSBase::VERB_VOIDED)
                     {
+                        $this->log("void statement " . $uuid);
                         $this->voidStatement($lrsStatement["object_id"], $uuid);
                     }
                 }
             }
         }
     }
-
-
 
     /**
      * PUT statement stream
@@ -447,8 +457,10 @@ abstract class LRSBase extends Logger
     {
         if (isset($aStream) && gettype($aStream) == "array")
         {
+            $this->log("process " . count($aStrem) . " statements");
             foreach ($aStream as $st)
             {
+                $this->log("handle one statement " . $st["id"]);
                 $this->handleStatement($st);
             }
         }
@@ -473,7 +485,7 @@ abstract class LRSBase extends Logger
     }
 
     /**
-     * GET one Callback
+     * GET one
      */
     public function getAction($uuid)
     {
@@ -498,10 +510,10 @@ abstract class LRSBase extends Logger
                 $ts = $this->generateTimestamp();
                 $statement["stored"]    = ts;
 
-                $aTS = preg_split('/[\w:-]+/ ', $ts);
+                $aTS = preg_split('/\D/ ', $ts);
 
                 // pop seconds
-                array_pop($aTS);
+                array_splice($aTS, 5);
 
                 $lrsStatement = array();
 
@@ -544,9 +556,14 @@ abstract class LRSBase extends Logger
         $opts = $this->translateGetOptions($getOptions);
     }
 
-    public function getDocument($uuid)
+    public function getDocument($getOptions)
     {
-        return $this->findDocumentByUUID($uuid);
+        $opts = $this->translateGetOptions($getOptions);
+        $dl = $this->readDocument($opts);
+        if (count($dl) == 1) {
+            return $dl[0];
+        }
+        return null;
     }
 
     public function storeDocument($doc, $getOptions)
@@ -559,8 +576,10 @@ abstract class LRSBase extends Logger
                 count($oDoc) == 1)
             {
                 $this->updateDocument($doc, $opts);
+                return true;
             }
         }
+        return false;
     }
 
     public function createDocument($doc, $getOptions)
@@ -574,8 +593,10 @@ abstract class LRSBase extends Logger
                 $uuid = $this->db->generateID();
                 $opts["uuid"] = $uuid;
                 $this->addDocument($doc, $opts);
+                return true;
             }
         }
+        return false;
     }
 
     public function removeDocument($getOptions)
@@ -587,8 +608,10 @@ abstract class LRSBase extends Logger
             if (isset($oDoc) && count($oDoc))
             {
                 $this->deleteDocument($opts);
+                return true;
             }
         }
+        return false;
     }
 }
 ?>
