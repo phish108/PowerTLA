@@ -16,13 +16,13 @@ class LRSManager extends LRSBase
         "statement"     => "text",
         "object_id"     => "text",
         "agent"         => "text",
-        "agent_id"      => "text",
+        "actor_id"      => "text",
         "registration"  => "text",
+        "verb_id"       => "text",
         "user_id"       => "integer",
         "stored"        => "integer",
         "duration"      => "integer",
         "score"         => "integer",
-        "verb_id"       => "text",
         "tsyear"        => "integer",
         "tsmonth"       => "integer",
         "tsday"         => "integer",
@@ -41,7 +41,6 @@ class LRSManager extends LRSBase
      */
     protected function getActorUserID($actor)
     {
-        $this->mark();
         if (array_key_exists("mbox", $actor))
         {
             $email = array_pop(explode(":", $actor["mbox"]));
@@ -56,7 +55,6 @@ class LRSManager extends LRSBase
                 {
                     return $data["usr_id"];
                 }
-                $this->log("failed to load by mail");
             }
         }
 
@@ -67,7 +65,7 @@ class LRSManager extends LRSBase
 
             // TODO we MUST check if the URL belongs to us, too
 
-            $itoken = array_pop(explode("/", $array["openid"]));
+            $itoken = array_pop(explode("/", $actor["openid"]));
         }
 
         if (array_key_exists("account", $actor) &&

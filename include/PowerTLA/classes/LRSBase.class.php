@@ -413,13 +413,13 @@ abstract class LRSBase extends Logger
                     $lrsStatement["stored"]       = implode("", $aTS);
                     $lrsStatement["uuid"]         = $uuid;
 
-                    $lrsStatement["year"]         = $aTS[0];
-                    $lrsStatement["day"]          = $aTS[3];
-                    $lrsStatement["minute"]       = $aTS[4];
-                    $lrsStatement["month"]        = $aTS[0] . $aTS[1];
-                    $lrsStatement["day"]          = $aTS[0] . $aTS[1] . $aTS[2];
+                    $lrsStatement["tsyear"]         = $aTS[0];
+                    $lrsStatement["tshour"]         = $aTS[3];
+                    $lrsStatement["tsminute"]       = $aTS[4];
+                    $lrsStatement["tsmonth"]        = $aTS[0] . $aTS[1];
+                    $lrsStatement["tsday"]          = $aTS[0] . $aTS[1] . $aTS[2];
 
-                    $lrsStatement["agent_id"]     = $actorid;
+                    $lrsStatement["actor_id"]     = $actorid;
                     $lrsStatement["user_id"]      = $userid;
                     $lrsStatement["verb_id"]      = $statement["verb"]["id"];
                     $lrsStatement["object_id"]    = $statement["object"]["id"];
@@ -508,7 +508,7 @@ abstract class LRSBase extends Logger
             {
                 // only extend without touching the integrety of the object
                 $ts = $this->generateTimestamp();
-                $statement["stored"]    = ts;
+                $statement["stored"]    = $ts;
 
                 $aTS = preg_split('/\D/ ', $ts);
 
