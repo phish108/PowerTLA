@@ -121,7 +121,6 @@ class LRSManager extends LRSBase
             }
         }
 
-        $this->log("insert xapi statement " . json_encode($dbstatement));
         $this->db->insert("pwrtla_xapistatements", $dbstatement);
     }
 
