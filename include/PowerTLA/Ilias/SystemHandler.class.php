@@ -53,8 +53,6 @@ class SystemHandler extends VLEHandler
         // We require a configuration variable that informs us about the LMS include path.
 
         parent::__construct($tp, 'Ilias');
-
-
     }
 
     public function getVersion()
@@ -83,7 +81,6 @@ class SystemHandler extends VLEHandler
         return $ilUser->getId();
     }
 
-
     public function isGuestUser()
     {
         global $ilUser;
@@ -98,18 +95,6 @@ class SystemHandler extends VLEHandler
         }
 
         return TRUE;
-    }
-
-    public function getXAPIStatement()
-    {
-        require_once 'PowerTLA/Ilias/VleXAPIStatement.class.php';
-        return new VleXAPIStatement();
-    }
-
-    public function getXAPIDocument()
-    {
-        require_once 'PowerTLA/Ilias/VleXAPIDocument.class.php';
-        return new VleXAPIDocument();
     }
 }
 
