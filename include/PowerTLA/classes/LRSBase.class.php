@@ -445,9 +445,11 @@ abstract class LRSBase extends Logger
                         $this->log("void statement " . $uuid);
                         $this->voidStatement($lrsStatement["object_id"], $uuid);
                     }
+                    return $uuid;
                 }
             }
         }
+        return null;
     }
 
     /**
@@ -455,15 +457,22 @@ abstract class LRSBase extends Logger
      */
     public function processStatementStream($aStream)
     {
+        $retval = array();
         if (isset($aStream) && gettype($aStream) == "array")
         {
             $this->log("process " . count($aStream) . " statements");
+            $retval = array();
             foreach ($aStream as $st)
             {
                 $this->log("handle one statement " . $st["id"]);
-                $this->handleStatement($st);
+                $uuid = $this->handleStatement($st);
+                if (isset($uuid))
+                {
+                    $retval[] = $uuid;
+                }
             }
         }
+        return $retval;
     }
 
     /**

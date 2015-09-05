@@ -181,7 +181,7 @@ class XAPIService extends VLEService
 
     protected function put_statements()
     {
-        $this->lrs->handleStatement($this->inputData);
+        $this->data = $this->lrs->handleStatement($this->inputData);
     }
 
     protected function post_statements()
@@ -193,7 +193,7 @@ class XAPIService extends VLEService
         else
         {
             $this->log("process incoming stream");
-            $this->lrs->processStatementStream($this->inputData);
+            $this->data = $this->lrs->processStatementStream($this->inputData);
         }
     }
 
