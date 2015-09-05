@@ -166,20 +166,18 @@ class IdentityProvider extends Logger
         );
     }
 
-    private function createIdentityToken()
+    private function createIdentityToken($userid)
     {
-        global $ilUser, $ilDB;
+        global $ilDB;
 
-        $tid = sha1($ilUser->getLogin() . $this->randomString(10));
-        $startid = rand(0, strlen($tid) - 7);
-        $tokenid  = substr($tid, $startid, 7);
+        $tokenid  = $this->randomString(7);
 
         $ilDB->insert("pwrtla_usertokens", array(
-            "user_id"    => array("integer", $ilUser->getId()),
+            "user_id"    => array("integer", $userid),
             "user_token" => array("text", $tokenid)
         ));
 
-        $this->idToken = $tokenid;
+        return $tokenid;
     }
 
     private function checkAuthPin($expirytime=0) {
@@ -301,19 +299,11 @@ class IdentityProvider extends Logger
                 else
                 {
                     // create a new userToken
-                    $this->createIdentityToken();
+                    $this->idToken = $this->createIdentityToken($ilUser->getId());
                 }
             }
-
-            $retval = array(
-                "name"       => $ilUser->getFullname(),
-                "id"         => $this->idToken,
-                "login"      => $ilUser->getLogin(),
-                "email"      => $ilUser->getEmail(),
-                "givenname"  => $ilUser->getFirstName(),
-                "familyname" => $ilUser->getLastName(),
-                "language"   => $ilUser->getLanguage()
-            );
+            $retval = $this->makeUserInfo($ilUser,
+                                          array("token", $this->idToken));
         }
 
         return $retval;
@@ -356,6 +346,160 @@ class IdentityProvider extends Logger
         }
 
         return $retval;
+    }
+
+    /**
+     * Load function to handle Identities of *different* users
+     */
+    public function findUserByID($userid)
+    {
+        $retval = null;
+        // first verify the userid
+        $oUser = new ilObjUser($userid);
+        $oUser->read();
+
+        if ($oUser->getLogin())
+        {
+            $tData = $this->loadUserToken($userid);
+            $retval = $this->makeUserInfo($oUser, $tData);
+        }
+        return $retval;
+    }
+
+    public function findUserByMail($usermail)
+    {
+        global $ilDB;
+        $retval = null;
+        $r = $ilDB->queryF("SELECT usr_id FROM usr_data ".
+                           "WHERE email= %s", array("text"), array($usermail));
+
+        if ($data = $ilDB->fetchAssoc($r))
+        {
+            $oUser  = new ilObjUser($data["usr_id"]);
+            $tData  = $this->loadUserToken($data["usr_id"]);
+            $retval = $this->makeUserInfo($oUser, $tData);
+        }
+        return $retval;
+    }
+
+    public function findUserByToken($idtoken)
+    {
+        $retval = null;
+        $tData = $this->loadTokenUser($idtoken);
+        if (isset($tData) && array_key_exists("id", $tData))
+        {
+            // load the rest
+            $oUser = new ilObjUser($tData["id"]);
+            $retval = $this->makeUserInfo($oUser, $tData);
+        }
+        return $retval;
+    }
+
+    public function findUserByLogin($loginname)
+    {
+        global $ilUser;
+
+        $retval = null;
+        $userId = $ilUser->getUserIdByLogin($credentials["username"]);
+        if (isset($userId) && $userId > 0)
+        {
+            $tData = $this->loadUserToken($userId);
+
+            // now get the rest of the data
+            $oUser = new ilObjUser($userId);
+            $oUser->read();
+            $retval = $this->makeUserInfo($oUser, $tData);
+        }
+
+        return $retval;
+    }
+
+    public function findUserByHomepage($homepage)
+    {
+        // Ilias has no homepage profile
+        if (isset($homepage) &&
+            !empty($homepage))
+        {
+            $aHomepage = explode("/", $homepage);
+            $token = array_pop($aHomepage);
+            return $this->findUserByToken($token);
+        }
+        return null;
+    }
+
+    protected function loadUserToken($userid)
+    {
+        if (isset($userid) && $userid > 0)
+        {
+            $tokenData = $this->loadTokenData(array("id" => $userid));
+            if (!isset($tokenData))
+            {
+                $tokenData = array("id"=> $userid);
+                $tokenData["token"] = $this->createIdentityToken($userid);
+            }
+
+            return $tokenData;
+        }
+        return null;
+    }
+
+    protected function loadTokenUser($idtoken)
+    {
+        if (isset($idtoken) &&
+            !empty($idtoken))
+        {
+            return $this->loadTokenData(array("token" => $idtoken));
+        }
+        return null;
+    }
+
+    private function makeUserInfo($oUser, $tData)
+    {
+        return array(
+            "name"       => $oUser->getFullname(),
+            "id"         => $tData["token"],
+            "login"      => $oUser->getLogin(),
+            "email"      => $oUser->getEmail(),
+            "givenname"  => $oUser->getFirstName(),
+            "familyname" => $oUser->getLastName(),
+            "language"   => $oUser->getLanguage()
+        );
+    }
+
+    private function loadTokenData($whereO)
+    {
+        global $ilDB;
+        $sql = "select * from pwrtla_usertokens where ";
+        $at = array();
+        $av = array();
+        if (array_key_exists("id", $whereO))
+        {
+            $sql .= "user_id = %s";
+            $at[] = "integer";
+            $av[] = $whereO["id"];
+        }
+        else if (array_key_exists("token", $whereO))
+        {
+            $sql .= "user_token = %s";
+            $at[] = "text";
+            $av[] = $whereO["token"];
+        }
+
+        if (!empty($av))
+        {
+            $res = $ilDB->queryF($sql,
+                                $at,
+                                $av);
+            $row = $ilDB->fetchAssoc($res);
+            if (isset($row))
+            {
+                return array(
+                    "id" => $row["user_id"],
+                    "token" => $row["user_token"]
+                );
+            }
+        }
+        return null;
     }
 }
 
