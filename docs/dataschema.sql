@@ -59,5 +59,5 @@ create table if not exists pwrtla_xapidocuments ( -- XAPI Document Repository
     stored       INT NOT NULL,                     -- implement since
     object_id    varchar(255),
     verb_id      varchar(255),
-    registration: varchar(255)
+    registration varchar(255)
 );
