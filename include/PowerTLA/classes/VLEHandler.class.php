@@ -8,6 +8,7 @@ class VLEHandler extends Logger
 
     protected $tlapath;
     protected $tlahost;
+    protected $baseurl;
 
     /**
      * internal data store for LMS Interfaces.
@@ -21,30 +22,110 @@ class VLEHandler extends Logger
 
         $this->tlahost = $_SERVER["SERVER_PROTOCOL"] . "://" . $_SERVER["SERVER_NAME"];
 
-        $this->handler = new stdClass();
+        $this->baseurl = $this->tlahost . "/" . $this->tlapath . "/restservice";
 
+        $this->handler = new stdClass();
         $this->initLMS($lmspath);
     }
 
     protected function initLMS($tlapath) {}
+
+    public function idpURI()
+    {
+        return $this->baseurl . "/identity/profile.php/";
+    }
+
+    public function xapiURI()
+    {
+        return $this->baseurl . "/xapi/lrs.php/";
+    }
+
+    public function courseURI()
+    {
+        return $this->baseurl . "/content/course.php/";
+    }
+
+    public function qtiURI()
+    {
+        return $this->baseurl . "/content/qti.php/";
+    }
+
+    public function rsdURI()
+    {
+        return $this->baseurl . "rsd.php";
+    }
 
     public function getUserId()
     {
         return -1;
     }
 
+    public function getUserToken()
+    {
+        $retval = null;
+        $userDetails = $this->getIdentityProvider()->getUserDetails();
+
+        if ($userDetails)
+        {
+            $retval = $userDetails["id"];
+        }
+
+        return $retval;
+    }
+
     public function getAgentProfile()
     {
         if (!$this->isGuestUser())
         {
-            return $this->tlahost . "/" . $this->tlapath . "/restservice/profile/" . $this->getUserId();
+            return $this->getUserToken();
         }
+        return null;
+    }
+
+    /**
+     * validates an agent object (as used by XAPI)
+     */
+    public function validateAgent($agent)
+    {
+        if(isset($agent) && gettype($agent) == "array")
+        {
+            $idp = $this->getIdentityProvider();
+
+            if(array_key_exists("mbox", $agent))
+            {
+                $mail = array_pop(explode(":", $agent["mbox"]));
+                return $idp->findUserByMail($mail);
+            }
+
+            if(array_key_exists("openid", $agent))
+            {
+                $token = array_pop(explode("/", $agent["openid"]));
+
+                return $idp->findUserByToken($token);
+            }
+
+            if(array_key_exists("account", $agent))
+            {
+                if(array_key_exists("name", $agent["account"]))
+                {
+                    return $idp->findUserByLogin($agent["account"]["name"]);
+                }
+
+                if(array_key_exists("homepage", $agent["account"]))
+                {
+                    return $idp->findUserByHomepage($agent["account"]["homepage"]);
+                }
+            }
+        }
+
         return null;
     }
 
     public function checkAgentProfile($profile)
     {
-        if ($profile == $this->getAgentProfile()) {
+        if (isset($profile) &&
+            $profile["id"] == $this->getAgentProfile())
+        {
             return true;
         }
         return FALSE;
