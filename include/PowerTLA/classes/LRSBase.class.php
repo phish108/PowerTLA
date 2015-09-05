@@ -188,7 +188,7 @@ abstract class LRSBase extends Logger
     }
 
 
-    private function generateID()
+    private function generateUUID()
     {
         $uuid = sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
                         mt_rand( 0, 0xffff ),
@@ -371,10 +371,10 @@ abstract class LRSBase extends Logger
             if (isset($statement["actor"]))
             {
                 $actorid = $statement["actor"]["mbox"];
-                if (!isset($actorid) || emtpy($actorid))
+                if (!isset($actorid) || empty($actorid))
                 {
                     $actorid = $statement["actor"]["openid"];
-                    if (!isset($actorid) || emtpy($actorid))
+                    if (!isset($actorid) || empty($actorid))
                     {
                         $actorid = $statement["actor"]["account"]["homepage"];
                     }
@@ -457,7 +457,7 @@ abstract class LRSBase extends Logger
     {
         if (isset($aStream) && gettype($aStream) == "array")
         {
-            $this->log("process " . count($aStrem) . " statements");
+            $this->log("process " . count($aStream) . " statements");
             foreach ($aStream as $st)
             {
                 $this->log("handle one statement " . $st["id"]);
@@ -590,7 +590,7 @@ abstract class LRSBase extends Logger
             $oDoc = $this->readDocument($opts);
             if (!isset($oDoc) || count($oDoc) == 0)
             {
-                $uuid = $this->db->generateID();
+                $uuid = $this->db->generateUUID();
                 $opts["uuid"] = $uuid;
                 $this->addDocument($doc, $opts);
                 return true;

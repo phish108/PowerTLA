@@ -298,12 +298,12 @@ class IdentityProvider extends Logger
                 }
                 else
                 {
-                    // create a new userToken
+                    // $this->log("create a new userToken");
                     $this->idToken = $this->createIdentityToken($ilUser->getId());
                 }
             }
             $retval = $this->makeUserInfo($ilUser,
-                                          array("token", $this->idToken));
+                                          array("token" => $this->idToken));
         }
 
         return $retval;

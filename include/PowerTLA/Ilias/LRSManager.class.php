@@ -41,7 +41,7 @@ class LRSManager extends LRSBase
      */
     protected function getActorUserID($actor)
     {
-
+        $this->mark();
         if (array_key_exists("mbox", $actor))
         {
             $email = array_pop(explode(":", $actor["mbox"]));
@@ -56,6 +56,7 @@ class LRSManager extends LRSBase
                 {
                     return $data["usr_id"];
                 }
+                $this->log("failed to load by mail");
             }
         }
 
@@ -78,7 +79,7 @@ class LRSManager extends LRSBase
 
         if (isset($itoken))
         {
-            $r = $ilDB->queryF("SELECT user_id FROM pwrtla_usertokens ".
+            $r = $this->db->queryF("SELECT user_id FROM pwrtla_usertokens ".
                                "WHERE user_token= %s",
                                array("text"),
                                array($itoken));
@@ -94,6 +95,7 @@ class LRSManager extends LRSBase
 
     protected function findStatementByUUID($uuid)
     {
+        $this->mark();
         if (isset($uuid) && !empty($uuid))
         {
             $r = $this->db->queryF("SELECT statement FROM pwrtla_xapistatements WHERE uuid = %s",
@@ -110,6 +112,7 @@ class LRSManager extends LRSBase
 
     protected function addStatement($aLRSStatement)
     {
+        $this->mark();
         $dbstatement = array();
         foreach ($aLRSStatement as $col => $val)
         {
@@ -120,11 +123,13 @@ class LRSManager extends LRSBase
             }
         }
 
+        $this->log("insert xapi statement " . json_encode($dbstatement));
         $this->db->insert("pwrtla_xapistatements", $dbstatement);
     }
 
     protected function updateStatement($aLRSStatement, $aOptions)
     {
+        $this->mark();
         $where = $this->buildWhere($aOptions);
         if (isset($aLRSStatement) && isset($where) && !empty($where))
         {
@@ -149,6 +154,7 @@ class LRSManager extends LRSBase
 
     protected function voidStatement($uuid, $vuuid)
     {
+        $this->mark();
         $statement = $this->findStatementByUUID($uuid);
         if (isset($vuuid) &&
             !empty($vuuid) &&
@@ -166,12 +172,14 @@ class LRSManager extends LRSBase
 
     protected function deleteStatement($uuid)
     {
+        $this->mark();
         $sql = "DELETE FROM pwrtla_xapistatements WHERE uuid = %s";
         $this->db->manipulateF($sql, array("text"), array($uuid));
     }
 
     protected function readActivityStream($aOptions = [])
     {
+        $this->mark();
         $aStream = array();
 
         $where = $this->buildWhere($aOptions);
