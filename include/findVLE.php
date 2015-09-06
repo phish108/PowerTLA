@@ -3,6 +3,8 @@
 include_once('RESTling/contrib/Restling.auto.php');
 include_once('PowerTLA.auto.php');
 
+define("TLA_VERSION", "0.6");
+
 function initCoreSystem($pwrtlaPath, $lmspath)
 {
     set_include_path($lmspath   . PATH_SEPARATOR .
@@ -37,10 +39,6 @@ function findVLEInstance()
         if (file_exists($cwd . "/include/inc.ilias_version.php"))
         {
             // got an ilias instance
-            // set include PowerTLA and Ilias paths
-            initCoreSystem($apath, $cwd);
-
-            $result["lmspath"] = $cwd;
             $result["lmstype"] = "Ilias";
             break;
         }
@@ -48,9 +46,6 @@ function findVLEInstance()
         if (file_exists($cwd . "/lib/moodlelib.php"))
         {
             // got a moodle instance
-            initCoreSystem($apath, $cwd);
-
-            $result["lmspath"] = $cwd;
             $result["lmstype"] = "Moodle";
             break;
         }
@@ -61,6 +56,9 @@ function findVLEInstance()
 
     if (array_key_exists("lmstype", $result))
     {
+        initCoreSystem($apath, $cwd);
+        $result["lmspath"] = $cwd;
+
         chdir($cwd); // change to the LMS directory
 
         // load the VLE specific SystemHandler class.
