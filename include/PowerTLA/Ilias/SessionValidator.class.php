@@ -2,25 +2,6 @@
 
 class SessionValidator extends VLEValidator
 {
-    private $clientId;
-    private $domain;
-    private $tokenKey;
-
-    public function getTokenInformation()
-    {
-        if (isset($this->clientId) &&
-            isset($this->tokenType))
-        {
-            return array(
-                "client" => $this->clientId,
-                "token"  => $this->tokenKey,
-                "domain" => $this->domain,
-                "type"   => $this->tokenType
-            );
-        }
-        return null;
-    }
-
     protected function validateLocalSession()
     {
         global $ilUser;
@@ -66,7 +47,7 @@ class SessionValidator extends VLEValidator
 
     protected function validateMACToken()
     {
-        global $ilDB;
+        global $ilDB, $ilUser;
         // MAC Tokens are pretty much OAuth1 Tokens
         $token = $this->extractToken();
 
@@ -86,13 +67,21 @@ class SessionValidator extends VLEValidator
         $duuid = $userIdArray["client_id"];
         $domain = $userIdArray["domain"];
 
-        $uri = "http" . ($_SERVER["HTTPS"]? "s": "") . "://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
+        $uri = $this->getRequestURI();
 
         // remove potential query string
         // $uri =
 
-        $tmac = sha1(implode("", array($duuid, $key, $domain, $_SERVER['REQUEST_METHOD'], $uri, $nonce)));
-        if ($mac == $tmac && isset($userId) && intval($userId))
+        $tmac = sha1(urlencode($duuid).
+                     urlencode($key).
+                     urlencode($domain).
+                     urlencode($_SERVER['REQUEST_METHOD']).
+                     urlencode($uri).
+                     urlencode($nonce));
+
+        if ($mac == $tmac &&
+            isset($userId) &&
+            intval($userId))
         {
             $ilUser->setId($userId);
             $ilUser->read();
@@ -116,7 +105,7 @@ class SessionValidator extends VLEValidator
         global $ilDB;
         $hToken = $this->extractToken();
 
-        $uri = "http" . ($_SERVER["HTTPS"]? "s": "") . "://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
+        $uri = $this->getRequestURI();
 
         $q = "SELECT token_type, token_id, token_key, client_id, domain, extra FROM pwrtla_tokens WHERE token_type = 'Request' AND domain = %s AND token_id = %s";
 

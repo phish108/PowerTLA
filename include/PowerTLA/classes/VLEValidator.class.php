@@ -20,11 +20,43 @@
  * During the Authentication phase, the validator may also need to validate
  * a Client token.
  */
-class VLEValidator extends RESTlingValidator
+abstract class VLEValidator extends RESTlingValidator
 {
     protected $token;
     protected $tokenType;
     protected $rejectTypes;
+
+    protected $clientId;
+    protected $domain;
+    protected $tokenKey;
+
+    abstract protected function validateLocalSession();
+    abstract protected function validateBearerToken();
+    abstract protected function validateMACToken();
+    abstract protected function validateRequestToken();
+
+    protected function getRequestURI()
+    {
+        return "http"
+            . ($_SERVER["HTTPS"]? "s": "")
+            . "://" . $_SERVER["SERVER_NAME"]
+            . $_SERVER["REQUEST_URI"];
+    }
+
+    public function getTokenInformation()
+    {
+        if (isset($this->clientId) &&
+            isset($this->tokenType))
+        {
+            return array(
+                "client" => $this->clientId,
+                "token"  => $this->tokenKey,
+                "domain" => $this->domain,
+                "type"   => $this->tokenType
+            );
+        }
+        return null;
+    }
 
     public function rejectTokenType($tokenType)
     {
@@ -92,26 +124,6 @@ class VLEValidator extends RESTlingValidator
                 break;
         }
         return FALSE;
-    }
-
-    protected function validateLocalSession()
-    {
-        return TRUE;
-    }
-
-    protected function validateBearerToken()
-    {
-        return TRUE;
-    }
-
-    protected function validateMACToken()
-    {
-        return TRUE;
-    }
-
-    protected function validateRequestToken()
-    {
-        return TRUE;
     }
 
     protected function extractToken()
