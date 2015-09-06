@@ -3,7 +3,7 @@ class ProfileService extends VLEService
 {
     private $provider;
 
-    public static function apiDefinition($prefix)
+    public static function apiDefinition($prefix, $name="", $link="")
     {
         return parent::apiDefinition($prefix, "org.ieee.papi", "profile.php");
     }

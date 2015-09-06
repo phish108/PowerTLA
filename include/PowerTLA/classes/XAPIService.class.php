@@ -6,7 +6,7 @@ class XAPIService extends VLEService
 {
     private $lrs;
 
-    public static function apiDefinition($prefix)
+    public static function apiDefinition($prefix, $name="", $link="")
     {
         return parent::apiDefinition($prefix, "gov.adlnet.xapi", "lrs.php");
     }
