@@ -5,17 +5,6 @@ include_once('PowerTLA.auto.php');
 
 define("TLA_VERSION", "0.6");
 
-function initCoreSystem($pwrtlaPath, $lmspath)
-{
-    set_include_path($lmspath   . PATH_SEPARATOR .
-                     get_include_path());
-
-    // include PowerTLA's classes via their autoloaders
-
-    include_once("PowerTLA/PowerTLA.ini");
-    date_default_timezone_set(TLA_TIMEZONE);
-}
-
 function findVLEInstance()
 {
     $result = array();
@@ -56,7 +45,15 @@ function findVLEInstance()
 
     if (array_key_exists("lmstype", $result))
     {
-        initCoreSystem($apath, $cwd);
+        // init the core system.
+        set_include_path($cwd   . PATH_SEPARATOR .
+                         get_include_path());
+
+        // include PowerTLA's classes via their autoloaders
+
+        include_once("PowerTLA/PowerTLA.ini");
+        date_default_timezone_set(TLA_TIMEZONE);
+
         $result["lmspath"] = $cwd;
 
         chdir($cwd); // change to the LMS directory
