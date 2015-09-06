@@ -1,46 +1,53 @@
 <?php
-class PluginConfig extends Logger
+class PluginConfig extends PluginBase
 {
-    public function getAPI($tlapath)
+    private $servername;
+    private $lang;
+    public function getEngine($tlapath)
     {
         global $ilClientIniFile;
 
-        $servername = $ilClientIniFile->readVariable('client',
+        $this->servername = $ilClientIniFile->readVariable('client',
                                                      'description');
-        $lang =       $ilClientIniFile->readVariable('language',
+        $this->lang =       $ilClientIniFile->readVariable('language',
                                                      'default');
 
-        $reqpath = $_SERVER["REQUEST_URI"];
-
-        // get rid of any query string garbage
-        $reqpath = preg_replace('/\?.*$/',"", $reqpath);
-
-        // get rid of the rsd section
-        $reqpath = preg_replace('/\/[\w\d]+\.php$/',"", $reqpath);
-
-        // strip the tla root
-        $rcp = preg_replace('/\//', '\\/', $tlapath);
-        $reqpath = preg_replace('/' . $rcp . '$/',"", $reqpath);
-
-        $requrl = "http";
-        $requrl .= !empty($_SERVER["HTTPS"]) ? "s://" : "://";
-        $requrl .= $_SERVER["SERVER_NAME"];
-        $requrl .= $reqpath;
+        $requrl = $this->buildExternalSystemUrl($tlapath);
 
         $retval = array(
-            "engine" => array(
-                "version" => ILIAS_VERSION_NUMERIC,
-                "type"=> "ILIAS",
-                "link"=> $requrl, // official link
-                "servicelink" => $requrl . $tlapath . "/"
-            ),
-            "language" => $lang,
-            "tlaversion" => "0.6",
-            "logolink" => $requrl . TLA_ICON,
-            "name"     => $servername
+            "version" => ILIAS_VERSION_NUMERIC,
+            "type"=> "ILIAS",
+            "link"=> $requrl, // official link
+            "servicelink" => $requrl . $tlapath . "/"
         );
 
         return $retval;
+    }
+
+    public function getDisplayName()
+    {
+        global $ilClientIniFile;
+
+        if(!isset($this->servername))
+        {
+            $this->servername = $ilClientIniFile->readVariable('client',
+                                                               'description');
+        }
+
+        return $this->servername;
+    }
+
+    public function getDefaultLanguage()
+    {
+        global $ilClientIniFile;
+
+        if (!isset($this->lang))
+        {
+            $this->lang = $ilClientIniFile->readVariable('language',
+                                                         'default');
+        }
+
+        return $this->lang;
     }
 
     /**
