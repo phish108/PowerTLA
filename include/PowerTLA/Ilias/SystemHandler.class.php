@@ -4,6 +4,17 @@ class SystemHandler extends VLEHandler
 {
     protected $iliasVersion;
 
+    public function __construct($tp)
+    {
+        global $optNoRedirect;
+        $optNoRedirect = true;
+
+        // assume that PowerTLA lives in the same include path.
+        // We require a configuration variable that informs us about the LMS include path.
+
+        parent::__construct($tp, 'Ilias');
+    }
+
     protected function initLMS($tp)
     {
         include_once($tp . "/include/inc.ilias_version.php");
@@ -42,17 +53,6 @@ class SystemHandler extends VLEHandler
                 }
             }
         }
-    }
-
-    public function __construct($tp)
-    {
-        global $optNoRedirect;
-        $optNoRedirect = true;
-
-        // assume that PowerTLA lives in the same include path.
-        // We require a configuration variable that informs us about the LMS include path.
-
-        parent::__construct($tp, 'Ilias');
     }
 
     public function getVersion()

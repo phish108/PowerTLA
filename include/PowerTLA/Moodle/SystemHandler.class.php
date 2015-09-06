@@ -13,7 +13,6 @@ class SystemHandler extends VLEHandler
     protected function initLMS($tp)
     {
         //inform Moodle that it will run as a service.
-        define('NO_DEBUG_DISPLAY', true);
 
         // TODO: does this create conflicts?
         // The idea is that MC and the web ui use the same API
@@ -23,6 +22,27 @@ class SystemHandler extends VLEHandler
         // this is OK, because the script now runs in moodle's root direactory
         require('config.php');
         // tons of black magic is happening now
+    }
+
+
+    public function getUserId()
+    {
+        global $USER;
+        return $USER->id;
+    }
+
+    public function isGuestUser()
+    {
+        global $USER;
+
+        if ($USER &&
+            $USER->id &&
+            $USER->username != "guest")
+        {
+            return FALSE;
+        }
+
+        return TRUE;
     }
 }
 
