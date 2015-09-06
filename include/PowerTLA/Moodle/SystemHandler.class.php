@@ -2,6 +2,14 @@
 
 class SystemHandler extends VLEHandler
 {
+    public function __construct($tp)
+    {
+        // assume that PowerTLA lives in the same include path.
+        // We require a configuration variable that informs us about the LMS include path.
+
+        parent::__construct($tp, 'Moodle');
+    }
+
     protected function initLMS($tp)
     {
         //inform Moodle that it will run as a service.
