@@ -5,69 +5,91 @@
 /*jslint todo: true */
 /*jslint unparam: true */
 /*jslint bitwise: true*/
+/*jslint devel: true*/
+/*jslint plusplus: true*/
 
 /*global lrs, rsd, console, $, jQuery*/
 
+/**
+ * PART 1 BUSINESS LOGIC
+ */
 var MainActionVerb    = "http://mobinaut.org/xapi/verb/creative/brainstormassign";
 var IdeaActionVerb    = "http://mobinaut.org/xapi/verb/creative/ideacontribute";
 var AssignActionVerb  = "http://mobinaut.org/xapi/verb/reflective/ideaassign";
 
+var blReady = 0;
+var bAdmin = false;
+var bUser  = false;
 var mainUUID;
+var i = 0;
 
-//function cbLoadDocuments(ok) {
-//    // eventually we can work
-//}
-//
 function cbAdminStream(ok) {
-    if (ok === undefined) {
-        console.log("you are no admin");
+    blReady++;
+    if (ok !== undefined) {
+        bAdmin = true;
     }
-    else {
-        console.log("got " + ok.length + " responses ");
+    if (blReady > 1) {
+        $(document).trigger("tlaready");
     }
 }
-//
-//function cbMyStream(ok) {
-//
-//}
 
-$("#contenthello").text("Hello World");
+function cbMyStream(ok) {
+    blReady++;
+    if (ok !== undefined) {
+        bUser = true;
+    }
+    if (blReady > 1) {
+        $(document).trigger("tlaready");
+    }
+}
 
-$("#contenthello").bind("click", function() {
-    console.log("hello click");
-
-    lrs.endAction(mainUUID, {score: 4});
-    console.log(JSON.stringify(lrs.getStream()));
+$(document).bind("xapiready", function() {
+    lrs.fetch({verb: MainActionVerb,
+               object: document.location.href}, cbMyStream);
+    lrs.fetchAdmin({verb: MainActionVerb,
+                    object: document.location.href},
+                   cbAdminStream);
 });
+
+$("#content-stop").bind("click", function() {
+    $("#content-next").addClass("hidden");
+    $("#content-stop").addClass("hidden");
+
+    var s = lrs.getStream();
+    $("#content-stats")
+        .text(s.length + " next clicks")
+        .removeClass("hidden");
+
+    lrs.finishAction(mainUUID, {score: s.length});
+    lrs.push();
+
+    // now we can store the document
+    lrs.setStateDoc(mainUUID, {"count": s.length, terms: [1,2,3]});
+
+});
+
+$("#content-start").bind("click", function() {
+    mainUUID = lrs.startAction(MainActionVerb,
+                               document.location.href);
+    lrs.startContext({"statement": mainUUID});
+    $("#content-next").removeClass("hidden");
+    $("#content-start").addClass("hidden");
+});
+
+$("#content-next").bind("click", function() {
+    $("#content-stop").removeClass("hidden");
+    lrs.recordAction(IdeaActionVerb,
+                     document.location.href,
+                     {extensions: {"foobar": "idea" + i++}});
+});
+
+/**
+ * Part 2 PowerTLA Logic
+ */
 
 function cbLocalActor(actor) {
     if (actor && actor.id) {
-        console.log("got user " + actor.id);
-        // lrs.fetch({}, cbMyStream);
-         lrs.fetchAdmin({verb: MainActionVerb,
-                         object: document.location.href},
-                        cbAdminStream);
-
-        mainUUID = lrs.startAction(MainActionVerb,
-                                   {"id": document.location.href});
-        lrs.startContext({"statement": mainUUID});
-
-        lrs.recordAction(IdeaActionVerb,
-                         {id: document.location.href},
-                         {extensions: {"foobar": "idea1"}});
-        lrs.recordAction(IdeaActionVerb,
-                         {id: document.location.href},
-                         {extensions: {"foobar": "idea2"}});
-
-
-
-//        lrs.recordAction(MainActionVerb,
-//                         {"id": document.location.href});
-
-        console.log(lrs.getStream());
-    }
-    else {
-        console.log('no actor?');
+        $(document).trigger("xapiready");
     }
 }
 

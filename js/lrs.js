@@ -25,9 +25,10 @@
          *
          * Must not be exposed externally.
          */
-        stream      = [],
-        adminStream = [],
-        upstream    = [], // upload cache
+        stream      = [], ///< contains those actions that need to go back to the lrs
+        oldStream   = [], ///< parts of the stream that come form the lrs
+        adminStream = [], ///< all related actions
+        upstream    = [], ///< upload cache
 
         /**
          * internal action map of not terminated actions.
@@ -127,7 +128,7 @@
      * returns a unmutable copy of the stream
      */
     function getStream() {
-        return cloneObject(stream);
+        return cloneObject(stream.concat(oldStream));
     }
 
     /**
@@ -294,9 +295,8 @@
 
         if (verbid &&
             verbid.length &&
-            typeof object === "object" &&
-            object.hasOwnProperty("id") &&
-            object.id.length) {
+            object &&
+            object.length) {
 
             uuid = makeUUID();
 
@@ -309,7 +309,9 @@
                 "verb": {
                     id: verbid
                 },
-                "object": cloneObject(object)
+                "object": {
+                    id: object
+                }
             };
 
             if (Object.getOwnPropertyNames(context).length) {
@@ -325,7 +327,7 @@
     /**
      * ends an action and marks it for delivery
      */
-    function endAction(uuid, result) {
+    function finishAction(uuid, result) {
         if (uuid &&
             ongoing.hasOwnProperty(uuid)) {
             var now = new Date();
@@ -382,15 +384,17 @@
      * writes an action directly to the activity stream
      *
      * returns the new UUID
+     *
+     * verb: verb ID
+     * object: object ID
      */
-    function recordAction(verbid, object, result) {
+    function recordAction(verb, object, result) {
         var uuid, arv;
 
-        if (verbid &&
-            verbid.length &&
-            typeof object === "object" &&
-            object.hasOwnProperty("id") &&
-            object.id.length) {
+        if (verb&&
+            verb.length &&
+            object &&
+            object.length) {
 
             uuid = makeUUID();
 
@@ -399,9 +403,11 @@
                 "timestamp": new Date().toISOString(),
                 "actor": cloneObject(actor),
                 "verb": {
-                    id: verbid
+                    id: verb
                 },
-                "object": cloneObject(object)
+                "object": {
+                    id: object
+                }
             };
 
             if (Object.getOwnPropertyNames(context).length) {
@@ -441,24 +447,24 @@
         return stream[stream.length - 1];
     }
 
-    function setStateDoc(uuid, stateid, doc) {
-        if (typeof doc === "object") {
-            if (!stateDocs.hasOwnProperty(uuid)) {
-                stateDocs[uuid] = {};
-            }
-            if (!stateDocs[uuid].hasOwnProperty(stateid)) {
-                stateDocs[uuid][stateid] = {};
-            }
-            Object.getOwnPropertyNames(doc).forEach(function (nm) {
-                stateDocs[uuid][stateid][nm] = doc[nm];
-            });
+    // The statedoc inherits the actor and the
+    function setStateDoc(stateid, doc) {
+        if (typeof doc === "object" &&
+            uuidMap.hasOwnProperty(stateid)) {
+            // we accept only a state for complete actions
+            var state = stream[uuidMap[stateid]];
+            stateDocs[stateid] = {
+                "agent": JSON.stringify(state.actor),
+                "activityId": state.object.id,
+                "stateId": stateid,
+                "doc": doc
+            };
         }
     }
 
-    function getStateDoc(uuid, stateid) {
-        if (stateDocs.hasOwnProperty(uuid) &&
-            stateDocs[uuid].hasOwnProperty(stateid)) {
-            return stateDocs[uuid][stateid];
+    function getStateDoc(stateid) {
+        if (stateDocs.hasOwnProperty(stateid)) {
+            return stateDocs[stateid].doc;
         }
     }
 
@@ -468,6 +474,7 @@
 
     function pushSuccess() {
         bSync = false;
+        oldStream = oldStream.concat(upstream);
         upstream = [];
     }
 
@@ -540,13 +547,13 @@
         }
 
         function fetchSuccess(data) {
-            stream = data;
-            uuidMap = {};
-            stream.forEach(function (a, i) {
-                uuidMap[a.id] = i;
-            });
+            oldStream = data;
+//            uuidMap = {};
+//            oldStream.forEach(function (a, i) {
+//                uuidMap[a.id] = i;
+//            });
 
-            cbFunc.call(bind, stream);
+            cbFunc.call(bind, oldStream);
         }
 
          if (jq && myServiceURL) {
@@ -591,7 +598,7 @@
 
         function fetchSuccess(data) {
             adminStream = data;
-            cbFunc.call(bind, stream);
+            cbFunc.call(bind, adminStream);
         }
 
         if (jq && myServiceURL) {
@@ -640,12 +647,16 @@
             !bSync) {
             bSync = true;
 
+            console.log(stream);
+
             if (upstream) {
-                upstream.concat(stream);
+                upstream = upstream.concat(stream);
             }
             else {
                 upstream = stream;
             }
+
+            console.log(upstream);
 
             // flush the stream
             stream  = [];
@@ -667,7 +678,36 @@
      * push the state documents to the server
      */
     function pushState() {
-        return;
+        function cbPushStateOK() {
+            console.log("state has been set to lrs");
+        }
+        function cbStateError(xhr, msg) {
+            console.error("state couldn't get sent to lrs: " + msg);
+        }
+
+        if (jq &&
+            myServiceURL) {
+            var url = myServiceURL + "/activities/state";
+            Object.getOwnPropertyNames(stateDocs).forEach(function (uuid,i) {
+                var atmp = [
+                    "agent=" + encodeURIComponent(stateDocs[uuid].agent),
+                    "activityId=" + encodeURIComponent(stateDocs[uuid].activityId),
+                    "stateId" + encodeURIComponent(stateDocs[uuid].stateId)
+                ];
+
+                var surl = url + "?" + atmp.join("&");
+
+                jq.ajax({
+                    type: "POST",
+                    url: surl,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: cbPushStateOK,
+                    error: cbStateError,
+                    data: JSON.stringify(upstream)
+                });
+            });
+        }
     }
 
     /**
@@ -763,7 +803,7 @@
     LRS.getContext    = getContext;
 
     LRS.startAction   = startAction;
-    LRS.endAction     = endAction;
+    LRS.finishAction     = finishAction;
     LRS.recordAction  = recordAction;
     LRS.getStream     = getStream;
     LRS.lastAction    = lastAction;
