@@ -40,16 +40,10 @@ class LRSManager extends LRSBase
             // not our user and we will reject.
 
             // TODO we MUST check if the URL belongs to us, too
-
-            $itoken = array_pop(explode("/", $array["openid"]));
+            $aTmp = explode("/", $actor["openid"]);
+            $itoken = array_pop($aTmp);
         }
 
-        if (array_key_exists("account", $actor) &&
-            array_key_exists("homepage", $actor["account"]) &&
-            !empty($actor["account"]["homepage"]))
-        {
-            $itoken = array_pop(explode("/", $actor["account"]["homepage"]));
-        }
 
         if (isset($itoken) &&
             !empty($itoken))
@@ -58,6 +52,19 @@ class LRSManager extends LRSBase
                                              array("user_token" => $itoken)))
             {
                 return $utoken->user_id;
+            }
+        }
+
+        if (array_key_exists("account", $actor) &&
+            array_key_exists("homepage", $actor["account"]) &&
+            !empty($actor["account"]["homepage"]))
+        {
+            // moodle has an uri attribute
+            // $itoken = array_pop(explode("/", $actor["account"]["homepage"]));
+            if ($user = $this->db->get_record('user',
+                                              array("url" => $actor["account"]["homepage"])))
+            {
+                return $user->id;
             }
         }
 
@@ -99,6 +106,7 @@ class LRSManager extends LRSBase
         $where = $this->buildWhere($aOptions);
         if (isset($where) && !empty($where))
         {
+            $this->log("where? " . $where);
             $records = $this->db->get_records_select("pwrtla_xapistatements",
                                                      $where);
             foreach ($records as $s)

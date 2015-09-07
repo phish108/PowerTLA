@@ -40,8 +40,11 @@ class XAPIService extends VLEService
         $m   = array_shift($op);
         $api = implode("_", $op);
 
-        $agent    = $this->queryParam["agent"];
-        $this->log("agent param is " . $agent);
+        if (array_key_exists("agent", $this->queryParam))
+        {
+            $agent    = $this->queryParam["agent"];
+            $this->log("agent param is " . $agent);
+        }
 
         if (isset($agent) && !empty($agent))
         {
@@ -62,9 +65,13 @@ class XAPIService extends VLEService
             }
         }
 
+        // load the core capabilities
+        $privs = $this->VLE->getPrivileges($this->queryParam);
+
         // per API ACL
         if ($this->status == RESTling::OK &&
-            !$this->VLE->checkAgentProfile($agentInfo))
+            (!isset($agentInfo) ||
+            !$this->VLE->checkAgentProfile($agentInfo)))
         {
             $this->log("run acl");
             /**
@@ -78,8 +85,7 @@ class XAPIService extends VLEService
              * The VLE handler may extend this to certain contexts.
              */
 
-            // load the core capabilities
-            $privs = $this->VLE->getPrivileges($this->queryParam);
+
             // check writeObjectSelf because we allow only authenticated users to
             // access the LRS. Only authenticated users have the privilege
             // to access the LRS, guestusers are excluded
@@ -91,7 +97,7 @@ class XAPIService extends VLEService
         }
 
         if ($this->status == RESTling::OK &&
-            $privs)
+            isset($privs))
         {
             $this->log("verify functional query params for " . $api);
             /**
@@ -99,35 +105,40 @@ class XAPIService extends VLEService
              * user in the provided actions.
              */
 
-            if($op == "put_statements")
+            if($this->operation == "put_statements")
             {
-                if (!$this->inputData["id"])
+                if (isset($this->inputData) &&
+                    !array_key_exists("id", $this->inputData))
                 {
                     $this->state = RESTling::BAD_DATA;
                 }
             }
-            else if ($op == "post_statements")
+            else if ($this->operation == "post_statements")
             {
-                if ($this->queryParam["statementId"])
+                if (isset($this->queryParam) &&
+                          array_key_exists("statementId", $this->queryParam))
                 {
-                    if (!$this->inputData["id"])
+                    if (isset($this->inputData) &&
+                        !array_key_exists("id", $this->inputData))
                     {
                         $this->state = RESTling::BAD_DATA;
                     }
                 }
-                else if ($this->inputData["id"])
+                else if (isset($this->inputData) &&
+                         array_key_exists("id", $this->inputData))
                 {
                     $this->state = RESTling::BAD_DATA;
                 }
             }
-            else if ($op == "delete_statements")
+            else if ($this->operation == "delete_statements")
             {
-                if (!$this->queryParam["statementId"])
+                if (isset($this->queryParam) &&
+                    !array_key_exists("statementId", $this->queryParam))
                 {
                     $this->state = RESTling::BAD_DATA;
                 }
             }
-            else if ($op != "get")
+            else if ($this->operation != "get")
             {
                 // in this case the document api is requested
                 $this->queryParam["doctype"] = $api;
@@ -135,30 +146,35 @@ class XAPIService extends VLEService
                 switch ($api)
                 {
                     case "activities_profile":
-                        if (!$this->queryParam["activityId"] ||
+                        if (isset($this->queryParam) &&
+                            !array_key_exists("activityId", $this->queryParam) ||
                             ($m != "get" &&
-                             !$this->queryParam["profileId"]))
+                             !array_key_exists("profileId", $this->queryParam)))
                         {
                             $this->state = RESTling::BAD_DATA;
                         }
                         break;
                     case "activities_state":
-                        if (!$this->queryParam["activityId"] &&
-                            !$this->queryParam["agent"])
+                        if (isset($this->queryParam) &&
+                            !array_key_exists("activityId", $this->queryParam) &&
+                            !array_key_exists("agent", $this->queryParam))
                         {
                             $this->state = RESTling::BAD_DATA;
                         }
                         break;
                     case "agent_profile":
-                        if (!$this->queryParam["agent"] ||
+                        if (isset($this->queryParam) &&
+                            !array_key_exists("agent", $this->queryParam)||
                             ($m != "get" &&
-                             !$this->queryParam["profileId"]))
+                             !array_key_exists("profileId", $this->queryParam)))
                         {
                             $this->state = RESTling::BAD_DATA;
                         }
                         break;
                     case "statements":
-                        if (!$this->queryParam["agent"])
+                        unset($this->queryParam["doctype"]);
+                        if (isset($this->queryParam) &&
+                            !array_key_exists("agent", $this->queryParam))
                         {
                             if (!($privs->readObject ||
                                   $privs->readContext))
@@ -168,7 +184,9 @@ class XAPIService extends VLEService
                         }
                         else
                         {
-                            if ($agentO["_system"] != $this->VLE->getUserId() &&
+                            if (isset($agentO) &&
+                                array_key_exists("_system", $agentO) &&
+                                $agentO["_system"] != $this->VLE->getUserId() &&
                                 !($privs->readObject ||
                                   $privs->readContext))
                             {
@@ -199,7 +217,7 @@ class XAPIService extends VLEService
     {
         // get the activity stream
         $this->log("get statements");
-        if ($this->queryParam["statementId"])
+        if (array_key_exists("statementId", $this->queryParam))
         {
             $this->lrs->getAction($this->queryParam["statementId"]);
         }
@@ -216,20 +234,22 @@ class XAPIService extends VLEService
 
     protected function post_statements()
     {
-        if ($this->queryParam["statementId"])
+        if (array_key_exists("statementId", $this->queryParam))
         {
             $this->lrs->extendStatement($this->inputData);
         }
         else
         {
-            $this->log("process incoming stream");
+            $this->log("process incoming stream " . json_encode($this->inputData));
             $this->data = $this->lrs->processStatementStream($this->inputData);
         }
     }
 
     protected function delete_statements()
     {
-        $this->lrs->deleteStatement($this->queryParam["statementId"]);
+        if (array_key_exists("statementId", $this->queryParam)) {
+            $this->lrs->deleteStatement($this->queryParam["statementId"]);
+        }
     }
 
     // Agent Document API
@@ -237,7 +257,7 @@ class XAPIService extends VLEService
     {
         if ($type == "state")
         {
-            if (!$this->queryParam["stateId"])
+            if (!array_key_exists("stateId", $this->queryParam))
             {
                 $this->data = $this->lrs->getDocumentList($this->queryParam);
             }
@@ -246,7 +266,7 @@ class XAPIService extends VLEService
                 $this->data = $this->lrs->getDocument($this->queryParam);
             }
         }
-        else if (!$this->queryParam["profileId"])
+        else if (!array_key_exists("profileId", $this->queryParam))
         {
             $this->data = $this->lrs->getDocumentList($this->queryParam);
         }
