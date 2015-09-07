@@ -14,10 +14,13 @@ class SystemHandler extends VLEHandler
     {
         //inform Moodle that it will run as a service.
 
-        // TODO: does this create conflicts?
+        // Combined use of AJAX and Webseriveces creates conflicts!
         // The idea is that MC and the web ui use the same API
         define('AJAX_SCRIPT', true);
-        define('WS_SERVER', true);
+
+        // However, as soon as WS_Server is set, browser sessions will not be
+        // evaluated. Remove for the time being.
+        // define('WS_SERVER', true);
 
         // this is OK, because the script now runs in moodle's root direactory
         require('config.php');
