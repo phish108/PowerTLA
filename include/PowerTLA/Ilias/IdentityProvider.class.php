@@ -75,6 +75,27 @@ class IdentityProvider extends IDPBase
                            ));
     }
 
+    public function getUserId()
+    {
+        global $ilUser;
+        return $ilUser->getId();
+    }
+
+    public function isGuestUser()
+    {
+        global $ilUser;
+
+        if ($ilUser->getId() &&
+            $ilUser->getLogin() != "anonymous" &&
+            !isset($this->guestuser) ||
+            (!empty($this->guestuser) &&
+            $ilUser->getLogin() != $this->guestuser))
+        {
+            return FALSE;
+        }
+
+        return TRUE;
+    }
 
     protected function generateBearerToken($clientToken)
     {
@@ -134,7 +155,7 @@ class IdentityProvider extends IDPBase
         ));
     }
 
-    private function checkAccessPin($expirytime=0) {
+    protected function checkAccessPin($expirytime=0) {
         global $ilUser, $ilDB;
 
         $retval = null;
@@ -164,102 +185,6 @@ class IdentityProvider extends IDPBase
                 $retval = $row["pinhash"];
             }
         }
-        return $retval;
-    }
-
-    public function getIdentityByToken($idToken)
-    {
-        global $ilUser, $ilDB;
-
-        $retval = null;
-        $q = "SELECT user_id FROM pwrtla_usertokens WHERE user_token = %s ";
-        $types = array("text");
-        $values = array($ilUser->getLogin());
-        $res = $ilDB->queryF($q,
-                             array("text"),
-                             array($idToken));
-        $row = $ilDB->fetchAssoc($res);
-        if (isset($row) && intval($row["user_id"]))
-        {
-            $ilUser->setId($row["user_id"]);
-            $ilUser->read();
-            $retval = $this->getUserDetails();
-        }
-        return $retval;
-    }
-
-    public function getIdentityById($userid=0)
-    {
-        global $ilUser, $ilDB;
-
-        if ($userid)
-        {
-            $oUser = new ilObjUser($userid);
-            $oUser->read();
-
-            if (!$oUser->getLogin())
-            {
-                return null;
-            }
-        }
-        else
-        {
-            $oUser = $ilUser;
-        }
-
-        $retval = null;
-        $q = "SELECT user_id, user_token FROM pwrtla_usertokens WHERE user_id = %s ";
-        $types = array("integer");
-        $values = array($oUser->getId());
-        $res = $ilDB->queryF($q,
-                             $types,
-                             $values);
-        $row = $ilDB->fetchAssoc($res);
-        if (isset($row) && intval($row["user_id"]))
-        {
-            $this->idToken = $row["user_token"];
-            $ilUser->setId($row["user_id"]);
-            $ilUser->read();
-            $retval = $this->getUserDetails();
-        }
-        return $retval;
-    }
-
-    public function getUserDetails()
-    {
-        global $ilUser, $ilDB;
-        $retval = null;
-
-        if ($ilUser->getId() &&
-            $ilUser->getLogin() != "anonymous" &&
-            isset($this->guestuser) &&
-            !empty($this->guestuser) &&
-            $ilUser->getLogin() != $this->guestuser)
-        {
-            // get idToken
-            if (!isset($this->idToken))
-            {
-                $q = "SELECT user_id, user_token FROM pwrtla_usertokens WHERE user_id = %s ";
-                $types = array("integer");
-                $values = array($ilUser->getId());
-                $res = $ilDB->queryF($q,
-                                     $types,
-                                     $values);
-                $row = $ilDB->fetchAssoc($res);
-                if (isset($row))
-                {
-                    $this->idToken = $row["user_token"];
-                }
-                else
-                {
-                    // $this->log("create a new userToken");
-                    $this->idToken = $this->createIdentityToken($ilUser->getId());
-                }
-            }
-            $retval = $this->makeUserInfo($ilUser,
-                                          array("token" => $this->idToken));
-        }
-
         return $retval;
     }
 
@@ -410,6 +335,7 @@ class IdentityProvider extends IDPBase
     private function makeUserInfo($oUser, $tData)
     {
         return array(
+            "_system"    => $oUser->getId(),
             "name"       => $oUser->getFullname(),
             "id"         => $tData["token"],
             "login"      => $oUser->getLogin(),

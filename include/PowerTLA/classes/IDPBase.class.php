@@ -15,6 +15,36 @@ abstract class IDPBase extends Logger
 
     abstract public function authenticate($credentials, $token);
     abstract public function logout($token);
+    abstract public function isGuestUser();
+    abstract public function getUserId();
+    abstract public function findUserByToken($token);
+    abstract public function findUserById($token);
+
+    public function getUserDetails()
+    {
+        if (!$this->isGuestUser())
+        {
+            $retval = $this->getIdentityById($this->getUserId());
+        }
+
+        return $retval;
+    }
+
+
+    public function getIdentityByToken($idToken)
+    {
+         $rv = $this->findUserByToken($idToken);
+         unset($rv["_system"]);
+         return $rv;
+    }
+
+    public function getIdentityById($userid=0)
+    {
+        $rv = $this->findUSerByID($userid);
+        unset($rv["_system"]);
+        return $rv;
+    }
+
 
     protected function randomString($length=0)
     {

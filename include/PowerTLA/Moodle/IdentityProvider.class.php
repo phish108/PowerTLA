@@ -26,31 +26,28 @@ class IdentityProvider extends IDPBase
                                  "user_token" => $token));
     }
 
-    private function checkAccessPin($expirytime=0) {}
-    public function generateAccessPin() {}
-
-    public function getIdentityByToken($idToken)
+    public function getUserId()
     {
-        return $this->findUserByToken($idToken);
+        global $USER;
+        return $USER->id;
     }
 
-    public function getIdentityById($userid=0)
-    {
-        return $this->findUSerByID($userid);
-    }
-
-    public function getUserDetails()
+    public function isGuestUser()
     {
         global $USER;
 
-        if ($USER->username != "guest")
+        if ($USER &&
+            $USER->id &&
+            $USER->username != "guest")
         {
-            $tData = $this->loadUserToken($USER->id);
-            $retval = $this->makeUserInfo($USER, $tData);
+            return FALSE;
         }
 
-        return $retval;
+        return TRUE;
     }
+
+    protected function checkAccessPin($expirytime=0) {}
+    public function generateAccessPin() {}
 
 /**
      * Load function to handle Identities of *different* users
@@ -157,6 +154,7 @@ class IdentityProvider extends IDPBase
     private function makeUserInfo($oUser, $tData)
     {
         return array(
+            "_system"    => $oUser->id,
             "name"       => $oUser->firstname . " " . $oUser->lastname,
             "id"         => $tData["token"],
             "login"      => $oUser->username,

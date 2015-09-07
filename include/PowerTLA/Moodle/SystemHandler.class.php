@@ -27,26 +27,9 @@ class SystemHandler extends VLEHandler
         // tons of black magic is happening now
     }
 
-
-    public function getUserId()
-    {
-        global $USER;
-        return $USER->id;
-    }
-
-    public function isGuestUser()
-    {
-        global $USER;
-
-        if ($USER &&
-            $USER->id &&
-            $USER->username != "guest")
-        {
-            return FALSE;
-        }
-
-        return TRUE;
-    }
+    // ignore guest user settings in moodle for the time being
+    public function setGuestUser($username)
+    {}
 }
 
 ?>

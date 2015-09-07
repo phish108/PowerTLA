@@ -57,7 +57,7 @@ class VLEHandler extends Logger
 
     public function getUserId()
     {
-        return -1;
+        return $this->getIdentityProvider()->isGuestUser();
     }
 
     public function getUserToken()
@@ -133,7 +133,7 @@ class VLEHandler extends Logger
 
     public function isGuestUser()
     {
-        return TRUE;
+        return $this->getIdentityProvider()->isGuestUser();
     }
 
     public function isActiveUser()
