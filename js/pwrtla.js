@@ -61,10 +61,13 @@ $("#content-stop").bind("click", function() {
         .removeClass("hidden");
 
     lrs.finishAction(mainUUID, {score: s.length});
+    lrs.setStateDoc(mainUUID, {"count": s.length, terms: [1,2,3]});
+
     lrs.push();
 
     // now we can store the document
-    lrs.setStateDoc(mainUUID, {"count": s.length, terms: [1,2,3]});
+
+    lrs.pushState();
 
 });
 

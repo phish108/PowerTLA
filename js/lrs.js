@@ -499,6 +499,7 @@
                     "objectType": "Agent",
                     "openid": idurl + "/user/" + data.id
                 };
+                console.log("local actor id : " + localActor.openid);
 
                 if (!actor ||
                     !actor.objectType) {
@@ -514,16 +515,21 @@
             rsd.engine.servicelink) {
             idurl = rsd.engine.servicelink;
         }
+        console.log(idurl);
         rsd.apis.some(function (api) {
             if (api.name === "org.ieee.papi") {
+                console.log(api.link);
                 idurl += api.link;
                 return true;
             }
         });
 
+        console.log(idurl);
+
         // now we have the link, fetch the data
         if (idurl &&
             jq) {
+            console.log(idurl);
             jq.ajax({
                 type: "GET",
                 url: idurl,
@@ -698,7 +704,7 @@
                 var surl = url + "?" + atmp.join("&");
 
                 jq.ajax({
-                    type: "POST",
+                    type: "PUT",
                     url: surl,
                     dataType: 'json',
                     contentType: 'application/json',
@@ -779,6 +785,7 @@
                     }
                 });
             }
+            console.log(myServiceURL);
         }
     }
 
@@ -817,6 +824,7 @@
     LRS.fetch         = fetchStream;
     LRS.fetchAdmin    = fetchAdminStream;
     LRS.push          = pushStream;
+    LRS.pushState     = pushState;
 
     LRS.store         = storeStream;
     LRS.load          = loadStream;

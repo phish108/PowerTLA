@@ -48,7 +48,7 @@
                 jq.ajax({
                     type: "GET",
                     dataType: "json",
-                    url: host + dir + "/tla/rsd.php",
+                    url: host + (dir === "/"? "": dir) + "/tla/rsd.php",
                     success: function (data) {
                         rsd = data;
                         cbFunc.call(bind, rsd);
