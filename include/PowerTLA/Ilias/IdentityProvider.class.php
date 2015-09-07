@@ -1,15 +1,7 @@
 <?php
 
-class IdentityProvider extends Logger
+class IdentityProvider extends IDPBase
 {
-    private $guestuser;
-    private $idToken;
-
-    public function __construct($guestuserid)
-    {
-        $this->guestuser = $guestuserid;
-    }
-
     public function authenticate($credentials, $clientToken)
     {
         global $ilUser, $ilDB;
@@ -39,7 +31,7 @@ class IdentityProvider extends Logger
                 $now   = time();
                 $dtime = 24 * 60 * 60 * 1000; // 1 day expiry time
 
-                $pin = $this->checkAuthPin($now - $dtime);
+                $pin = $this->checkAccessPin($now - $dtime);
                 if (isset($pin))
                 {
                     $validate = sha1($credentials["username"].
@@ -83,42 +75,8 @@ class IdentityProvider extends Logger
                            ));
     }
 
-    private function generateAccessToken($clientToken)
-    {
-        switch (TLA_TOKENTYPE)
-        {
-            case "Bearer":
-                return $this->generateBearerToken($clientToken);
-                break;
-            case "MAC":
-                return $this->generateMACToken($clientToken);
-                break;
-            default:
-                $this->log("bad token type? " . TLA_TOKENTYPE);
-                break;
-        }
-        return null;
-    }
 
-    private function randomString($length=0)
-    {
-        if ($length == 0)
-        {
-            $length = 10;
-        }
-        $resstring = "";
-        $chars = "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLNOPQRSTUVWXYZ.1234567890";
-        $len = strlen($chars);
-        for ($i = 0; $i < $length; $i++)
-        {
-            $x = rand(0, $len-1);
-            $resstring .= substr($chars, $x, 1);
-        }
-        return $resstring;
-    }
-
-
-    private function generateBearerToken($clientToken)
+    protected function generateBearerToken($clientToken)
     {
         global $ilUser, $ilDB;
 
@@ -139,7 +97,7 @@ class IdentityProvider extends Logger
         );
     }
 
-    private function generateMACToken($clientToken)
+    protected function generateMACToken($clientToken)
     {
         global $ilUser, $ilDB;
 
@@ -166,21 +124,17 @@ class IdentityProvider extends Logger
         );
     }
 
-    private function createIdentityToken($userid)
+    protected function storeIdentityToken($userid, $token)
     {
         global $ilDB;
 
-        $tokenid  = $this->randomString(7);
-
         $ilDB->insert("pwrtla_usertokens", array(
             "user_id"    => array("integer", $userid),
-            "user_token" => array("text", $tokenid)
+            "user_token" => array("text", $token)
         ));
-
-        return $tokenid;
     }
 
-    private function checkAuthPin($expirytime=0) {
+    private function checkAccessPin($expirytime=0) {
         global $ilUser, $ilDB;
 
         $retval = null;
@@ -328,7 +282,7 @@ class IdentityProvider extends Logger
             $now   = time();
             $dtime = 24 * 60 * 60 * 1000; // 1 day expiry time
 
-            $pin = $this->checkAuthPin($now - $dtime);
+            $pin = $this->checkAccessPin($now - $dtime);
             if (isset($pin))
             {
                 // invalidate the old pin
