@@ -30,7 +30,6 @@ class VLEService extends RESTling {
 
         // $service->allowCORS();
         // $service->addCORSHost('*', array('GET', 'POST', 'PUT'));
-
     }
 
     public function setVLE()
@@ -66,12 +65,22 @@ class VLEService extends RESTling {
     protected function initializeRun()
     {
         $this->response_type = "json";
+        // we do not know until this point which LMS we are dealing with
+        // in order to workaround greedy systems we need to grab our data
+        // as early as possible.
+        // $this->loadData();
 
-        if (!$this->VLE) {
-            $this->status = RESTling::UNINITIALIZED;
-        }
-        else {
-            parent::initializeRun();
+        if ($this->status == RESTling::OK)
+        {
+            // now the lms can work.
+            // moodle might be confused that something snatched the data first.
+
+            if (!$this->VLE) {
+                $this->status = RESTling::UNINITIALIZED;
+            }
+            else {
+                parent::initializeRun();
+            }
         }
     }
 }

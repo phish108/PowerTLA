@@ -142,7 +142,7 @@ abstract class LRSBase extends Logger
 
         foreach ($aOptions as $k => $v)
         {
-            switch ($types[k])
+            switch ($types[$k])
             {
                 case "text":
                     if (getType($v) == "array")
@@ -298,7 +298,7 @@ abstract class LRSBase extends Logger
 
                     if (isset($id) && !empty($id))
                     {
-                        $lrsOpts["actor_id"] = $id;
+                        $lrsOpts["agent_id"] = $id;
                     }
                     break;
                 case "verb":
@@ -368,13 +368,22 @@ abstract class LRSBase extends Logger
             }
 
             $actorid = null;
-            if (isset($statement["actor"]))
+            if (array_key_exists("actor", $statement))
             {
-                $actorid = $statement["actor"]["mbox"];
+                if (array_key_exists("mbox", $statement["actor"]))
+                {
+                    $actorid = $statement["actor"]["mbox"];
+                }
                 if (!isset($actorid) || empty($actorid))
                 {
-                    $actorid = $statement["actor"]["openid"];
-                    if (!isset($actorid) || empty($actorid))
+                    if (array_key_exists("openid", $statement["actor"]))
+                    {
+                        $actorid = $statement["actor"]["openid"];
+                    }
+                    if ((!isset($actorid) || empty($actorid)) &&
+                        array_key_exists("account", $statement["actor"]) &&
+                        array_key_exists("homepage",
+                                         $statement["actor"]["account"]))
                     {
                         $actorid = $statement["actor"]["account"]["homepage"];
                     }
@@ -382,11 +391,15 @@ abstract class LRSBase extends Logger
             }
 
             if (!$this->findStatementByUUID($uuid) &&
-               !(empty($actorid) ||
-                 empty($statement["verb"]) ||
-                 empty($statement["object"]) ||
-                 empty($statement["verb"]["id"]) ||
-                 empty($statement["object"]["id"])))
+                !empty($actorid) &&
+                array_key_exists("verb", $statement) &&
+                !empty($statement["verb"]) &&
+                array_key_exists("object", $statement) &&
+                !empty($statement["object"]) &&
+                array_key_exists("id", $statement["verb"]) &&
+                array_key_exists("id", $statement["object"]) &&
+                !empty($statement["verb"]["id"]) ||
+                !empty($statement["object"]["id"]))
             {
                 // verify the user
                 $userid = $this->getActorUserID($statement["actor"]);
@@ -394,9 +407,9 @@ abstract class LRSBase extends Logger
                 {
                     $lrsStatement = array();
                     $ts = $this->generateTimestamp();
-                    $statement["stored"] = ts;
+                    $statement["stored"] = $ts;
 
-                    if (!isset($statement["timestamp"]) ||
+                    if (!array_key_exists("timestamp", $statement) ||
                         empty($statement["timestamp"]))
                     {
                         $statement["timestamp"] = $ts;
@@ -419,7 +432,7 @@ abstract class LRSBase extends Logger
                     $lrsStatement["tsmonth"]        = $aTS[0] . $aTS[1];
                     $lrsStatement["tsday"]          = $aTS[0] . $aTS[1] . $aTS[2];
 
-                    $lrsStatement["actor_id"]     = $actorid;
+                    $lrsStatement["agent_id"]     = $actorid;
                     $lrsStatement["user_id"]      = $userid;
                     $lrsStatement["verb_id"]      = $statement["verb"]["id"];
                     $lrsStatement["object_id"]    = $statement["object"]["id"];

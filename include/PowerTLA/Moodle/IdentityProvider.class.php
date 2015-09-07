@@ -81,6 +81,7 @@ class IdentityProvider extends IDPBase
 
     public function findUserByToken($idtoken)
     {
+        global $DB;
         $retval = null;
         $tData = $this->loadTokenUser($idtoken);
         if (isset($tData) && array_key_exists("id", $tData))

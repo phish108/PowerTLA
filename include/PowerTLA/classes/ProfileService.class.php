@@ -10,6 +10,7 @@ class ProfileService extends VLEService
 
     protected function initializeRun()
     {
+        parent::initializeRun();
         $this->provider = $this->VLE->getIdentityProvider();
     }
 

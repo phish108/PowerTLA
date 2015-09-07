@@ -99,7 +99,8 @@ class VLEHandler extends Logger
 
             if(array_key_exists("openid", $agent))
             {
-                $token = array_pop(explode("/", $agent["openid"]));
+                $aTmp = explode("/", $agent["openid"]);
+                $token = array_pop($aTmp);
 
                 return $idp->findUserByToken($token);
             }
@@ -188,6 +189,7 @@ class VLEHandler extends Logger
 
             if (!$this->isGuestUser())
             {
+                $this->log("no guest privilege");
                 $privileges->writeObjectSelf = true;
             }
             $this->privileges = $privileges;
