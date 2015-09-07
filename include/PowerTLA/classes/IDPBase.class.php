@@ -15,8 +15,10 @@ abstract class IDPBase extends Logger
 
     abstract public function authenticate($credentials, $token);
     abstract public function logout($token);
+
     abstract public function isGuestUser();
     abstract public function getUserId();
+
     abstract public function findUserByToken($token);
     abstract public function findUserById($token);
 

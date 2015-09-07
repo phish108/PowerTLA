@@ -91,7 +91,9 @@ class LRSManager extends LRSBase
         return $document;
     }
 
-    protected function readActivtyStream($aOptions = [])
+    protected function readActivityStreamWithCallback($callback, $aOptions) {}
+
+    protected function readActivityStream($aOptions = [])
     {
         $aStream = array();
         $where = $this->buildWhere($aOptions);
@@ -151,21 +153,10 @@ class LRSManager extends LRSBase
         }
     }
 
-    protected function addStatement($aLRSStatement, $aOptions)
+    protected function addStatement($aLRSStatement)
     {
-        $dbstatement = array(
-            "statement" => array("text", json_encode($aStatement))
-        );
-
-        foreach ($aOptions as $col => $val)
-        {
-            if (array_key_exists($col, self::$DocumentTypes))
-            {
-                $dbstatement[$col] = $aOptions[$col];
-            }
-        }
         $this->db->insert_record("pwrtla_xapistatements",
-                                 array((object)$dbstatement));
+                                 $aLRSStatement);
     }
 
     protected function updateStatement($aLRSStatement, $aOptions)
