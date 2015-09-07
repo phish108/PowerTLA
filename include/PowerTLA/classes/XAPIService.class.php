@@ -77,13 +77,26 @@ class XAPIService extends VLEService
              *
              * The VLE handler may extend this to certain contexts.
              */
+
+            // load the core capabilities
+            $privs = $this->VLE->getPrivileges($this->queryParam);
+            // check writeObjectSelf because we allow only authenticated users to
+            // access the LRS. Only authenticated users have the privilege
+            // to access the LRS, guestusers are excluded
+            if (!$privs ||
+                !$privs->writeObjectSelf)
+            {
+                $this->status = RESTling::OPERATION_FORBIDDEN;
+            }
         }
 
-        if ($this->status == RESTling::OK)
+        if ($this->status == RESTling::OK &&
+            $privs)
         {
             $this->log("verify functional query params for " . $api);
             /**
-             * verify that the different operations are valid
+             * Need to verify that the active user is the same as the
+             * user in the provided actions.
              */
 
             if($op == "put_statements")
@@ -145,6 +158,23 @@ class XAPIService extends VLEService
                         }
                         break;
                     case "statements":
+                        if (!$this->queryParam["agent"])
+                        {
+                            if (!($privs->readObject ||
+                                  $privs->readContext))
+                            {
+                                $this->status = RESTling::OPERATION_FORBIDDEN;
+                            }
+                        }
+                        else
+                        {
+                            if ($agentO["_system"] != $this->VLE->getUserId() &&
+                                !($privs->readObject ||
+                                  $privs->readContext))
+                            {
+                                $this->state = RESTling::OPERATION_FORBIDDEN;
+                            }
+                        }
                         break;
                     default:
                         $this->state = RESTling::BAD_DATA;

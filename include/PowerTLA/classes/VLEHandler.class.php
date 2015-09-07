@@ -57,7 +57,7 @@ class VLEHandler extends Logger
 
     public function getUserId()
     {
-        return $this->getIdentityProvider()->isGuestUser();
+        return $this->getIdentityProvider()->getUserId();
     }
 
     public function getUserToken()
