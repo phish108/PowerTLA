@@ -102,11 +102,17 @@ class LRSManager extends LRSBase
 
     protected function readActivityStream($aOptions = [])
     {
+        if(array_key_exists("agent", $aOptions))
+        {
+            // because our own stupid logic requires this :(
+            unset($aOptions["agent"]);
+        }
+
+        // note: moodle sumbles upon question mark
         $aStream = array();
         $where = $this->buildWhere($aOptions);
         if (isset($where) && !empty($where))
         {
-            $this->log("where? " . $where);
             $records = $this->db->get_records_select("pwrtla_xapistatements",
                                                      $where);
             foreach ($records as $s)
@@ -119,12 +125,22 @@ class LRSManager extends LRSBase
 
     protected function readDocument($aOptions = [])
     {
+        if(array_key_exists("agent", $aOptions))
+        {
+            // because our own stupid logic requires this :(
+            unset($aOptions["agent"]);
+        }
         $aStream = array();
         $where = $this->buildWhere($aOptions);
         if (isset($where) && !empty($where))
         {
-            $records = $this->db->get_records_select("pwrtla_xapidocuments",
-                                                     $where);
+            if(array_key_exists("agent", $opts))
+            {
+                // because our own stupid logic requires this :(
+                unset($aOptions["agent"]);
+            }
+            $records = $this->db->get_records("pwrtla_xapidocuments",
+                                              $aOptions);
             foreach ($records as $s)
             {
                 $aStream[] = json_decode($s->document);
@@ -135,6 +151,11 @@ class LRSManager extends LRSBase
 
     protected function readActivtyStreamWithCallback($cb, $aOptions = [])
     {
+        if(array_key_exists("agent", $aOptions))
+        {
+            // because our own stupid logic requires this :(
+            unset($aOptions["agent"]);
+        }
         $where = $this->buildWhere($aOptions);
         if (isset($where) && !empty($where))
         {
@@ -149,6 +170,11 @@ class LRSManager extends LRSBase
 
     protected function readDocumentWithCallback($cb, $aOptions = [])
     {
+        if(array_key_exists("agent", $aOptions))
+        {
+            // because our own stupid logic requires this :(
+            unset($aOptions["agent"]);
+        }
         $where = $this->buildWhere($aOptions);
         if (isset($where) && !empty($where))
         {
@@ -163,12 +189,22 @@ class LRSManager extends LRSBase
 
     protected function addStatement($aLRSStatement)
     {
+        if(array_key_exists("agent", $aLRSStatement))
+        {
+            // because our own stupid logic requires this :(
+            unset($aLRSStatement["agent"]);
+        }
         $this->db->insert_record("pwrtla_xapistatements",
                                  $aLRSStatement);
     }
 
     protected function updateStatement($aLRSStatement, $aOptions)
     {
+        if(array_key_exists("agent", $aOptions))
+        {
+            // because our own stupid logic requires this :(
+            unset($aOptions["agent"]);
+        }
         $where = $this->buildWhere($aOptions);
         if (isset($aStatement) &&
             !isset($where) &&
@@ -181,6 +217,11 @@ class LRSManager extends LRSBase
     }
     protected function deleteStatement($aOptions)
     {
+        if(array_key_exists("agent", $aOptions))
+        {
+            // because our own stupid logic requires this :(
+            unset($aOptions["agent"]);
+        }
         if($where = $this->buildWhere($aOptions))
         {
             $this->db->delete_records_select("pwrtla_xapistatements",
@@ -191,23 +232,25 @@ class LRSManager extends LRSBase
     protected function addDocument($aDocument, $aOptions)
     {
         $dbstatement = array(
-            "document" => array("text", json_encode($aDocument))
+            "document" => json_encode($aDocument)
         );
 
         foreach ($aOptions as $col => $val)
         {
-            if (array_key_exists($col, self::$DocumentTypes))
-            {
-                $dbstatement[$col] = array(self::$DocumentTypes[$col],
-                                           $aOptions[$col]);
-            }
+            $dbstatement[$col] = $aOptions[$col];
         }
+
         $this->db->insert_record("pwrtla_xapidocuments",
-                                 array((object)$dbstatement));
+                                 $dbstatement);
     }
 
     protected function updateDocument($aDocument, $aOptions)
     {
+        if(array_key_exists("agent", $aOptions))
+        {
+            // because our own stupid logic requires this :(
+            unset($aOptions["agent"]);
+        }
         $where = $this->buildWhere($aOptions);
         if (isset($aDocument) &&
             !isset($where) &&
@@ -221,6 +264,11 @@ class LRSManager extends LRSBase
 
     protected function deleteDocument($aOptions)
     {
+        if(array_key_exists("agent", $aOptions))
+        {
+            // because our own stupid logic requires this :(
+            unset($aOptions["agent"]);
+        }
         if($where = $this->buildWhere($aOptions))
         {
             $this->db->delete_records_select("pwrtla_xapidocuments",

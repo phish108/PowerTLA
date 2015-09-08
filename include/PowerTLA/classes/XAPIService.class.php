@@ -43,7 +43,6 @@ class XAPIService extends VLEService
         if (array_key_exists("agent", $this->queryParam))
         {
             $agent    = $this->queryParam["agent"];
-            $this->log("agent param is " . $agent);
         }
 
         if (isset($agent) && !empty($agent))
@@ -99,7 +98,6 @@ class XAPIService extends VLEService
         if ($this->status == RESTling::OK &&
             isset($privs))
         {
-            $this->log("verify functional query params for " . $api);
             /**
              * Need to verify that the active user is the same as the
              * user in the provided actions.
@@ -216,7 +214,6 @@ class XAPIService extends VLEService
     protected function get_statements()
     {
         // get the activity stream
-        $this->log("get statements");
         if (array_key_exists("statementId", $this->queryParam))
         {
             $this->lrs->getAction($this->queryParam["statementId"]);
@@ -240,7 +237,6 @@ class XAPIService extends VLEService
         }
         else
         {
-            $this->log("process incoming stream " . json_encode($this->inputData));
             $this->data = $this->lrs->processStatementStream($this->inputData);
         }
     }
@@ -278,6 +274,7 @@ class XAPIService extends VLEService
 
     private function createDocument()
     {
+        $this->data = [];
         if (!$this->lrs->createDocument($this->inputData,
                                         $this->queryParam))
         {
@@ -287,6 +284,7 @@ class XAPIService extends VLEService
 
     private function updateDocument()
     {
+        $this->data = [];
         if (!$this->lrs->storeDocument($this->inputData,
                                        $this->queryParam))
         {
@@ -296,6 +294,7 @@ class XAPIService extends VLEService
 
     private function deleteDocument()
     {
+        $this->data = [];
         if (!$this->lrs->removeDocument($this->inputData,
                                         $this->queryParam))
         {
@@ -310,7 +309,7 @@ class XAPIService extends VLEService
 
     protected function put_agents_profile()
     {
-        $this->createtDocument();
+        $this->createDocument();
     }
 
     protected function post_agents_profile()
@@ -333,7 +332,7 @@ class XAPIService extends VLEService
 
     protected function put_activities_profile()
     {
-        $this->createtDocument();
+        $this->createDocument();
     }
 
     protected function post_activities_profile()
@@ -355,7 +354,7 @@ class XAPIService extends VLEService
 
     protected function put_activities_state()
     {
-        $this->createtDocument();
+        $this->createDocument();
     }
 
     protected function post_activities_state()

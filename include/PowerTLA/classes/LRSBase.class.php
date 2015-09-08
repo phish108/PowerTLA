@@ -298,6 +298,7 @@ abstract class LRSBase extends Logger
 
                     if (isset($id) && !empty($id))
                     {
+                        $lrsOpts["agent"] = $value;
                         $lrsOpts["agent_id"] = $id;
                     }
                     break;
@@ -455,7 +456,6 @@ abstract class LRSBase extends Logger
 
                     if ($lrsStatement["verb_id"] == LRSBase::VERB_VOIDED)
                     {
-                        $this->log("void statement " . $uuid);
                         $this->voidStatement($lrsStatement["object_id"], $uuid);
                     }
                     return $uuid;
@@ -473,11 +473,9 @@ abstract class LRSBase extends Logger
         $retval = array();
         if (isset($aStream) && gettype($aStream) == "array")
         {
-            $this->log("process " . count($aStream) . " statements");
             $retval = array();
             foreach ($aStream as $st)
             {
-                $this->log("handle one statement " . $st["id"]);
                 $uuid = $this->handleStatement($st);
                 if (isset($uuid))
                 {
@@ -494,6 +492,7 @@ abstract class LRSBase extends Logger
     public function getStream($getOptions)
     {
         $opts = $this->translateGetOptions($getOptions);
+
         return $this->readActivityStream($opts);
     }
 
@@ -590,7 +589,7 @@ abstract class LRSBase extends Logger
 
     public function storeDocument($doc, $getOptions)
     {
-        if (!isset($getOptions))
+        if (isset($getOptions))
         {
             $opts = $this->translateGetOptions($getOptions);
             $oDoc = $this->readDocument($opts);
@@ -606,16 +605,27 @@ abstract class LRSBase extends Logger
 
     public function createDocument($doc, $getOptions)
     {
-        if (!isset($getOptions))
+        if (isset($getOptions))
         {
-            $opts = $this->translateGetOptions($getOptions);
-            $oDoc = $this->readDocument($opts);
+            $optsT = $this->translateGetOptions($getOptions);
+
+            $oDoc = $this->readDocument($optsT);
             if (!isset($oDoc) || count($oDoc) == 0)
             {
-                $uuid = $this->db->generateUUID();
-                $opts["uuid"] = $uuid;
+                $opts  = $this->translateGetOptions($getOptions);
+                //$uuid = $this->generateUUID();
+                // $opts["uuid"] = $uuid;
+                $ts = $this->generateTimestamp();
+                $aTS = preg_split('/\D/ ', $ts);
+                // pop seconds
+                array_splice($aTS, 5);
+
+                $opts["stored"] = implode("", $aTS);
                 $this->addDocument($doc, $opts);
                 return true;
+            }
+            else {
+                $this->log("could not create document");
             }
         }
         return false;
@@ -623,7 +633,7 @@ abstract class LRSBase extends Logger
 
     public function removeDocument($getOptions)
     {
-        if (!isset($getOptions))
+        if (isset($getOptions))
         {
             $opts = $this->translateGetOptions($getOptions);
             $oDoc = $this->readDocument($opts);
