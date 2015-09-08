@@ -476,6 +476,7 @@
         bSync = false;
         oldStream = oldStream.concat(upstream);
         upstream = [];
+        pushState();
     }
 
     function cbError(req) {
@@ -499,7 +500,6 @@
                     "objectType": "Agent",
                     "openid": idurl + "/user/" + data.id
                 };
-                console.log("local actor id : " + localActor.openid);
 
                 if (!actor ||
                     !actor.objectType) {
@@ -515,16 +515,12 @@
             rsd.engine.servicelink) {
             idurl = rsd.engine.servicelink;
         }
-        console.log(idurl);
         rsd.apis.some(function (api) {
             if (api.name === "org.ieee.papi") {
-                console.log(api.link);
                 idurl += api.link;
                 return true;
             }
         });
-
-        console.log(idurl);
 
         // now we have the link, fetch the data
         if (idurl &&
@@ -553,7 +549,10 @@
         }
 
         function fetchSuccess(data) {
+            console.log("helo old stream?");
             oldStream = data;
+            console.log(oldStream);
+
 //            uuidMap = {};
 //            oldStream.forEach(function (a, i) {
 //                uuidMap[a.id] = i;
@@ -698,11 +697,11 @@
                 var atmp = [
                     "agent=" + encodeURIComponent(stateDocs[uuid].agent),
                     "activityId=" + encodeURIComponent(stateDocs[uuid].activityId),
-                    "stateId" + encodeURIComponent(stateDocs[uuid].stateId)
+                    "stateId=" + encodeURIComponent(stateDocs[uuid].stateId)
                 ];
 
                 var surl = url + "?" + atmp.join("&");
-
+                console.log(surl);
                 jq.ajax({
                     type: "PUT",
                     url: surl,
@@ -710,7 +709,7 @@
                     contentType: 'application/json',
                     success: cbPushStateOK,
                     error: cbStateError,
-                    data: JSON.stringify(upstream)
+                    data: JSON.stringify(stateDocs[uuid].doc)
                 });
             });
         }
@@ -785,7 +784,6 @@
                     }
                 });
             }
-            console.log(myServiceURL);
         }
     }
 

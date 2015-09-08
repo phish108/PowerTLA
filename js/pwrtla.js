@@ -67,7 +67,7 @@ $("#content-stop").bind("click", function() {
 
     // now we can store the document
 
-    lrs.pushState();
+    // lrs.pushState();
 
 });
 
