@@ -582,7 +582,7 @@ abstract class LRSBase extends Logger
         $opts = $this->translateGetOptions($getOptions);
         $dl = $this->readDocument($opts);
         if (count($dl) == 1) {
-            return $dl[0];
+            return array_pop($dl);
         }
         return null;
     }

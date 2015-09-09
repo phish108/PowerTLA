@@ -333,7 +333,7 @@
         if (uuid &&
             ongoing.hasOwnProperty(uuid)) {
             var now = new Date();
-            var duration = "P";
+            var duration = "";
 
             if (result &&
                 typeof result === "object") {
@@ -353,25 +353,24 @@
                 });
                 if (!bad) {
                     ongoing[uuid].action.result = cloneObject(result);
-
-                    // add duration
-                    var dt, s, m, h;
-
-                    dt = now - ongoing[uuid].start;
-
-                    s = Math.floor(dt/1000);
-                    m = Math.floor(s/60);
-                    h = Math.floor(m/60);
-
-                    s = s - m*60;
-                    m = m - h*60;
-
-                    duration = "PT" + h + "H" + m + "M" + s + "S";
                 }
             }
             else {
                 ongoing[uuid].action.result = {};
             }
+            // add duration
+            var dt, s, m, h;
+
+            dt = now - ongoing[uuid].start;
+
+            s = Math.floor(dt/1000);
+            m = Math.floor(s/60);
+            h = Math.floor(m/60);
+
+            s = s - m*60;
+            m = m - h*60;
+
+            duration = "PT" + h + "H" + m + "M" + s + "S";
 
             ongoing[uuid].action.result.duration = duration;
 
@@ -716,8 +715,44 @@
     /**
      * fetch state document from the server
      */
-    function fetchState() {
-        return;
+    function fetchState(cbDocument, objectId, stateId, agent) {
+
+        function cbFetchStateOK (retDoc) {
+            if (typeof cbDocument === "function") {
+                console.log("received document");
+                console.log(retDoc);
+                cbDocument.call(LRS, retDoc);
+            }
+        }
+
+        function cbFetchError(xhr, m) {
+            console.log("fetch document: server problem " + xhr.status + " => "+ m);
+        }
+
+        if (jq &&
+            myServiceURL) {
+            if (!agent) {
+                agent = localActor;
+            }
+
+            var sAgent = JSON.stringify(agent);
+
+            var url = myServiceURL + "/activities/state";
+            var aParam = [];
+            aParam.push("stateId=" + encodeURIComponent(stateId));
+            aParam.push("activityId=" + encodeURIComponent(objectId));
+            aParam.push("agent=" + encodeURIComponent(sAgent));
+
+            url += "?" + aParam.join("&");
+
+            jq.ajax({
+                type: "GET",
+                url: url,
+                dataType: 'json',
+                success: cbFetchStateOK,
+                error: cbFetchError
+            });
+        }
     }
 
     /**
@@ -863,6 +898,8 @@
 
     LRS.fetch         = fetchStream;
     LRS.fetchAdmin    = fetchAdminStream;
+    LRS.fetchState    = fetchState;
+
     LRS.push          = pushStream;
     LRS.pushState     = pushState;
 
