@@ -72,7 +72,6 @@ class XAPIService extends VLEService
             (!isset($agentInfo) ||
             !$this->VLE->checkAgentProfile($agentInfo)))
         {
-            $this->log("run acl");
             /**
              * the acl can be only reltive to the context.
              *
@@ -249,9 +248,9 @@ class XAPIService extends VLEService
     }
 
     // Agent Document API
-    private function getDocument()
+    private function getDocument($type)
     {
-        if ($type == "state")
+        if ($type == "activities_state")
         {
             if (!array_key_exists("stateId", $this->queryParam))
             {
@@ -272,7 +271,7 @@ class XAPIService extends VLEService
         }
     }
 
-    private function createDocument()
+    private function createDocument($type)
     {
         $this->data = [];
         if (!$this->lrs->createDocument($this->inputData,
@@ -282,7 +281,7 @@ class XAPIService extends VLEService
         }
     }
 
-    private function updateDocument()
+    private function updateDocument($type)
     {
         $this->data = [];
         if (!$this->lrs->storeDocument($this->inputData,
@@ -292,7 +291,7 @@ class XAPIService extends VLEService
         }
     }
 
-    private function deleteDocument()
+    private function deleteDocument($type)
     {
         $this->data = [];
         if (!$this->lrs->removeDocument($this->inputData,
@@ -304,22 +303,22 @@ class XAPIService extends VLEService
 
     protected function get_agents_profile()
     {
-        $this->getDocument();
+        $this->getDocument("agents_profile");
     }
 
     protected function put_agents_profile()
     {
-        $this->createDocument();
+        $this->createDocument("agents_profile");
     }
 
     protected function post_agents_profile()
     {
-        $this->updateDocument();
+        $this->updateDocument("agents_profile");
     }
 
     protected function delete_agents_profile()
     {
-        $this->deleteDocument();
+        $this->deleteDocument("agents_profile");
     }
 
     // Activities Document API
@@ -327,44 +326,44 @@ class XAPIService extends VLEService
     // activity profiles
     protected function get_activities_profile()
     {
-        $this->getDocument();
+        $this->getDocument("activities_profile");
     }
 
     protected function put_activities_profile()
     {
-        $this->createDocument();
+        $this->createDocument("activities_profile");
     }
 
     protected function post_activities_profile()
     {
-        $this->updateDocument();
+        $this->updateDocument("activities_profile");
     }
 
     protected function delete_activities_profile()
     {
-        $this->deleteDocument();
+        $this->deleteDocument("activities_profile");
     }
 
     // state api
 
     protected function get_activities_state()
     {
-        $this->getDocument();
+        $this->getDocument("activities_state");
     }
 
     protected function put_activities_state()
     {
-        $this->createDocument();
+        $this->createDocument("activities_state");
     }
 
     protected function post_activities_state()
     {
-        $this->updateDocument();
+        $this->updateDocument("activities_state");
     }
 
     protected function delete_activities_state()
     {
-        $this->deleteDocument();
+        $this->deleteDocument("activities_state");
     }
 }
 
