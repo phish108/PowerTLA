@@ -54,15 +54,14 @@
             switch (request.status) {
                 case 401:
                 case 403:
-                    glob.console.log("no authenticated");
                     break;
                 default:
-                    if (request.status < 100) {
-                        glob.console.log("connection error: " + msg);
-                    }
-                    else {
-                        glob.console.log("server error " + msg);
-                    }
+//                    if (request.status < 100) {
+//                        // internal error
+//                    }
+//                    else {
+//                        // server error
+//                    }
                     break;
             }
         }
@@ -113,7 +112,6 @@
 
     if (glob.define && glob.define.amd) {
         // RequireJS  stuff
-        glob.console.log("use RequireJS");
         glob.define(["jquery"], function ($) { jq = $; return IDP;});
     }
     else {

@@ -5,10 +5,9 @@
 /*jslint todo: true */
 /*jslint unparam: true */
 /*jslint bitwise: true*/
-/*jslint devel: true*/
 /*jslint plusplus: true*/
 
-/*global lrs, rsd, console, $, jQuery*/
+/*global lrs, rsd, $, jQuery*/
 
 /**
  * PART 1 BUSINESS LOGIC

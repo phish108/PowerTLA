@@ -479,10 +479,10 @@
      */
     function pushState() {
         function cbPushStateOK() {
-            console.log("state has been set to lrs");
+            return;
         }
         function cbStateError(xhr, msg) {
-            console.error("state couldn't get sent to lrs: " + msg);
+            return;
         }
 
         if (jq &&
@@ -496,7 +496,6 @@
                 ];
 
                 var surl = url + "?" + atmp.join("&");
-                console.log(surl);
                 jq.ajax({
                     type: "PUT",
                     url: surl,
@@ -527,9 +526,7 @@
      * via setActor();
      */
     function initLocalActor() {
-        console.log("init local actor");
         function cbLoadActorSuccess(data) {
-            console.log("got actor");
             if (data &&
                 data.id) {
                 localActor = {
@@ -560,7 +557,6 @@
         // now we have the link, fetch the data
         if (idurl &&
             jq) {
-            console.log(idurl);
             jq.ajax({
                 type: "GET",
                 url: idurl,
@@ -584,9 +580,7 @@
         }
 
         function fetchSuccess(data) {
-            console.log("helo old stream?");
             oldStream = data;
-            console.log(oldStream);
 
 //            uuidMap = {};
 //            oldStream.forEach(function (a, i) {
@@ -685,16 +679,12 @@
             !bSync) {
             bSync = true;
 
-            console.log(stream);
-
             if (upstream) {
                 upstream = upstream.concat(stream);
             }
             else {
                 upstream = stream;
             }
-
-            console.log(upstream);
 
             // flush the stream
             stream  = [];
@@ -719,14 +709,12 @@
 
         function cbFetchStateOK (retDoc) {
             if (typeof cbDocument === "function") {
-                console.log("received document");
-                console.log(retDoc);
                 cbDocument.call(LRS, retDoc);
             }
         }
 
         function cbFetchError(xhr, m) {
-            console.log("fetch document: server problem " + xhr.status + " => "+ m);
+            return;
         }
 
         if (jq &&

@@ -5,7 +5,6 @@
 /*jslint todo: true */
 /*jslint unparam: true */
 /*jslint bitwise: true*/
-/*jslint devel: true*/
 
 /*global global*/
 
@@ -14,10 +13,13 @@
     var jq,
         rsd;
 
+    /**
+     * moves one directory up on a given path.
+     */
     function dirname(path) {
         if (path !== "/") {
             var aDir = path.split("/");
-            if (aDir && aDir.length) {
+            if (aDir && aDir.length > 1) {
                 aDir.pop();
             }
 
@@ -27,10 +29,27 @@
         return path;
     }
 
+    /**
+     * Remote Service Definition accessor.
+     *
+     * returns the RSD object or undefined (if not yet loaded)
+     */
     function getRSD() {
         return rsd;
     }
 
+    /**
+     * tries to load the remote service definition from the active href.
+     *
+     * if no RSD meta-tag is provided in the document, this function will
+     * try to detect the RSD by traversing the href path and look for
+     * PowerTLA's rsd.php
+     *
+     * The function accepts a callback function that will be called when
+     * the detection process terminates. If no RSD can be found, the
+     * callback will receive and empty rsd object (without any properties).
+     * Otherwise the identified rsd will be provided.
+     */
     function loadRSD(cbFunc, bind) {
         if (!bind) {
             bind = RSD;
@@ -59,7 +78,6 @@
                             tryRSDPath();
                         }
                         else {
-                            glob.console.log("cannot load rsd " + msg);
                             // call with an empty document
                             cbFunc.call(bind, {});
                         }
@@ -72,17 +90,56 @@
         tryRSDPath();
     }
 
+    /**
+     * builds a request URL for the given protocol.
+     *
+     * if the protocol is not provided by the service this function
+     * will return undefined.
+     *
+     * The function accepts an optional array containing url
+     * encoded path parameters.
+     */
+    function getServiceURL(protocol, pathParam) {
+        var retval;
+        if (rsd &&
+            rsd.hasOwnProperty("apis")) {
+
+            var url = rsd.engine.servicelink;
+            rsd.apis.some(function (spr) {
+
+                if (spr.name === protocol) {
+
+                    retval = url + spr.link;
+                    return true;
+                }
+            });
+            if (retval &&
+                Array.isArray(pathParam)) {
+
+                retval += "?" + pathParam.join("/");
+            }
+        }
+        return retval;
+    }
+
+    /**
+     * initialises the RSD process.
+     *
+     * This method emits the rsdready event when the initialisation has completed.
+     */
     function init() {
         RSD.load(function() {
-            jq(document).trigger("rsdready");
-        })
+            jq(glob.document).trigger("rsdready");
+        });
     }
 
     /** ******************************************************************
      * Define external accessors
      */
-    RSD.get   = getRSD;
-    RSD.load  = loadRSD;
+
+    RSD.get        = getRSD;
+    RSD.load       = loadRSD;
+    RSD.serviceURL = getServiceURL;
 
     /** ******************************************************************
      * Expose the LRS API
@@ -90,8 +147,8 @@
 
     if (glob.define && glob.define.amd) {
         // RequireJS  stuff
-        glob.define(["jquery"], function ($) {
-            jq = $;
+        glob.define(["jquery"], function (jQuery) {
+            jq = jQuery;
             init();
             return RSD;
         });
