@@ -5,10 +5,13 @@
 /*jslint todo: true */
 /*jslint unparam: true */
 /*jslint bitwise: true*/
-/*jslint devel: true*/
 
 /*global global, rsd*/
 
+/**
+ * Frontend Component for accessing the PowerTLA LRS. This service abstracts
+ * XAPI statement generation and process management
+ */
 (function (glob) {
     /** ******************************************************************
      * Private Members
@@ -29,7 +32,6 @@
          */
         stream      = [], ///< contains those actions that need to go back to the lrs
         oldStream   = [], ///< parts of the stream that come form the lrs
-        adminStream = [], ///< all related actions
         upstream    = [], ///< upload cache
 
         /**
@@ -78,7 +80,7 @@
         LRS = {};
 
     /**
-     * Helper function to create random UUIDs
+     * Helper function for creating random UUIDs
      */
     function makeUUID() {
         var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx',
@@ -128,6 +130,9 @@
 
     /**
      * returns a unmutable copy of the stream
+     *
+     * This function combines any previous data (provided by the server) with any
+     * newly recorded statements.
      */
     function getStream() {
         return cloneObject(stream.concat(oldStream));
@@ -138,7 +143,7 @@
      *
      * Provides a safe way for setting and unsetting action contexts.
      *
-     * This function accepts an action context object.
+     * This function accepts a partial action context object. (see Context in the Spec)
      *
      * It will *extend* any existing activty context that is already active.
      */
@@ -192,6 +197,8 @@
 
     /**
      * Removes a partial context from the activty context
+     *
+     * This function expects a partial context obejct.
      */
     function endContext(nContext) {
         if (typeof nContext === 'object') {
@@ -219,6 +226,8 @@
 
     /**
      * sets an actor by PowerTLA token.
+     *
+     * This function ONLY sets valid actor statements.
      */
     function setActor(nActor) {
         var tActor = {"objectType": "Agent"};
@@ -292,13 +301,13 @@
      * The combination of startAction() and endAction is useful for the
      * automatic timing of durations.
      */
-    function startAction(verbid, object) {
+    function startAction(verbid, objectid) {
         var uuid;
 
         if (verbid &&
             verbid.length &&
-            object &&
-            object.length) {
+            objectid &&
+            objectid.length) {
 
             uuid = makeUUID();
 
@@ -312,7 +321,7 @@
                     id: verbid
                 },
                 "object": {
-                    id: object
+                    id: objectid
                 }
             };
 
@@ -327,7 +336,15 @@
     }
 
     /**
-     * ends an action and marks it for delivery
+     * ends an action and marks it for delivery to the remote LRS.
+     *
+     * This method accepts an optional result object (as defined by the spec).
+     *
+     * This method requires a UUID pointing to an unfinished action that was
+     * initiated with startAction().
+     *
+     * Actions that were previously finished cannot be extended using this
+     * method.
      */
     function finishAction(uuid, result) {
         if (uuid &&
@@ -358,7 +375,8 @@
             else {
                 ongoing[uuid].action.result = {};
             }
-            // add duration
+
+            // add the real duration
             var dt, s, m, h;
 
             dt = now - ongoing[uuid].start;
@@ -383,6 +401,10 @@
 
     /**
      * writes an action directly to the activity stream
+     *
+     * This function is pretty much like a combination of
+     * startAction() and finishAction(), while it won't touch any duration
+     * property if provided.
      *
      * returns the new UUID
      *
@@ -448,7 +470,17 @@
         return stream[stream.length - 1];
     }
 
-    // The statedoc inherits the actor and the
+    /**
+     * Sets a Activities State Doucment
+     *
+     * The function expects a UUID as stateId. This uuid must be the
+     * same UUID as the action UUID relating to this state.
+     *
+     * Therefore, stateId should be read as "statementId".
+     *
+     * The document inherits the actor and the object from the originating
+     * action statement.
+     */
     function setStateDoc(stateid, doc) {
         if (typeof doc === "object" &&
             uuidMap.hasOwnProperty(stateid)) {
@@ -463,6 +495,11 @@
         }
     }
 
+    /**
+     * returns an activity state document for a given stateId.
+     *
+     * This function will not lookup state documents from the server!
+     */
     function getStateDoc(stateid) {
         if (stateDocs.hasOwnProperty(stateid)) {
             return stateDocs[stateid].doc;
@@ -473,9 +510,10 @@
      * callback functions for network requrests
      */
 
-
     /**
-     * push the state documents to the server
+     * push the *new* actions in the activity stream to the server.
+     *
+     * This function forbids 2 simultaneous transmissions to the LRS.
      */
     function pushState() {
         function cbPushStateOK() {
@@ -509,6 +547,11 @@
         }
     }
 
+    /**
+     * Helper function to complete pushing statements to the server.
+     *
+     * This is function will forward any state documents to the server, if present.
+     */
     function pushSuccess() {
         bSync = false;
         oldStream = oldStream.concat(upstream);
@@ -516,6 +559,9 @@
         pushState();
     }
 
+    /**
+     * helper to reset the transmission lock.
+     */
     function cbError(req) {
         bSync = false;
     }
@@ -524,6 +570,11 @@
      * loads the actor data from the local PowerTLA service.
      * The local actor is the default actor, if no other actor is set
      * via setActor();
+     *
+     * Note that this function is called internally to identify the
+     * presently authenticated actor. Therefore, it is not necessary to
+     * initialize the actor if only actions for the local user are
+     * called.
      */
     function initLocalActor() {
         function cbLoadActorSuccess(data) {
@@ -568,71 +619,15 @@
     }
 
     /**
-     * download the activity stream for the active user from the server.
+     * generic function to download any activity stream from the LRS.
      */
     function fetchStream(options, cbFunc, bind) {
         if (!bind) {
             bind = LRS;
         }
 
-        if (!localActor || !localActor.objectType) {
-            throw "no authorized actor";
-        }
-
         function fetchSuccess(data) {
-            oldStream = data;
-
-//            uuidMap = {};
-//            oldStream.forEach(function (a, i) {
-//                uuidMap[a.id] = i;
-//            });
-
-            cbFunc.call(bind, oldStream);
-        }
-
-         if (jq && myServiceURL) {
-            var aopts = [];
-            if (options.hasOwnProperty("verb")) {
-                aopts.push("verb=" + encodeURIComponent(options.verb));
-            }
-            if (options.hasOwnProperty("object")) {
-                aopts.push("activity=" + encodeURIComponent(options.object));
-            }
-            if (options.hasOwnProperty("activity")) {
-                aopts.push("activity=" + encodeURIComponent(options.activty));
-            }
-
-            var uri = myServiceURL + "/statements";
-
-            aopts.push("agent=" + encodeURIComponent(JSON.stringify(localActor)));
-
-            if (aopts.length) {
-                uri += "?" + aopts.join("&");
-            }
-
-
-            jq.ajax({
-                type: "GET",
-                url: uri,
-                dataType: 'json',
-                success: fetchSuccess,
-                error: cbError
-            });
-        }
-    }
-
-    function fetchAdminStream(options, cbFunc, bind) {
-        if (!bind) {
-            bind = LRS;
-        }
-
-        if (!localActor || !localActor.objectType) {
-            throw "no authorized actor";
-        }
-
-        function fetchSuccess(data) {
-            adminStream = data;
-            cbFunc.call(bind, adminStream);
+            cbFunc.call(bind, data);
         }
 
         if (jq && myServiceURL) {
@@ -645,6 +640,9 @@
             }
             if (options.hasOwnProperty("activity")) {
                 aopts.push("activity=" + encodeURIComponent(options.activty));
+            }
+            if (options.hasOwnProperty("agent")) {
+                aopts.push("agent=" + encodeURIComponent(options.agent));
             }
 
             var uri = myServiceURL + "/statements";
@@ -662,6 +660,73 @@
                 }
             });
         }
+    }
+
+    /**
+     * download the activity stream for the active user from the server.
+     *
+     * This will fetch the activity stream of the presently authenticated actor
+     * (aka localActor) and NOT the actor set by setActor().
+     *
+     * Note that this function will override any actor setting provided
+     * in the options.
+     *
+     * This function will alter the internal activity stream.
+     */
+    function fetchMyStream(options, cbFunc, bind) {
+        if (!bind) {
+            bind = LRS;
+        }
+
+        if (!localActor || !localActor.objectType) {
+            throw "no authorized actor";
+        }
+
+        if (!options) {
+            options = {};
+        }
+
+        function cbSuccess(stream) {
+            oldStream = stream;
+            if (typeof cbFunc === "function") {
+                cbFunc.call(bind, stream);
+            }
+        }
+
+        options.agent = JSON.stringify(localActor);
+        fetchStream(options, cbSuccess, LRS);
+    }
+
+    /**
+     * Variant for fetching the activitiy stream for the set actor.
+     *
+     * Note that this function will override any actor setting provided
+     * in the options.
+     *
+     * This function will alter the internal activity stream.
+     */
+    function fetchActorStream(options, cbFunc, bind) {
+        if (!bind) {
+            bind = LRS;
+        }
+
+        if (!actor || !actor.objectType) {
+            throw "no actor set"; // should never happen
+        }
+
+        if (!options) {
+            options = {};
+        }
+
+        function cbSuccess(stream) {
+            oldStream = stream;
+            if (typeof cbFunc === "function") {
+                cbFunc.call(bind, stream);
+            }
+        }
+
+        options.agent = JSON.stringify(actor);
+        fetchStream(options, cbSuccess, LRS);
     }
 
     /**
@@ -746,21 +811,41 @@
     /**
      * Local Storage Persistency Layer
      */
+
+    /**
+     * store the locally added actions and statedocs to localStorage.
+     */
     function storeStream() {
         if (glob.localStorage) {
             glob.localStorage.setItem("prwtlaXAPIStream", JSON.stringify(stream));
             glob.localStorage.setItem("pwrtlaXAPIState", JSON.stringify(stateDocs));
+            glob.localStorage.setItem("pwrtlaXAPIOngoing", JSON.stringify(ongoing));
         }
     }
 
+    /**
+     * load stream and state documents from localStorage.
+     */
     function loadStream() {
         if (glob.localStorage) {
-            var sStream = glob.localStorage.setItem("prwtlaXAPIStream"),
-                sState  = glob.localStorage.getItem("pwrtlaXAPIState");
+            var sStream   = glob.localStorage.setItem("prwtlaXAPIStream"),
+                sState    = glob.localStorage.getItem("pwrtlaXAPIState"),
+                sOngoing  = glob.localStorage.getItem("pwrtlaXAPIOngoing");
 
             if (sStream &&
                 sStream.length) {
-                stream.concat(JSON.parse(sStream));
+                var tNStream;
+                try {
+                    tNStream = JSON.parse(sStream);
+                }
+                catch (err) {
+                    tNStream = [];
+                }
+
+                if (!tNStream) {
+                    tNStream = [];
+                }
+                stream.concat(tNStream);
                 stream.forEach(function (a, i) {
                     uuidMap[a.id] = i;
                 });
@@ -768,24 +853,54 @@
 
             if (sState &&
                 sState.length) {
-                var tObj = JSON.parse(sState);
+
+                var tObj;
+                try {
+                    tObj = JSON.parse(sState);
+                }
+                catch (err) {
+                    tObj = {};
+                }
                 Object.getOwnPropertyNames(tObj).forEach(function (nm) {
                     stateDocs[nm] = tObj[nm];
                 });
             }
+
+            if (sOngoing &&
+                sOngoing.length) {
+                var tOStream = JSON.parse(sOngoing);
+                try {
+                    tOStream = JSON.parse(sOngoing);
+                }
+                catch (err) {
+                    tOStream = [];
+                }
+
+                if (!tOStream) {
+                    tOStream = [];
+                }
+                ongoing.concat(tOStream);
+            }
         }
     }
 
-    function flushStream() {
+    /**
+     * remove all stream data from local storage.
+     */
+    function eraseStream() {
         if (glob.localStorage) {
             glob.localStorage.setItem("prwtlaXAPIStream", "[]");
             glob.localStorage.setItem("pwrtlaXAPIState", "{}");
+            glob.localStorage.setItem("pwrtlaXAPIOngoing", "[]");
         }
 
         stateDocs = {};
         stream = [];
     }
 
+    /**
+     * sets the internal RSD information
+     */
     function setRSD(newRSD) {
         if (newRSD) {
             localrsd = newRSD;
@@ -808,14 +923,6 @@
         }
     }
 
-    function ownActions() {
-        return stream.length;
-    }
-
-    function otherActions() {
-        return adminStream.length;
-    }
-
     /**
      * enable finishing unfinished business on unload.
      */
@@ -824,12 +931,15 @@
     }
 
     /**
-     * enable finishing unfinished business on unload.
+     * disable finishing unfinished business on unload.
      */
     function disableAutoFinish() {
         autoFinish = true;
     }
 
+    /**
+     * internal helper to push the activity stream before leaving the page.
+     */
     function cbUnload() {
         // presently we don't support long running actions
         // finish all unfinished business.
@@ -842,6 +952,9 @@
         pushStream();
     }
 
+    /**
+     * internal initialization function
+     */
     function init() {
         setRSD(RSD.get());
 
@@ -863,6 +976,7 @@
     /** ******************************************************************
      * Define external accessors
      */
+    LRS.setRSD        = setRSD;
 
     LRS.setActor      = setActor;
     LRS.unsetActor    = unsetActor;
@@ -875,6 +989,7 @@
     LRS.startAction   = startAction;
     LRS.finishAction  = finishAction;
     LRS.recordAction  = recordAction;
+
     LRS.getStream     = getStream;
     LRS.lastAction    = lastAction;
 
@@ -882,22 +997,17 @@
     LRS.setStateDoc   = setStateDoc;
     LRS.getStateDoc   = getStateDoc;
 
-    // LRS.fetchAgent    = initLocalActor;
+    LRS.fetchMyActions    = fetchMyStream;
+    LRS.fetchUserActions  = fetchActorStream;
+    LRS.fetchActions      = fetchStream;
+    LRS.fetchState        = fetchState;
 
-    LRS.fetch         = fetchStream;
-    LRS.fetchAdmin    = fetchAdminStream;
-    LRS.fetchState    = fetchState;
+    LRS.push              = pushStream;
+    LRS.pushState         = pushState;
 
-    LRS.push          = pushStream;
-    LRS.pushState     = pushState;
-
-    LRS.store         = storeStream;
-    LRS.load          = loadStream;
-    LRS.flush         = flushStream;
-
-    LRS.setRSD        = setRSD;
-    LRS.myActions     = ownActions;
-    LRS.adminActions  = otherActions;
+    LRS.store             = storeStream;
+    LRS.load              = loadStream;
+    LRS.flush             = eraseStream;
 
     LRS.enableAutoFinish  = enableAutoFinish;
     LRS.disableAutoFinish = disableAutoFinish;
