@@ -306,6 +306,7 @@ abstract class LRSBase extends Logger
                     $lrsOpts["verb_id"] = $value;
                     break;
                 case "object":
+                case "activity":
                 case "activityId":
                     $lrsOpts["object_id"] = $value;
                     break;
