@@ -72,6 +72,12 @@
         tryRSDPath();
     }
 
+    function init() {
+        RSD.load(function() {
+            jq(document).trigger("rsdready");
+        })
+    }
+
     /** ******************************************************************
      * Define external accessors
      */
@@ -84,15 +90,23 @@
 
     if (glob.define && glob.define.amd) {
         // RequireJS  stuff
-        glob.define(["jquery"], function ($) { jq = $; return RSD;});
+        glob.define(["jquery"], function ($) {
+            jq = $;
+            init();
+            return RSD;
+        });
     }
     else {
         // any other environment
         if (glob.jQuery) {
             jq = glob.jQuery;
+            init();
         }
         glob.rsd = RSD;
     }
+
+    // load the RSD information
+
 } (
     (function factory() {
         if (window) {

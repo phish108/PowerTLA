@@ -17,39 +17,11 @@ var MainActionVerb    = "http://mobinaut.org/xapi/verb/creative/brainstormassign
 var IdeaActionVerb    = "http://mobinaut.org/xapi/verb/creative/ideacontribute";
 var AssignActionVerb  = "http://mobinaut.org/xapi/verb/reflective/ideaassign";
 
-var blReady = 0;
-var bAdmin = false;
-var bUser  = false;
+var bAdmin  = false,
+    bUser   = false,
+    i       = 0;
+
 var mainUUID;
-var i = 0;
-
-function cbAdminStream(ok) {
-    blReady++;
-    if (ok !== undefined) {
-        bAdmin = true;
-    }
-    if (blReady > 1) {
-        $(document).trigger("tlaready");
-    }
-}
-
-function cbMyStream(ok) {
-    blReady++;
-    if (ok !== undefined) {
-        bUser = true;
-    }
-    if (blReady > 1) {
-        $(document).trigger("tlaready");
-    }
-}
-
-$(document).bind("xapiready", function() {
-    lrs.fetch({verb: MainActionVerb,
-               object: document.location.href}, cbMyStream);
-    lrs.fetchAdmin({verb: MainActionVerb,
-                    object: document.location.href},
-                   cbAdminStream);
-});
 
 $("#content-stop").bind("click", function() {
     $("#content-next").addClass("hidden");
@@ -64,11 +36,6 @@ $("#content-stop").bind("click", function() {
     lrs.setStateDoc(mainUUID, {"count": s.length, terms: [1,2,3]});
 
     lrs.push();
-
-    // now we can store the document
-
-    // lrs.pushState();
-
 });
 
 $("#content-start").bind("click", function() {
@@ -86,34 +53,24 @@ $("#content-next").bind("click", function() {
                      {extensions: {"foobar": "idea" + i++}});
 });
 
-/**
- * Part 2 PowerTLA Logic
- */
-
-function cbLocalActor(actor) {
-    if (actor && actor.id) {
-        $(document).trigger("xapiready");
+function cbAdminStream(ok) {
+    if (ok !== undefined) {
+        bAdmin = true;
     }
 }
 
-function cbRSD(rsdDef) {
-    if (rsdDef && rsdDef.engine) {
-        lrs.setRSD(rsdDef);
-        lrs.fetchAgent(cbLocalActor);
-    }
-    else {
-        console.log("fatal error: cannot load RSD");
+function cbMyStream(ok) {
+    if (ok !== undefined) {
+        bUser = true;
     }
 }
 
-function init() {
-    var rsdDef = rsd.get();
-    if (rsdDef) {
-        cbRSD(rsdDef);
-    }
-    else {
-        rsd.load(cbRSD);
-    }
-}
+$(document).bind("xapiready", function() {
+    lrs.fetch({verb: MainActionVerb,
+               object: document.location.href},
+              cbMyStream);
 
-init();
+    lrs.fetchAdmin({verb: MainActionVerb,
+                    object: document.location.href},
+                   cbAdminStream);
+});

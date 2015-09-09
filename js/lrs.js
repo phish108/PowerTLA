@@ -7,7 +7,7 @@
 /*jslint bitwise: true*/
 /*jslint devel: true*/
 
-/*global global*/
+/*global global, rsd*/
 
 (function (glob) {
     /** ******************************************************************
@@ -18,7 +18,9 @@
         bSync         = false,
         myServiceURL  = null,
         idurl         = null,
-        rsd           = {},
+        localrsd      = {},
+        RSD,
+        autoFinish    = true,
 
         /**
          * Local activity stream.
@@ -472,6 +474,43 @@
      * callback functions for network requrests
      */
 
+
+    /**
+     * push the state documents to the server
+     */
+    function pushState() {
+        function cbPushStateOK() {
+            console.log("state has been set to lrs");
+        }
+        function cbStateError(xhr, msg) {
+            console.error("state couldn't get sent to lrs: " + msg);
+        }
+
+        if (jq &&
+            myServiceURL) {
+            var url = myServiceURL + "/activities/state";
+            Object.getOwnPropertyNames(stateDocs).forEach(function (uuid,i) {
+                var atmp = [
+                    "agent=" + encodeURIComponent(stateDocs[uuid].agent),
+                    "activityId=" + encodeURIComponent(stateDocs[uuid].activityId),
+                    "stateId=" + encodeURIComponent(stateDocs[uuid].stateId)
+                ];
+
+                var surl = url + "?" + atmp.join("&");
+                console.log(surl);
+                jq.ajax({
+                    type: "PUT",
+                    url: surl,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: cbPushStateOK,
+                    error: cbStateError,
+                    data: JSON.stringify(stateDocs[uuid].doc)
+                });
+            });
+        }
+    }
+
     function pushSuccess() {
         bSync = false;
         oldStream = oldStream.concat(upstream);
@@ -488,12 +527,10 @@
      * The local actor is the default actor, if no other actor is set
      * via setActor();
      */
-    function initLocalActor(cbFunc, bind) {
-        if (!bind) {
-            bind = LRS;
-        }
-
+    function initLocalActor() {
+        console.log("init local actor");
         function cbLoadActorSuccess(data) {
+            console.log("got actor");
             if (data &&
                 data.id) {
                 localActor = {
@@ -505,17 +542,16 @@
                     !actor.objectType) {
                     actor = localActor;
                 }
-
-                cbFunc.call(bind, data);
+                jq(document).trigger("xapiready");
             }
         }
 
         idurl = "";
-        if (rsd.engine &&
-            rsd.engine.servicelink) {
-            idurl = rsd.engine.servicelink;
+        if (localrsd.engine &&
+            localrsd.engine.servicelink) {
+            idurl = localrsd.engine.servicelink;
         }
-        rsd.apis.some(function (api) {
+        localrsd.apis.some(function (api) {
             if (api.name === "org.ieee.papi") {
                 idurl += api.link;
                 return true;
@@ -635,8 +671,6 @@
         }
     }
 
-
-
     /**
      * uploads the activity stream to the server
      */
@@ -675,42 +709,6 @@
                 success: pushSuccess,
                 error: cbError,
                 data: JSON.stringify(upstream)
-            });
-        }
-    }
-
-    /**
-     * push the state documents to the server
-     */
-    function pushState() {
-        function cbPushStateOK() {
-            console.log("state has been set to lrs");
-        }
-        function cbStateError(xhr, msg) {
-            console.error("state couldn't get sent to lrs: " + msg);
-        }
-
-        if (jq &&
-            myServiceURL) {
-            var url = myServiceURL + "/activities/state";
-            Object.getOwnPropertyNames(stateDocs).forEach(function (uuid,i) {
-                var atmp = [
-                    "agent=" + encodeURIComponent(stateDocs[uuid].agent),
-                    "activityId=" + encodeURIComponent(stateDocs[uuid].activityId),
-                    "stateId=" + encodeURIComponent(stateDocs[uuid].stateId)
-                ];
-
-                var surl = url + "?" + atmp.join("&");
-                console.log(surl);
-                jq.ajax({
-                    type: "PUT",
-                    url: surl,
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    success: cbPushStateOK,
-                    error: cbStateError,
-                    data: JSON.stringify(stateDocs[uuid].doc)
-                });
             });
         }
     }
@@ -767,7 +765,7 @@
 
     function setRSD(newRSD) {
         if (newRSD) {
-            rsd = newRSD;
+            localrsd = newRSD;
             myServiceURL = "";
             if (newRSD.hasOwnProperty("engine") &&
                 typeof newRSD.engine === "object" &&
@@ -795,6 +793,50 @@
         return adminStream.length;
     }
 
+    /**
+     * enable finishing unfinished business on unload.
+     */
+    function enableAutoFinish() {
+        autoFinish = true;
+    }
+
+    /**
+     * enable finishing unfinished business on unload.
+     */
+    function disableAutoFinish() {
+        autoFinish = true;
+    }
+
+    function cbUnload() {
+        // presently we don't support long running actions
+        // finish all unfinished business.
+        if (autoFinish) {
+            Object.getOwnPropertyNames(ongoing).forEach(function (actUUID) {
+                finishAction(actUUID);
+            });
+        }
+
+        pushStream();
+    }
+
+    function init() {
+        setRSD(RSD.get());
+
+        // ensure that we catch all actions, even if the user reloads the page.
+        jq(document).bind("unload",       cbUnload);
+        jq(document).bind("beforeunload", cbUnload);
+
+        if (localrsd.engine) {
+            initLocalActor();
+        }
+        else {
+            jq(document).bind("rsdready", function() {
+                setRSD(RSD.get());
+                initLocalActor();
+            });
+        }
+    }
+
     /** ******************************************************************
      * Define external accessors
      */
@@ -808,7 +850,7 @@
     LRS.getContext    = getContext;
 
     LRS.startAction   = startAction;
-    LRS.finishAction     = finishAction;
+    LRS.finishAction  = finishAction;
     LRS.recordAction  = recordAction;
     LRS.getStream     = getStream;
     LRS.lastAction    = lastAction;
@@ -817,7 +859,7 @@
     LRS.setStateDoc   = setStateDoc;
     LRS.getStateDoc   = getStateDoc;
 
-    LRS.fetchAgent    = initLocalActor;
+    // LRS.fetchAgent    = initLocalActor;
 
     LRS.fetch         = fetchStream;
     LRS.fetchAdmin    = fetchAdminStream;
@@ -832,6 +874,9 @@
     LRS.myActions     = ownActions;
     LRS.adminActions  = otherActions;
 
+    LRS.enableAutoFinish  = enableAutoFinish;
+    LRS.disableAutoFinish = disableAutoFinish;
+
     /** ******************************************************************
      * Expose the LRS API
      */
@@ -839,12 +884,19 @@
     if (glob.define &&
         glob.define.amd) {
         // RequireJS  stuff
-        glob.define(["jquery"], function ($) { jq = $; return LRS;});
+        glob.define(["jquery", "rsd"], function ($, rsd) {
+            jq = $;
+            RSD = rsd;
+            init();
+            return LRS;
+        });
     }
     else {
         // any other environment
         if (glob.jQuery) {
             jq = glob.jQuery;
+            RSD = glob.rsd;
+            init();
         }
         glob.lrs = LRS;
     }
