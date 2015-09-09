@@ -77,7 +77,7 @@
         <FIELD NAME="uuid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="document" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="doctype" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="agent" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="agent" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="agent_id" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="stored" TYPE="int" LENGTH="16" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="statement_id" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
