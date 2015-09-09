@@ -113,8 +113,8 @@ class LRSManager extends LRSBase
         $where = $this->buildWhere($aOptions);
         if (isset($where) && !empty($where))
         {
-            $records = $this->db->get_records_select("pwrtla_xapistatements",
-                                                     $where);
+            $records = $this->db->get_records("pwrtla_xapistatements",
+                                                     $aOptions);
             foreach ($records as $s)
             {
                 $aStream[] = json_decode($s->statement);
@@ -134,11 +134,6 @@ class LRSManager extends LRSBase
         $where = $this->buildWhere($aOptions);
         if (isset($where) && !empty($where))
         {
-            if(array_key_exists("agent", $opts))
-            {
-                // because our own stupid logic requires this :(
-                unset($aOptions["agent"]);
-            }
             $records = $this->db->get_records("pwrtla_xapidocuments",
                                               $aOptions);
             foreach ($records as $s)
@@ -159,8 +154,8 @@ class LRSManager extends LRSBase
         $where = $this->buildWhere($aOptions);
         if (isset($where) && !empty($where))
         {
-            $records = $this->db->get_records_select("pwrtla_xapistatements",
-                                                     $where);
+            $records = $this->db->get_records("pwrtla_xapistatements",
+                                                     $aOptions);
             foreach ($records as $s)
             {
                 call_user_func($cb, $s->statement);
@@ -178,8 +173,8 @@ class LRSManager extends LRSBase
         $where = $this->buildWhere($aOptions);
         if (isset($where) && !empty($where))
         {
-            $records = $this->db->get_records_select("pwrtla_xapidocuments",
-                                                     $where);
+            $records = $this->db->get_records("pwrtla_xapidocuments",
+                                                     $aOptions);
             foreach ($records as $s)
             {
                 call_user_func($cb, $s->document);
@@ -224,8 +219,8 @@ class LRSManager extends LRSBase
         }
         if($where = $this->buildWhere($aOptions))
         {
-            $this->db->delete_records_select("pwrtla_xapistatements",
-                                             $where);
+            $this->db->delete_records("pwrtla_xapistatements",
+                                      $aOptions);
         }
     }
 
@@ -271,8 +266,8 @@ class LRSManager extends LRSBase
         }
         if($where = $this->buildWhere($aOptions))
         {
-            $this->db->delete_records_select("pwrtla_xapidocuments",
-                                             $where);
+            $this->db->delete_records("pwrtla_xapidocuments",
+                                             $aOptions);
         }
     }
 
