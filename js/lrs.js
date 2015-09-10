@@ -19,9 +19,6 @@
 
     var jq,
         bSync         = false,
-        myServiceURL  = null,
-        idurl         = null,
-        localrsd      = {},
         RSD,
         autoFinish    = true,
 
@@ -524,25 +521,32 @@
         }
 
         if (jq &&
-            myServiceURL) {
-            var url = myServiceURL + "/activities/state";
-            Object.getOwnPropertyNames(stateDocs).forEach(function (uuid,i) {
-                var atmp = [
-                    "agent=" + encodeURIComponent(stateDocs[uuid].agent),
-                    "activityId=" + encodeURIComponent(stateDocs[uuid].activityId),
-                    "stateId=" + encodeURIComponent(stateDocs[uuid].stateId)
-                ];
+            RSD) {
 
-                var surl = url + "?" + atmp.join("&");
-                jq.ajax({
-                    type: "PUT",
-                    url: surl,
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    success: cbPushStateOK,
-                    error: cbStateError,
-                    data: JSON.stringify(stateDocs[uuid].doc)
-                });
+            Object.getOwnPropertyNames(stateDocs).forEach(function (uuid,i) {
+                var aParam = {
+                    agent: stateDocs[uuid].agent,
+                    activityId: stateDocs[uuid].activityId,
+                    stateId: stateDocs[uuid].stateId
+                };
+
+                var url = RSD.getServiceURL("xapi.adlnet.gov",
+                                            ["activities", "state"],
+                                            aParam);
+                if (url) {
+                    jq.ajax({
+                        type: "PUT",
+                        url: url,
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        success: cbPushStateOK,
+                        error: cbStateError,
+                        data: JSON.stringify(stateDocs[uuid].doc)
+                    });
+                }
+                else {
+                    throw new Error("RSD not initialized or service not available");
+                }
             });
         }
     }
@@ -580,30 +584,24 @@
         function cbLoadActorSuccess(data) {
             if (data &&
                 data.id) {
-                localActor = {
-                    "objectType": "Agent",
-                    "openid": idurl + "/user/" + data.id
-                };
+                var url = RSD.serviceURL("papi.ieee.org", ["user", data.id]);
 
-                if (!actor ||
-                    !actor.objectType) {
-                    actor = localActor;
+                if (url) {
+                    localActor = {
+                        "objectType": "Agent",
+                        "openid": url
+                    };
+
+                    if (!actor ||
+                        !actor.objectType) {
+                        actor = localActor;
+                    }
+                    jq(document).trigger("xapiready");
                 }
-                jq(document).trigger("xapiready");
             }
         }
 
-        idurl = "";
-        if (localrsd.engine &&
-            localrsd.engine.servicelink) {
-            idurl = localrsd.engine.servicelink;
-        }
-        localrsd.apis.some(function (api) {
-            if (api.name === "org.ieee.papi") {
-                idurl += api.link;
-                return true;
-            }
-        });
+        var idurl = RSD.serviceURL("org.ieee.papi");
 
         // now we have the link, fetch the data
         if (idurl &&
@@ -615,6 +613,9 @@
                 success: cbLoadActorSuccess,
                 error: cbError
             });
+        }
+        else {
+            throw new Error("RSD not initialized or service not available");
         }
     }
 
@@ -630,35 +631,24 @@
             cbFunc.call(bind, data);
         }
 
-        if (jq && myServiceURL) {
-            var aopts = [];
-            if (options.hasOwnProperty("verb")) {
-                aopts.push("verb=" + encodeURIComponent(options.verb));
+        if (jq && RSD) {
+            var uri = RSD.getServiceURL("xapi.adlnet.gov",
+                                        ["statements"],
+                                        options);
+            if (uri) {
+                jq.ajax({
+                    type: "GET",
+                    url: uri,
+                    dataType: 'json',
+                    success: fetchSuccess,
+                    error: function () {
+                        cbFunc.call(bind);
+                    }
+                });
             }
-            if (options.hasOwnProperty("object")) {
-                aopts.push("activity=" + encodeURIComponent(options.object));
+            else {
+                throw new Error("RSD not initialized or service not available");
             }
-            if (options.hasOwnProperty("activity")) {
-                aopts.push("activity=" + encodeURIComponent(options.activty));
-            }
-            if (options.hasOwnProperty("agent")) {
-                aopts.push("agent=" + encodeURIComponent(options.agent));
-            }
-
-            var uri = myServiceURL + "/statements";
-            if (aopts.length) {
-                uri += "?" + aopts.join("&");
-            }
-
-            jq.ajax({
-                type: "GET",
-                url: uri,
-                dataType: 'json',
-                success: fetchSuccess,
-                error: function () {
-                    cbFunc.call(bind);
-                }
-            });
         }
     }
 
@@ -740,7 +730,7 @@
         }
 
         if (jq &&
-            myServiceURL &&
+            RSD &&
             !bSync) {
             bSync = true;
 
@@ -755,15 +745,22 @@
             stream  = [];
             uuidMap = {};
 
-            jq.ajax({
-                type: "POST",
-                url: myServiceURL + "/statements",
-                dataType: 'json',
-                contentType: 'application/json',
-                success: pushSuccess,
-                error: cbError,
-                data: JSON.stringify(upstream)
-            });
+            var URI = RSD.serviceURL("xapi.adlnet.gov", ["statements"]);
+
+            if (URI) {
+                jq.ajax({
+                    type: "POST",
+                    url: URI,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: pushSuccess,
+                    error: cbError,
+                    data: JSON.stringify(upstream)
+                });
+            }
+            else {
+                throw new Error("RSD not initialized or service not available");
+            }
         }
     }
 
@@ -783,28 +780,35 @@
         }
 
         if (jq &&
-            myServiceURL) {
+            RSD) {
             if (!agent) {
                 agent = localActor;
             }
 
-            var sAgent = JSON.stringify(agent);
+            var param = {
+                stateId: stateId,
+                activityId: objectId
+            };
+            if (typeof agent === "object") {
+                param.agent = agent;
+            }
 
-            var url = myServiceURL + "/activities/state";
-            var aParam = [];
-            aParam.push("stateId=" + encodeURIComponent(stateId));
-            aParam.push("activityId=" + encodeURIComponent(objectId));
-            aParam.push("agent=" + encodeURIComponent(sAgent));
+            var url = RSD.serviceURL( "xapi.adlnet.gov",
+                                     ["activities", "state"],
+                                     param);
 
-            url += "?" + aParam.join("&");
-
-            jq.ajax({
-                type: "GET",
-                url: url,
-                dataType: 'json',
-                success: cbFetchStateOK,
-                error: cbFetchError
-            });
+            if (url) {
+                jq.ajax({
+                    type: "GET",
+                    url: url,
+                    dataType: 'json',
+                    success: cbFetchStateOK,
+                    error: cbFetchError
+                });
+            }
+            else {
+                throw new Error("RSD not initialized or service not available");
+            }
         }
     }
 
@@ -899,31 +903,6 @@
     }
 
     /**
-     * sets the internal RSD information
-     */
-    function setRSD(newRSD) {
-        if (newRSD) {
-            localrsd = newRSD;
-            myServiceURL = "";
-            if (newRSD.hasOwnProperty("engine") &&
-                typeof newRSD.engine === "object" &&
-                newRSD.engine.hasOwnProperty("servicelink")) {
-                myServiceURL = newRSD.engine.servicelink;
-            }
-
-            if (newRSD.hasOwnProperty("apis") &&
-                Array.isArray(newRSD.apis)) {
-                newRSD.apis.some(function (api) {
-                    if (api.name === "gov.adlnet.xapi") {
-                        myServiceURL += api.link;
-                        return true;
-                    }
-                });
-            }
-        }
-    }
-
-    /**
      * enable finishing unfinished business on unload.
      */
     function enableAutoFinish() {
@@ -956,27 +935,34 @@
      * internal initialization function
      */
     function init() {
-        setRSD(RSD.get());
-
         // ensure that we catch all actions, even if the user reloads the page.
         jq(document).bind("unload",       cbUnload);
         jq(document).bind("beforeunload", cbUnload);
 
-        if (localrsd.engine) {
-            initLocalActor();
+        initLocalActor();
+    }
+
+    /**
+     * register a callback for flexible readiness registration.
+     */
+    function readyInit(cbReady) {
+        if (typeof cbReady === "function") {
+            if (localActor) {
+                cbReady.call(glob.document);
+            }
+            else {
+                jq(glob.document).bind("xapiready", cbReady);
+            }
         }
         else {
-            jq(document).bind("rsdready", function() {
-                setRSD(RSD.get());
-                initLocalActor();
-            });
+            throw new Error("ready requires a callback function as parameter 1");
         }
     }
 
     /** ******************************************************************
      * Define external accessors
      */
-    LRS.setRSD        = setRSD;
+    LRS.ready         = readyInit;
 
     LRS.setActor      = setActor;
     LRS.unsetActor    = unsetActor;
@@ -1019,10 +1005,10 @@
     if (glob.define &&
         glob.define.amd) {
         // RequireJS  stuff
-        glob.define(["jquery", "rsd"], function ($, rsd) {
-            jq = $;
+        glob.define(["jquery", "rsd"], function (jQuery, rsd) {
+            jq = jQuery;
             RSD = rsd;
-            init();
+            RSD.ready(init);
             return LRS;
         });
     }
@@ -1031,7 +1017,7 @@
         if (glob.jQuery) {
             jq = glob.jQuery;
             RSD = glob.rsd;
-            init();
+            RSD.ready(init);
         }
         glob.lrs = LRS;
     }

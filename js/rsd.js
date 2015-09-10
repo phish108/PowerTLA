@@ -9,7 +9,8 @@
 /*global global*/
 
 (function (glob) {
-    var RSD = {};
+    var RSD = {},
+        apis = {};
     var jq,
         rsd;
 
@@ -98,25 +99,53 @@
      *
      * The function accepts an optional array containing url
      * encoded path parameters.
+     *
+     * @param {STRING} protocol name
+     * @param {ARRAY} path parameters
+     * @param {MIXED} query parameters
+     *
+     * for query parameter is expeted that all data is not URL encoded.
+     *
+     * if query parameter is a string, it will be encoded with encodeURIComponent
+     * and attached as a search query.
+     *
+     * if query parameter is an object, then all properties will be
+     * added as key-value pairs and attached as GET parameters to the URL.
      */
-    function getServiceURL(protocol, pathParam) {
-        var retval;
-        if (rsd &&
-            rsd.hasOwnProperty("apis")) {
+    function getServiceURL(protocol, pathParam, queryParam) {
+        var retval, tval, aParam = [];
+        if (protocol &&
+            protocol.length &&
+            rsd &&
+            rsd.hasOwnProperty("engine") &&
+            rsd.engine.hasOwnProperty("servicelink") &&
+            apis.hasOwnProperty(protocol)) {
 
-            var url = rsd.engine.servicelink;
-            rsd.apis.some(function (spr) {
+            retval = rsd.engine.servicelink + apis[protocol];
 
-                if (spr.name === protocol) {
+            if (Array.isArray(pathParam)) {
+                retval += "/" + pathParam.join("/");
+            }
 
-                    retval = url + spr.link;
-                    return true;
+            if (typeof queryParam === "object" &&
+                     Object.getOwnPropertyNames(queryParam).length) {
+                Object.getOwnPropertyNames(queryParam).forEach(function(pn){
+                    if (queryParam[pn] !== undefined) {
+                        if (typeof queryParam[pn] === "string") {
+                            aParam.push(pn + "=" + encodeURIComponent(queryParam[pn]));
+                        }
+                        else if (typeof queryParam[pn] === "object") {
+                            tval = JSON.stringify(queryParam[pn]);
+                            aParam.push(pn + "=" + encodeURIComponent(tval));
+                        }
+                    }
+                });
+                if (aParam.length) {
+                    retval += "?" + aParam.join("&");
                 }
-            });
-            if (retval &&
-                Array.isArray(pathParam)) {
-
-                retval += "?" + pathParam.join("/");
+            }
+            else if (typeof queryParam === "string") {
+                retval += "?" + encodeURIComponent(queryParam);
             }
         }
         return retval;
@@ -128,15 +157,33 @@
      * This method emits the rsdready event when the initialisation has completed.
      */
     function init() {
-        RSD.load(function() {
+        loadRSD(function() {
             jq(glob.document).trigger("rsdready");
         });
+    }
+
+    /**
+     * register a callback for flexible readiness registration.
+     */
+    function readyInit(cbReady) {
+        if (typeof cbReady === "function") {
+            if (rsd && rsd.engine) {
+                cbReady.call(glob.document);
+            }
+            else {
+                jq(glob.document).bind("rsdready", cbReady);
+            }
+        }
+        else {
+            throw new Error("ready requires a callback function as parameter 1");
+        }
     }
 
     /** ******************************************************************
      * Define external accessors
      */
 
+    RSD.ready      = readyInit;
     RSD.get        = getRSD;
     RSD.load       = loadRSD;
     RSD.serviceURL = getServiceURL;
