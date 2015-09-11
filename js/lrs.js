@@ -530,9 +530,9 @@
                     stateId: stateDocs[uuid].stateId
                 };
 
-                var url = RSD.getServiceURL("xapi.adlnet.gov",
-                                            ["activities", "state"],
-                                            aParam);
+                var url = RSD.serviceURL("gov.adlnet.xapi",
+                                         ["activities", "state"],
+                                         aParam);
                 if (url) {
                     jq.ajax({
                         type: "PUT",
@@ -584,7 +584,7 @@
         function cbLoadActorSuccess(data) {
             if (data &&
                 data.id) {
-                var url = RSD.serviceURL("papi.ieee.org", ["user", data.id]);
+                var url = RSD.serviceURL("org.ieee.papi", ["user", data.id]);
 
                 if (url) {
                     localActor = {
@@ -632,9 +632,9 @@
         }
 
         if (jq && RSD) {
-            var uri = RSD.getServiceURL("xapi.adlnet.gov",
-                                        ["statements"],
-                                        options);
+            var uri = RSD.serviceURL("gov.adlnet.xapi",
+                                     ["statements"],
+                                     options);
             if (uri) {
                 jq.ajax({
                     type: "GET",
@@ -745,7 +745,7 @@
             stream  = [];
             uuidMap = {};
 
-            var URI = RSD.serviceURL("xapi.adlnet.gov", ["statements"]);
+            var URI = RSD.serviceURL("gov.adlnet.xapi", ["statements"]);
 
             if (URI) {
                 jq.ajax({
@@ -793,7 +793,7 @@
                 param.agent = agent;
             }
 
-            var url = RSD.serviceURL( "xapi.adlnet.gov",
+            var url = RSD.serviceURL( "gov.adlnet.xapi",
                                      ["activities", "state"],
                                      param);
 
@@ -947,7 +947,8 @@
      */
     function readyInit(cbReady) {
         if (typeof cbReady === "function") {
-            if (localActor) {
+            if (localActor &&
+                localActor.hasOwnProperty("objectType")) {
                 cbReady.call(glob.document);
             }
             else {

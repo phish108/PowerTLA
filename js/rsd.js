@@ -71,6 +71,10 @@
                     url: host + (dir === "/"? "": dir) + "/tla/rsd.php",
                     success: function (data) {
                         rsd = data;
+                        apis = {};
+                        rsd.apis.forEach(function (api) {
+                            apis[api.name] = api.link;
+                        });
                         cbFunc.call(bind, rsd);
                     },
                     error: function (xhr, msg) {
@@ -171,7 +175,8 @@
                 cbReady.call(glob.document);
             }
             else {
-                jq(glob.document).bind("rsdready", cbReady);
+                jq(glob.document).bind("rsdready",
+                                       cbReady);
             }
         }
         else {
