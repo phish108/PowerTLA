@@ -105,7 +105,7 @@
     function cloneObject(obj) {
         var object;
         if (typeof obj === 'string') {
-            return obj;
+            return obj.substr(0); // clone the string
         }
 
         if (typeof obj === "object") {
@@ -302,9 +302,15 @@
         var uuid;
 
         if (verbid &&
-            verbid.length &&
-            objectid &&
-            objectid.length) {
+            verbid.length) {
+            if (!(objectid &&
+                  objectid.length &&
+                  glob.document)) {
+                objectid = document.location.href;
+            }
+            else {
+                throw new Error("cannot determine the object id in headless mode");
+            }
 
             uuid = makeUUID();
 
@@ -408,13 +414,20 @@
      * verb: verb ID
      * object: object ID
      */
-    function recordAction(verb, object, result) {
+    function recordAction(verbid, objectid, result) {
         var uuid, arv;
 
-        if (verb&&
-            verb.length &&
-            object &&
-            object.length) {
+        if (verbid &&
+            verbid.length) {
+
+            if (!(objectid &&
+                  objectid.length &&
+                  glob.document)) {
+                objectid = document.location.href;
+            }
+            else {
+                throw new Error("cannot determine the object id in headless mode");
+            }
 
             uuid = makeUUID();
 
@@ -423,10 +436,10 @@
                 "timestamp": new Date().toISOString(),
                 "actor": cloneObject(actor),
                 "verb": {
-                    id: verb
+                    id: verbid
                 },
                 "object": {
-                    id: object
+                    id: objectid
                 }
             };
 
