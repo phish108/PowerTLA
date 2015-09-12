@@ -493,7 +493,9 @@ abstract class LRSBase extends Logger
     public function getStream($getOptions)
     {
         $opts = $this->translateGetOptions($getOptions);
-
+        if (array_key_exists("agent", $opts)) {
+            unset($opts["agent"]);
+        }
         return $this->readActivityStream($opts);
     }
 
@@ -503,6 +505,9 @@ abstract class LRSBase extends Logger
     public function getStreamWithCallback($callback, $getOptions)
     {
         $opts = $this->translateGetOptions($getOptions);
+        if (array_key_exists("agent", $opts)) {
+            unset($opts["agent"]);
+        }
         $this->readActivityStreamWithCallback($callback, $opts);
     }
 
@@ -570,17 +575,26 @@ abstract class LRSBase extends Logger
     public function getDocumentList($getOptions)
     {
         $opts = $this->translateGetOptions($getOptions);
+        if (array_key_exists("agent", $opts)) {
+            unset($opts["agent"]);
+        }
         return $this->readDocument($opts);
     }
 
     public function getDocumentListWithCallback($callback, $getOptions)
     {
         $opts = $this->translateGetOptions($getOptions);
+        if (array_key_exists("agent", $opts)) {
+            unset($opts["agent"]);
+        }
     }
 
     public function getDocument($getOptions)
     {
         $opts = $this->translateGetOptions($getOptions);
+        if (array_key_exists("agent", $opts)) {
+            unset($opts["agent"]);
+        }
         $dl = $this->readDocument($opts);
         if (count($dl) == 1) {
             return array_pop($dl);
@@ -593,6 +607,9 @@ abstract class LRSBase extends Logger
         if (isset($getOptions))
         {
             $opts = $this->translateGetOptions($getOptions);
+            if (array_key_exists("agent", $opts)) {
+                unset($opts["agent"]);
+            }
             $oDoc = $this->readDocument($opts);
             if (isset($oDoc) &&
                 count($oDoc) == 1)
@@ -609,7 +626,9 @@ abstract class LRSBase extends Logger
         if (isset($getOptions))
         {
             $optsT = $this->translateGetOptions($getOptions);
-
+            if (array_key_exists("agent", $optsT)) {
+                unset($opts["agent"]);
+            }
             $oDoc = $this->readDocument($optsT);
             if (!isset($oDoc) || count($oDoc) == 0)
             {
@@ -637,6 +656,9 @@ abstract class LRSBase extends Logger
         if (isset($getOptions))
         {
             $opts = $this->translateGetOptions($getOptions);
+            if (array_key_exists("agent", $opts)) {
+                unset($opts["agent"]);
+            }
             $oDoc = $this->readDocument($opts);
             if (isset($oDoc) && count($oDoc))
             {

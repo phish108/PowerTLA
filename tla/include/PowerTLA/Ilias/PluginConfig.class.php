@@ -55,7 +55,19 @@ class PluginConfig extends PluginBase
      */
     public function isActive()
     {
-        return TRUE;
+        // TODO - find out how to hook a headless plugin
+
+//        global $ilPluginAdmin;
+//        if (isset($ilPluginAdmin))
+//        {
+//            return $ilPluginAdmin->isActive(IL_COMP_SERVICE,
+//                                            "PowerTLA",      // name of the plugin slot
+//                                            "ptla",          // ILIAS requires 4 character ids
+//                                            "PowerTLA");     // name of the plugin
+//        }
+//
+//        return false;
+        return true;
     }
 }
 

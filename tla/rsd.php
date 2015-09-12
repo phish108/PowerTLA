@@ -1,6 +1,6 @@
 <?php
-chdir("tla");
+$pathprefix = "";
 
 // path prefix is the local request URL - the rsd chunk
-include("rsd.php");
+include("restservice/rsd.php");
 ?>

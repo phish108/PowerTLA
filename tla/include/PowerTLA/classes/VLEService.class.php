@@ -75,10 +75,19 @@ class VLEService extends RESTling {
             // now the lms can work.
             // moodle might be confused that something snatched the data first.
 
-            if (!$this->VLE) {
+            if (!$this->VLE)
+            {
                 $this->status = RESTling::UNINITIALIZED;
             }
-            else {
+            else if (!$this->VLE->getPluginManager()->isActive())
+            {
+                $this->log("PowerTLA has been deactivated!");
+                // we need a different status for this case.
+                $this->status = RESTling::UNINITIALIZED;
+                // TODO: add additional information if in maintenace mode
+            }
+            else
+            {
                 parent::initializeRun();
             }
         }

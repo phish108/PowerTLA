@@ -1,6 +1,6 @@
 <?php
 
-class VLEHandler extends Logger
+abstract class VLEHandler extends Logger
 {
     protected $lmstype;
 
@@ -28,7 +28,7 @@ class VLEHandler extends Logger
         $this->initLMS($lmspath);
     }
 
-    protected function initLMS($tlapath) {}
+    abstract protected function initLMS($tlapath);
 
     public function idpURI()
     {
@@ -178,6 +178,7 @@ class VLEHandler extends Logger
             // return global privileges
             $privileges = new stdClass();
 
+            // TODO use better priv names.
             $privileges->readObjectSelf   = true;
             $privileges->readObject       = false;
             $privileges->readContextSelf  = true;
