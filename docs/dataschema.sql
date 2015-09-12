@@ -33,7 +33,7 @@ create table if not exists pwrtla_xapistatements ( -- XAPI LRS
     tshour       INT NOT NULL,                     -- clustering
     tsminute     INT NOT NULL,
     verb_id      varchar(255),
-    actor_id     varchar(255),
+    agent_id     varchar(255),
     object_id    varchar(255),
     score        INT,
     duration     INT,                              -- stats
