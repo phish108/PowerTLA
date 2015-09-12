@@ -18,19 +18,39 @@ PowerTLA builds on top of the existing LMS code and allows easy integration of m
 
 ## Install
 
+1. Clone the PowerTLA repository into a safe place, but not into your learning management system.
+
+2. copy the tla directory and the rsd.php into your LMS's root directory.
+
 ### ILIAS LMS
 
-On Ilias create a folder in the root directory called "tla".
+3. connect to the LMS data base and install the PowerTLA schema.
 
-Then copy all powertla files into this directory. The rest will work (hopefully) like magic.
+```
+> cat doc/dbschema.sql | mysql -u iliasDBUser -p iliasDBInstance
+```
+
+4. Done.
 
 ### Moodle
 
-The moodle integration is presently in progress and will become available in Autumn 2015.
+3. copy the moodle's powertla folder into the root directory.
+
+```
+> cp -r VLE-plugins/moodle/powertla /your/moodle/
+```
+
+4. Log into your moodle as an administrator
+
+5. visit System Administration/ Notifications
+
+6. Update the database.
+
+6. Done.
 
 ## Documentation
 
-Find the documentation in the [docs folder](docs/).
+Find some bits of documentation in the [docs folder](docs/).
 
 ## Contribute
 
@@ -42,7 +62,7 @@ Committing is easy.
 
 3. Check if you code contains only valid PHP. Pull-requests that do not pass PHP lint will not get accepted.
 
-4. Commt your changes to your branch.
+4. Commit your changes to your branch.
 
 5. Create a pull request.
 
