@@ -64,7 +64,7 @@ class CourseBroker extends Logger
                     require_once 'Modules/Course/classes/class.ilCourseItems.php';
                     $courseItems = new ilCourseItems($crs->getRefId(), 0, $ilUser->getId());
                     $courseItemList = $courseItems->getAllItems();
-                    $course["content-type"] = $this->mapItemTypes($courseItemList);
+                    $course["content-type"] = $this->mapItemTypes($courseItemList, false);
                     break;
                  }
             }
@@ -81,7 +81,7 @@ class CourseBroker extends Logger
 
                     // TODO check with Ilias 4.4 and 4.3
 //                    $this->log(">>> IL >>> " . json_encode($courseItemList["_all"]));
-                    $course["content-type"] = $this->mapItemTypes($courseItemList);
+                    $course["content-type"] = $this->mapItemTypes($courseItemList, true);
                 }
             }
             array_push($retval, $course);
@@ -92,60 +92,73 @@ class CourseBroker extends Logger
     /**
      * maps the Ilias object types to content types
      */
-    protected function mapItemTypes($itemList)
+    protected function mapItemTypes($itemList, $looptype)
     {
         $ctList = array();
         if ($itemList && count($itemList)) {
-            foreach($itemList as $courseItem) {
-                // $this->log("Course Item: " . json_encode($courseItem));
-                // map the ILIAS types to fake MIME types
-                unset($type);
-                switch ($courseItem["type"])
+            if (looptype) {
+                foreach($itemList as $courseItem => $foo)
                 {
-                    case "crs":
-                    case "lm":
-                        $type = "x-application/imscp"; // IMS Content Package
-                        break;
-                    case "sco":
-                        $type = "x-application/imscp+imsss"; // IMS Content Package
-                        break;
-                    case "pg":
-                    case "page":
-                    case "chap":
-                    case "htlm":
-                        $type = "text/html";
-                        break;
-                    case "tst": // tst should be the same as qpl
-                        $type = "x-application/imsqti-test";
-                        break;
-                    case "qpl":
-                        $type = "x-application/imsqti";
-                        break;
-                    case "spl": // generic survey pool
-                    case "svy": // a survey form
-                        $type = "x-application/x-form";
-                        break;
-                    case "glo":
-                        $type = "x-application/x-glossary";
-                        break;
-                    case "webr":
-                        $type = "text/url";
-                        break;
-                    case "file":
-                    case "ass":
-                        // Images or Files
-                        $type = "x-application/asset";
-                        break;
-                    default:
-                        break;
-                }
-
-                if (isset($type) &&
-                    array_search($type, $ctList) === FALSE)
-                {
-                    array_push($ctList, $type);
+                    $ctList = $this->mapType($courseItem, $ctList);
                 }
             }
+            else
+            {
+                foreach($itemList as $courseItem )
+                {
+                    $ctList = $this->mapType($courseItem["type"], $ctList);
+                }
+            }
+        }
+        return $ctList;
+    }
+
+    private function mapType($ilType, $ctList)
+    {
+        switch ($ilType)
+        {
+            case "crs":
+            case "lm":
+                $type = "x-application/imscp"; // IMS Content Package
+                break;
+            case "sco":
+                $type = "x-application/imscp+imsss"; // IMS Content Package
+                break;
+            case "pg":
+            case "page":
+            case "chap":
+            case "htlm":
+                $type = "text/html";
+                break;
+            case "tst": // tst should be the same as qpl
+                $type = "x-application/imsqti-test";
+                break;
+            case "qpl":
+                $type = "x-application/imsqti";
+                break;
+            case "spl": // generic survey pool
+            case "svy": // a survey form
+                $type = "x-application/x-form";
+                break;
+            case "glo":
+                $type = "x-application/x-glossary";
+                break;
+            case "webr":
+                $type = "text/url";
+                break;
+            case "file":
+            case "ass":
+                // Images or Files
+                $type = "x-application/asset";
+                break;
+            default:
+                break;
+        }
+
+        if (isset($type) &&
+            !array_search($type, $ctList))
+        {
+            array_push($ctList, $type);
         }
         return $ctList;
     }
