@@ -6,7 +6,9 @@ The files in this directory are intended to operated within the calling page.
 
 ## Contents
 
+* rsd.js
 * lrs.js
+* idp.js
 *
 * lrsAnalytics.js
 
