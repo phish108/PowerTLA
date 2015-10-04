@@ -89,6 +89,78 @@ class CourseBroker extends Logger
         return $retval;
     }
 
+    public function getUserCourse($courseId)
+    {
+        global $ilUser, $ilObjDataCache;
+        $this->log($courseId);
+
+        $items = ilParticipants::_getMembershipByType($ilUser->getId(), 'crs');
+        foreach($items as $obj_id)
+        {
+            $this->log($obj_id . " :: " . $courseId);
+
+            if ($obj_id == $courseId)
+            {
+                $crs = new ilObjCourse($obj_id, false);
+                $crs->read();
+
+                $title       = $crs->getTitle();
+    			$description = $crs->getDescription();
+
+                // $this->log($crs->getOfflineStatus());
+                if ($crs->getOfflineStatus() == 1)
+                {
+                    // skip offline courses
+                    continue;
+                }
+                $course = array("id" => $obj_id,
+                                "title" => $title,
+                                "description" => $description);
+
+                // 2 get course objects
+                $item_references = ilObject::_getAllReferences($obj_id);
+                reset($item_references);
+
+                if (strcmp($this->iliasVersion, "4.2") === 0)
+                {
+                    foreach($item_references as $ref_id => $x ) {
+                        // Antique Ilias
+
+                        // For some strange reason remains the $crs->getRefId() remains empty
+                        $crs = new ilObjCourse($ref_id);
+                        // TODO: Verify that the course is online
+                        // TODO: If the course is offline, check if the user is admin.
+                        // TODO: skip offline student courses
+
+                        require_once 'Modules/Course/classes/class.ilCourseItems.php';
+                        $courseItems = new ilCourseItems($crs->getRefId(), 0, $ilUser->getId());
+                        $courseItemList = $courseItems->getAllItems();
+                        $course["content-type"] = $this->mapItemTypes($courseItemList, false);
+                        break;
+                     }
+                }
+                else
+                {
+                    // Modern Ilias
+                    foreach($item_references as $ref_id => $x ) {
+                        $crs = new ilObjCourse($ref_id);
+                        // TODO: Verify that the course is online
+                        // TODO: If the course is offline, check if the user is admin.
+                        // TODO: skip offline student courses
+
+                        $courseItemList = $crs->getSubItems();
+
+                        // TODO check with Ilias 4.4 and 4.3
+    //                    $this->log(">>> IL >>> " . json_encode($courseItemList["_all"]));
+                        $course["content-type"] = $this->mapItemTypes($courseItemList, true);
+                    }
+                }
+                return $course;
+            }
+        }
+        return null;
+    }
+
     /**
      * maps the Ilias object types to content types
      */

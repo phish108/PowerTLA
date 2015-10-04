@@ -30,7 +30,17 @@ class CourseService extends VLEService
         $cbH = $this->VLE->getCourseBroker();
         if ($cbH)
         {
-            $this->data = $cbH->getCourseList();
+            // check for course id
+            $cid = $this->path_info[0];
+            if (isset($cid) && !empty($cid))
+            {
+                $this->log("load course id " . $cid);
+                $this->data = $cbH->getUserCourse($cid);
+            }
+            else
+            {
+                $this->data = $cbH->getCourseList();
+            }
         }
     }
 }
