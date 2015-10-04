@@ -16,6 +16,9 @@ class QTIPoolBroker extends Logger
         $this->iliasVersion = $system->getVersion();
     }
 
+    /**
+     * returns the list of question pools
+     */
     public function getPoolList($CourseID)
     {
         global $ilUser, $ilObjDataCache;
@@ -126,9 +129,11 @@ class QTIPoolBroker extends Logger
                 if (isset($poolid) &&
                     intval($poolid) != intval($courseItem["ref_id"]))
                 {
+                    // in this case only 1 question pool is requested
                     $this->log("skip");
                     continue;
                 }
+
                 switch ($courseItem["type"])
                 {
                     case "tst": // tst should be the same as qpl
@@ -152,18 +157,35 @@ class QTIPoolBroker extends Logger
     private function loadQPList($qpItem)
     {
         $retval = array();
-        $curT = time();
+        $curT = intval(time());
+        // $this->log(json_encode($qpItem));
 
-        if (intval($qpItem["timing_type"]) == 0 &&
-            (intval($curT) < intval($qpItem["timing_start"]) ||
-             intval($curT) > intval($qpItem["timing_end"])))
+        // check predefined timings
+        if (intval($qpItem["timing_type"]) == 0)
         {
-            $this->log('bad timig, skip question pool');
-            return $retval;
+            // ensure that the correct timings are used
+            if ((array_key_exists("start", $qpItem) &&
+                 ($curT < intval($qpItem["start"]) ||
+                  $curT > intval($qpItem["end"]))) ||
+                (array_key_exists("timing_start", $qpItem) &&
+                 ($curT < intval($qpItem["timing_start"]) ||
+                  $curT > intval($qpItem["timing_end"]))))
+            {
+                $this->log('bad timig, skip question pool');
+                return $retval;
+            }
         }
 
         $questionPool = new ilObjQuestionPool($qpItem["ref_id"]);
         $questionPool->read();
+
+        // check online state
+        if ($questionPool->getOnline() == 0)
+        {
+            $this->log('offline, skip question pool');
+            return $retval;
+        }
+
 
         $questions = $questionPool->getQuestionList();
 
@@ -184,15 +206,22 @@ class QTIPoolBroker extends Logger
             $retval["questions"] = $this->getQuestionListOld($questions);
         }
 
-        $retval["id"]    = $qpItem["ref_id"]; // pass only the reference id
-        $retval["title"] = $questionPool->getTitle();
+        $retval["id"]          = $qpItem["ref_id"]; // pass only the reference id
+        $retval["title"]       = $questionPool->getTitle();
         $retval["description"] = $questionPool->getDescription();
 
         if (intval($qpItem["timing_type"]) == 0)
         {
             // pass the end-date on, so the remote broker can switch
             // the pool off if necessary.
-            $retval["end-date"] = intval($qpItem["timing_end"]);
+            if (array_key_exists("end", $qpItem))
+            {
+                $retval["end-date"] = intval($qpItem["end"]);
+            }
+            else if (array_key_exists("timing_end", $qpItem))
+            {
+                $retval["end-date"] = intval($qpItem["timing_end"]);
+            }
         }
 
         return $retval;
