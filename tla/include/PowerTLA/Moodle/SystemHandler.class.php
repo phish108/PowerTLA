@@ -30,6 +30,51 @@ class SystemHandler extends VLEHandler
     // ignore guest user settings in moodle for the time being
     public function setGuestUser($username)
     {}
+
+    protected function checkPrivileges($context, $privileges)
+    {
+        require_once 'lib/accesslib.php';
+
+        $mode = 1; // 1 = this user
+                   // 2 = other user
+                   // 3 = object
+                   // 4 = other user privs
+        if (property_exists($context, 'object'))
+        {
+            $mode = 3;
+        }
+        if (property_exists($context, 'user'))
+        {
+            $mode += 1;
+            $privileges  = $this->initPrivileges(false);
+        }
+
+        if (!isset($privileges))
+        {
+            $privileges = $this->initPrivileges();
+        }
+
+
+         if ($mode >= 3)
+        {
+            // get read privileges
+
+            // get write privileges
+
+             // get learning progress teacher's privileges
+
+             $priv =  'gradereport/grader:view';
+             $priv =  'gradereport/history:view';
+         }
+
+        if ($mode === 2)
+        {
+            // get learning progress reading privileges
+            // get learning progress update privileges
+        }
+        
+        return $privileges;
+    }
 }
 
 ?>

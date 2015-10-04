@@ -65,7 +65,9 @@ class XAPIService extends VLEService
         }
 
         // load the core capabilities
-        $privs = $this->VLE->getPrivileges($this->queryParam);
+        $ctxt = new stdClass();
+        $ctxt->object = $this->queryParam;
+        $privs = $this->VLE->getPrivileges($ctxt);
 
         // per API ACL
         if ($this->status == RESTling::OK &&

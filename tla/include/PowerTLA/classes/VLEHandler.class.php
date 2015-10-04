@@ -10,6 +10,8 @@ abstract class VLEHandler extends Logger
     protected $tlahost;
     protected $baseurl;
 
+    protected $privileges;
+
     /**
      * internal data store for LMS Interfaces.
      */
@@ -149,51 +151,114 @@ abstract class VLEHandler extends Logger
     }
 
     /**
+     * this function loads the actual privileges for the given system.
+     *
+     * This function expects two contexts: the object context and the user context
+     * Both contexts hold exactly one id.
+     *
+     * The user context hods a user id. checkPrivileges() should check if the
+     * present user id is allowed to access information for the provided user id.
+     *
+     * The object context holds a content/activity object id. checkPrivileges()
+     * must set the object privileges depending the the assigned privileges of the
+     * active user.
+     *
+     * if both user and object context are present, then checkPrivileges() must
+     * check whether the provided user context has access to the provided object
+     * context. In this configuration, the function must check if the active user
+     * is undefined OR the guest user. If this is the case, the function MUST NOT
+     * retrieve the actual privileges, but an object that has all properties
+     * set to false.
+     *
+     * If the context is empty the function must assume the user context of the
+     * active user.
+     *
+     * This function MUST return the completed privilege object.
+     */
+    abstract protected function checkPrivileges($context, $privileges);
+
+    /**
+     * creates the default privilege object
+     */
+    protected function initPrivileges($bCheckActiveUser = true)
+    {
+        $privileges = new stdClass();
+
+        // two types of privileges
+        $privileges->personal = new stdClass();
+        $privileges->context  = new stdClass();
+
+        $privileges->personal->readObject        = false;
+        $privileges->personal->writeObject       = false;
+        $privileges->personal->readProfile       = true;
+        $privileges->personal->writeProfile      = false;
+        $privileges->personal->readActionStream  = false;
+        $privileges->personal->writeActionStream = false;
+
+        $privileges->context->readObject         = false;
+        $privileges->context->writeObject        = false;
+        $privileges->context->readProfile        = false;
+        $privileges->context->writeProfile       = false;
+        $privileges->context->readActionStream   = false;
+        $privileges->context->writeActionStream  = false;
+
+        if ($bCheckActiveUser &&
+            !$this->isGuestUser())
+        {
+            // Guest users are only allowed to read certain contents,
+            // but are always forbidden to write the activity stream.
+            //
+            // Ordinary users are allowed to read and write to their
+            // activity stream.
+            $this->log("no guest privilege");
+            $privileges->personal->readActionStream  = true;
+            $privileges->personal->writeActionStream = true;
+            $privileges->personal->writeProfile      = true;
+        }
+        return $privileges;
+    }
+
+    /**
      * loads the privileges of a user for a given context.
      * The context is an array of the kind of a query parameter list.
      *
-     * We support 8 privileges
-     * - readObjectSelf: Read data on the given object that is directly available
-     *                   to the user.
-     * - readContextSelf: Read the own data that is available in the broader context
-     * - readContext: allow to access all data in a given context (typically managing)
-     * - writeObjectSelf: Write own data on the object
+     * The function accepts a context, which will be either an object
+     * context or a user context
      *
-     * if a user has access to read an given objectId/activityId
-     *     readObjectSelf will be TRUE (default TRUE)
-     * if a user can manage a given objectId/activityId
-     *     readObjectSelf and readObject will be TRUE (default FALSE)
-     * if a user can provide input to an objectId/activityId
-     *     writeObjectSelf will be TRUE (default FALSE, if not guest, TRUE)
-     * if a user can access the framing context
-     *     readContextSelf will be TRUE  (default: TRUE)
-     * if a user can manage the framing context
-     *     readContext and writeContext will be TRUE (default FALSE)
+     * PowerTLA supports differnt privilege types.
+     *
+     * 1. personal privileges
+     * 2. context privileges
+     *
+     * each privilege set has the same set of attributes, which define the
+     * range of data that can get exposed to the active user. The ACL should
+     * always check the personal privileges before the context privileges.
+     *
+     * NOTE: Most LMS build on a role system rather than a user-based AC.
+     * Within this scope, the user privileges are typically in the form of
+     * "can do" and "can do for others". The former refers to personal
+     * privileges, while the latter refers to context definitions.
+     *
+     * PowerTLA is ignorant about the user roles and just accepts the
+     * different role specific privileges and permissions. In order to
+     * provide a consistent API to the privileges, it abstracts from the
+     * various forms.
+     *
+     * * readObject: can read a given object
+     * * writeObject: can write a given object
+     * * readProfile: can read a user profile
+     * * writeProfile: can change a user profile
+     * * readActionStream: can read the LRS action stream
+     * * writeActionStream: can write the LRS action stream
      */
     public function getPrivileges($context)
     {
-        // enable caching privileges
+        // enable privilege caching
         if (!isset($this->privileges))
         {
             // return global privileges
-            $privileges = new stdClass();
-
-            // TODO use better priv names.
-            $privileges->readObjectSelf   = true;
-            $privileges->readObject       = false;
-            $privileges->readContextSelf  = true;
-            $privileges->readContext      = false;
-            $privileges->writeObjectSelf  = false;
-            $privileges->writeObject      = false;
-            $privileges->writeContextSelf = false;
-            $privileges->writeContext     = false;
-
-            if (!$this->isGuestUser())
-            {
-                $this->log("no guest privilege");
-                $privileges->writeObjectSelf = true;
-            }
-            $this->privileges = $privileges;
+            $this->privileges = $this->checkPrivileges($context,
+                                                       $this->initPrivileges());
         }
 
         return $this->privileges;

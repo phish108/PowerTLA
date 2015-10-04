@@ -3,7 +3,7 @@
 class SystemHandler extends VLEHandler
 {
     protected $iliasVersion;
-    protected $privileges;
+    private $rbacAcl;  // ILIAS calls its access control RBAC
 
     public function __construct($tp)
     {
@@ -74,6 +74,96 @@ class SystemHandler extends VLEHandler
             $ilUser->setId($guid);
             $ilUser->read();
         }
+    }
+
+    protected function checkPrivileges($context, $privileges)
+    {
+        require_once 'Services/AccessControl/classes/class.ilRbacSystem.php';
+
+        global $ilUser;
+        $userid = $ilUser->getId();
+
+        if (!isset($this->rbacAcl))
+        {
+            $this->rbacAcl = ilRbacSystem::getInstance();
+        }
+
+        $this->log(json_encode($context));
+        $this->log(json_encode($privileges));
+
+        $mode = 1; // 1 = this user
+                   // 2 = other user
+                   // 3 = object
+                   // 4 = other user privs
+        if (property_exists($context, 'object'))
+        {
+            $mode  = 3;
+            $objid = $context->object;
+        }
+        if (property_exists($context, 'user'))
+        {
+            $mode += 1;
+            $privileges  = $this->initPrivileges(false);
+            $userid = $context->user;
+        }
+
+        if (!isset($privileges))
+        {
+            $privileges = $this->initPrivileges();
+        }
+
+        if ($mode >= 3)
+        {
+
+            // get read privileges
+            $privileges->personal->readObject = $this->rbacAcl->checkAccessOfUser($userid,
+                                                                                  'read',
+                                                                                  $objid);
+            $privileges->context->readObject = $privileges->personal->readObject;
+            // get write privileges
+            $privileges->personal->writeObject = $this->rbacAcl->checkAccessOfUser($userid,
+                                                                                  'write',
+                                                                                  $objid);
+            $privileges->context->writeObject = $privileges->personal->writeObject;
+
+            // get learning progress teacher's privileges
+            $priv = 'read_learning_progress';
+            $privileges->context->readActionStream = $this->rbacAcl->checkAccessOfUser($userid,
+                                                                                       'read_learning_progress',
+                                                                                       $objid);
+
+            if (!$privileges->context->readActionStream)
+            {
+                // if the priv is missing NOW, we need to lookup the parent
+                global $tree;
+                $objid = $tree->getParentId($objid);
+                $privileges->context->readActionStream = $this->rbacAcl->checkAccessOfUser($userid,
+                                                                                           'read_learning_progress',
+                                                                                           $objid);
+            }
+
+            if (!$privileges->context->readActionStream)
+            {
+                // if the user is lacking privileges now,
+                // it is also necessary to verify if the current object
+                // is an organisational unit because in that case there is a
+                // different privilege.
+                $privileges->context->readActionStream = $this->rbacAcl->checkAccessOfUser($userid,
+                                                                                           'view_learning_progress',
+                                                                                           $objid);
+            }
+
+        }
+
+        if ($mode === 2 || $mode === 4)
+        {
+            // this is a different part of the ACL!
+
+            // get learning progress reading privileges
+            // get learning progress update privileges
+        }
+
+        return $privileges;
     }
 }
 
