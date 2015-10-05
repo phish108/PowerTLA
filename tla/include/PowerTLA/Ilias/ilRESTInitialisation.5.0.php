@@ -59,8 +59,8 @@ class ilRESTInitialisation extends ilInitialisation
 	/**
 	 * set session cookie params for path, domain, etc.
 	 */
-	protected static function setCookieParams()
-	{}
+	// protected static function setCookieParams()
+	// {}
 
 	/**
 	 * provide $styleDefinition object
@@ -90,7 +90,6 @@ class ilRESTInitialisation extends ilInitialisation
 	protected static function goToLogin($a_auth_stat = "")
 	{}
 
-
 	/**
 	 * Exit
 	 *
@@ -115,6 +114,8 @@ class ilRESTInitialisation extends ilInitialisation
 	 * ilias initialisation
 	 *
 	 * This needs to be overwritten because Ilias would ignore several settings
+	 * initIlias has to be overwritten because there is no easy way to
+	 * refine the context definition
 	 */
 	public static function initILIAS()
 	{
@@ -133,13 +134,9 @@ class ilRESTInitialisation extends ilInitialisation
 		{
 			self::initClient();
 
-            self::initUser();
-
-             if (ilSession::get("AccountId"))
-             {
-                 // ensure that web users have access to the services
-                 self::initUserAccount();
-             }
+			self::initUser();
+			// NOTE authenticate() will setup the session user
+			self::authenticate();
 
 			// init after Auth otherwise breaks CAS
 			self::includePhp5Compliance();
@@ -150,11 +147,83 @@ class ilRESTInitialisation extends ilInitialisation
 		}
 	}
 
+	public static function authenticate()
+	{
+		global $ilAuth, $ilias, $ilErr, $ilUser;
+
+		$oldSid = session_id();
+
+		// error_log(">> init authenticate " . $oldSid);
+
+		$ilAuth->start();
+		$ilias->setAuthError($ilErr->getLastError());
+
+		if($ilAuth->getAuth() && $ilAuth->getStatus() == '')
+		{
+			error_log(">> init authenticate no session?");
+			if (ilSession::get("AccountId"))
+         	{
+            	// ensure that web users have access to the services
+                self::initUserAccount();
+         	}
+		// 	self::initUserAccount();
+		//
+		// 	self::handleAuthenticationSuccess();
+		}
+		//
+		// error_log(">> init authenticate user is: " . $ilUser->getId());
+	}
+
+	protected static function setCookieParams()
+	{
+		global $ilSetting;
+
+		include_once 'Services/Authentication/classes/class.ilAuthFactory.php';
+
+		$cookie_path = '/';
+
+		/* if ilias is called directly within the docroot $cookie_path
+		is set to '/' expecting on servers running under windows..
+		here it is set to '\'.
+		in both cases a further '/' won't be appended due to the following regex
+		*/
+		$cookie_path .= (!preg_match("/[\/|\\\\]$/", $cookie_path)) ? "/" : "";
+
+		if($cookie_path == "\\") $cookie_path = '/';
+
+		include_once './Services/Http/classes/class.ilHTTPS.php';
+		$cookie_secure = !$ilSetting->get('https', 0) && ilHTTPS::getInstance()->isDetected();
+
+		define('IL_COOKIE_EXPIRE',0);
+		define('IL_COOKIE_PATH',$cookie_path);
+		define('IL_COOKIE_DOMAIN','');
+		define('IL_COOKIE_SECURE', $cookie_secure); // Default Value
+
+		// session_set_cookie_params() supports 5th parameter
+		// only for php version 5.2.0 and above
+		if( version_compare(PHP_VERSION, '5.2.0', '>=') )
+		{
+			// PHP version >= 5.2.0
+			define('IL_COOKIE_HTTPONLY',true); // Default Value
+			session_set_cookie_params(
+			IL_COOKIE_EXPIRE, IL_COOKIE_PATH, IL_COOKIE_DOMAIN, IL_COOKIE_SECURE, IL_COOKIE_HTTPONLY
+		);
+		}
+		else
+		{
+				// PHP version < 5.2.0
+				session_set_cookie_params(
+				IL_COOKIE_EXPIRE, IL_COOKIE_PATH, IL_COOKIE_DOMAIN, IL_COOKIE_SECURE
+				);
+		}
+	}
+
+
 	/**
 	 * @static
 	 */
-	protected static function handleAuthenticationSuccess()
-	{}
+	// protected static function handleAuthenticationSuccess()
+	// {}
 
 	/**
 	 * @static
@@ -181,10 +250,10 @@ class ilRESTInitialisation extends ilInitialisation
 	 *
 	 * @return boolean
 	 */
-//	protected static function blockedAuthentication($a_current_script)
-//	{
-//        return true;
-//    }
+	protected static function blockedAuthentication($a_current_script)
+	{
+       return true;
+   }
 
 	/**
 	 * Is current view the login form?
