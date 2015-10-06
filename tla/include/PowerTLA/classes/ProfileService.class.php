@@ -41,7 +41,7 @@ class ProfileService extends VLEService
                 case "delete":
                     if ($this->VLE->isGuestUser() &&
                         ($token["type"] == "Session" || // cannot bypass the VLE
-                        $token["type"] == "Client"))
+                         $token["type"] == "Client"))
                     {
                         $this->status = RESTling::OPERATION_FORBIDDEN;
                         $this->data = array("message" => "Bad Token");
@@ -63,19 +63,21 @@ class ProfileService extends VLEService
     {
         if ($token["type"] != "Request")
         {
-            $this->log("wrong type: ". $token["type"]);
+            // $this->log("wrong type: ". $token["type"]);
 
             $this->status = RESTling::OPERATION_FORBIDDEN;
             $this->data = array("message" => "Bad Token");
         }
-        else if (isset($this->inputData) &&
-            ($this->inputDataType == "application/json" ||
-             $this->inputDataType == "application/x-www-form-urlencoded") &&
-            !(array_key_exists("username", $this->inputData) &&
-              array_key_exists("challenge", $this->inputData) &&
-              !empty($this->inputData["username"]) &&
-              !empty($this->inputData["challenge"])))
+        else if (!isset($this->inputData) ||
+                 !($this->inputDataType == "application/json" ||
+                   $this->inputDataType == "application/x-www-form-urlencoded") ||
+                !(array_key_exists("username", $this->inputData) &&
+                  array_key_exists("challenge", $this->inputData) &&
+                  !empty($this->inputData["username"]) &&
+                  !empty($this->inputData["challenge"])))
         {
+            // $this->log("authentication data missing");
+
             $this->status = RESTling::BAD_DATA;
             $this->data = array("message" => "Missing Data");
         }
