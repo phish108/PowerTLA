@@ -304,12 +304,9 @@
         if (verbid &&
             verbid.length) {
             if (!(objectid &&
-                  objectid.length &&
-                  glob.document)) {
+                  objectid.length) &&
+                  glob.document) {
                 objectid = document.location.href;
-            }
-            else {
-                throw new Error("cannot determine the object id in headless mode");
             }
 
             uuid = makeUUID();
@@ -424,9 +421,6 @@
                   objectid.length) &&
                   glob.document) {
                 objectid = document.location.href;
-            }
-            else {
-                throw new Error("cannot determine the object id in headless mode");
             }
 
             uuid = makeUUID();
