@@ -421,8 +421,8 @@
             verbid.length) {
 
             if (!(objectid &&
-                  objectid.length &&
-                  glob.document)) {
+                  objectid.length) &&
+                  glob.document) {
                 objectid = document.location.href;
             }
             else {
@@ -1002,7 +1002,8 @@
     LRS.fetchActions      = fetchStream;
     LRS.fetchState        = fetchState;
 
-    LRS.push              = pushStream;
+    LRS.push              = function () {this.pushStream(); this.pushState();};
+    LRS.pushStream        = pushStream;
     LRS.pushState         = pushState;
 
     LRS.store             = storeStream;
