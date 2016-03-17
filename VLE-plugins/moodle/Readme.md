@@ -6,9 +6,13 @@ The plugin allows to setup and verify the system installation and its basic func
 
 ## Installation
 
+copy the powertla directory to MOODLE_ROOT/local/
+
 
 ## Usage
 
+To be defined
 
 ## Activation and Deactivation
 
+To be defined

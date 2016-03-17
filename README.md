@@ -34,10 +34,10 @@ PowerTLA builds on top of the existing LMS code and allows easy integration of m
 
 ### Moodle
 
-3. copy the moodle's powertla folder into the root directory.
+3. copy the moodle's powertla folder into the root/local directory.
 
 ```
-> cp -r VLE-plugins/moodle/powertla /your/moodle/
+> cp -r VLE-plugins/moodle/powertla /your/moodle/local/
 ```
 
 4. Log into your moodle as an administrator
