@@ -1,9 +1,9 @@
 <?php
 class CourseService extends VLEService
 {
-    public static function apiDefinition($prefix, $name="", $link="")
+    public static function apiDefinition($prefix, $link="course.php", $name="")
     {
-        return parent::apiDefinition($prefix, "powertla.content.courselist", "course.php");
+        return parent::apiDefinition($prefix, $link, "powertla.content.courselist");
     }
 
     protected function initializeRun()

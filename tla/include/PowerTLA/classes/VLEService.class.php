@@ -8,14 +8,15 @@ class VLEService extends RESTling {
      */
     public    $VLE;
 
-    public static function apiDefinition($prefix, $name, $link)
+    public static function apiDefinition($prefix, $link, $name)
     {
         // trim all leading slashes
         $prefix = preg_replace("/^\/+/", "", $prefix);
 
         return array(
             "name"   => $name,
-            "link" => $prefix . "/" . $link
+            "apiLink" => $prefix . "/" . $link,
+            "transport" => array("REST")
         );
     }
 
