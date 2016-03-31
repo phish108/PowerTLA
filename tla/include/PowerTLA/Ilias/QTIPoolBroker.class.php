@@ -256,10 +256,10 @@ class QTIPoolBroker extends Logger
             $assQuestion = new $type();
             if ($assQuestion)
             {
-            $assQuestion->loadFromDb($question["question_id"]);
+                $assQuestion->loadFromDb($question["question_id"]);
 
-        		  //add question into the question list
-            array_push($questions, $this->calculateQUestion($question, $assQuestion));
+                //add question into the question list
+                array_push($questions, $this->calculateQuestion($question, $assQuestion));
             }
             else
             {
@@ -313,6 +313,7 @@ class QTIPoolBroker extends Logger
 
         return array(
             "id" => $questionId,
+            "title" => $question["title"],
             "type" => $type,
             "question" => $questionText,
             "answer" => $answerList,

@@ -86,11 +86,7 @@ class ilRESTInitialisation extends ilInitialisation
 			if (ilContext::hasUser())
 			{
 				self::initUser();
-//
-//				if(ilContext::doAuthentication())
-//				{
-//					self::authenticate();
-//				}
+				self::authenticate();
 			}
 
 			// init after Auth otherwise breaks CAS
