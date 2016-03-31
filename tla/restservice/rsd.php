@@ -23,7 +23,8 @@ while ($cwd != "/")
 require_once("findVLE.php");
 $service = getVLEInstanceInformation($rwd);
 
-include($cwd."/rsd.php");
+chdir($cwd);
+include("rsd.php");
 
 $service['apis'] = tla::describe($service['homePageLink'], $service["engineLink"]);
 
