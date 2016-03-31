@@ -15,17 +15,11 @@ abstract class PluginBase extends Logger
     {
         if (!isset($this->exteranalURL))
         {
-            $reqpath = $_SERVER["REQUEST_URI"];
-
-            // get rid of any query string garbage
-            $reqpath = preg_replace('/\?.*$/',"", $reqpath);
-
-            // get rid of the rsd section
-            $reqpath = preg_replace('/\/[\w\d]+\.php$/',"", $reqpath);
+            $reqpath = dirname($_SERVER["REQUEST_URI"]);
 
             // strip the tla root
             $rcp = preg_replace('/\//', '\\/', $tlapath);
-            $reqpath = preg_replace('/' . $rcp . '$/',"", $reqpath);
+            $reqpath = preg_replace('/' . $rcp . '\/.*$/',"", $reqpath);
 
             $requrl = "http";
             $requrl .= !empty($_SERVER["HTTPS"]) ? "s://" : "://";
@@ -43,11 +37,11 @@ abstract class PluginBase extends Logger
         $requrl = $this->buildExternalSystemUrl($tlapath);
 
         $retval = array(
-            "engine" => $this->getEngine($tlapath),
-            "language" => $this->getDefaultLanguage(),
-            "tlaversion" => TLA_VERSION,
-            "logolink" => $requrl . TLA_ICON,
-            "name"     => $this->getDisplayName()
+            "homePageLink" => $requrl,
+            "engineLink" => $tlapath,
+            // "language" => $this->getDefaultLanguage(),
+            "homePageIcon" => $requrl . TLA_ICON,
+            "engineName"     => $this->getDisplayName()
         );
         return $retval;
     }

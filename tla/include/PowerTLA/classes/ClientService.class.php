@@ -3,9 +3,9 @@ class ClientService extends VLEService
 {
     private $provider;
 
-    public static function apiDefinition($prefix, $link="client.php", $name="")
+    public static function apiDefinition($apis, $prefix, $link="client.php", $name="")
     {
-        return parent::apiDefinition($prefix, $link, "powertla.identity.client");
+        return parent::apiDefinition($apis, $prefix, $link, "powertla.identity.client");
     }
 
     protected function initializeRun()
