@@ -1,0 +1,18 @@
+; power TLA configuration
+; this configuration is used by the rest.php launcher to setup the include path
+
+[PowerTLA]
+
+; include_path=/path/to/your/tla/instance
+include_path= "../../PowerTLA/include/PowerTLA"
+
+TLA_GUESTUSER = "guestuser"
+TLA_TIMEZONE = "Europe/Zurich"
+; TLA_TOKENTYPE = "Bearer"
+TLA_TOKENTYPE = "MAC"
+TLA_ICON = "/icon.png"
+
+[RESTling]
+
+; include_path=/path/to/your/restling/instance
+include_path = "../../PowerTLA/include"
