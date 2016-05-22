@@ -6,3 +6,5 @@ include/.DS_Store
 restservice/lrs.old.php
 
 include/PowerTLA/.DS_Store
+
+VLE-plugins/*.ini
