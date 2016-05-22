@@ -52,34 +52,37 @@ foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
 
     $enginepath = $engineRoot . strtolower($serviceType);
 
-    /**
-     * fetch API information for each service
-     *
-     * Services are always named as 'class.<SERVICENAME>Service.php'.
-     * All other files are ignored
-     */
-    foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($serviceType)) as $file) {
-        // include API files.
-        $filename = $file->getFilename();
+    if (is_dir($serviceType)) {
+    
+        /**
+         * fetch API information for each service
+         *
+         * Services are always named as 'class.<SERVICENAME>Service.php'.
+         * All other files are ignored
+         */
+        foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($serviceType)) as $file) {
+            // include API files.
+            $filename = $file->getFilename();
 
-        list( $pre, $classname, $suffix) = explode('.', $filename);
+            list( $pre, $classname, $suffix) = explode('.', $filename);
 
-        if (!empty($classname) &&
-            $suffix == "php" &&
-            preg_match("/Service$/", $classname)) {
+            if (!empty($classname) &&
+                $suffix == "php" &&
+                preg_match("/Service$/", $classname)) {
 
-            try{
-                include("./" . $file->getPathname());
-                // Note: because of call_user_func we cannot pass the apis array as reference :(
-                $tapis = call_user_func($classname.'::apiDefinition', $apis, $enginepath);
+                try{
+                    include("./" . $file->getPathname());
+                    // Note: because of call_user_func we cannot pass the apis array as reference :(
+                    $tapis = call_user_func($classname.'::apiDefinition', $apis, $enginepath);
 
-                foreach ($tapis as $k => $v) {
-                    $apis[$k] = $v;
+                    foreach ($tapis as $k => $v) {
+                        $apis[$k] = $v;
+                    }
                 }
-            }
-            catch(Execption $e) {
-                // ignore
-                error_log($e->getMessage());
+                catch(Execption $e) {
+                    // ignore
+                    error_log($e->getMessage());
+                }
             }
         }
     }
