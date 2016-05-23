@@ -19,8 +19,9 @@ PowerTLA builds on top of the existing LMS code and allows easy integration of m
 ## Install
 
 1. Clone the PowerTLA repository into a safe place, but not into your learning management system.
-
-2. copy the tla directory and the rsd.php into your LMS's root directory.
+ * run ```git clone https://github.com/phish108/PowerTLA.git```
+ * run ```git submodule update --init --recoursivce``` 
+2. copy or link the plugin into your LMS.
 
 ### ILIAS LMS
 
@@ -34,11 +35,13 @@ PowerTLA builds on top of the existing LMS code and allows easy integration of m
 
 ### Moodle
 
-3. copy the moodle's powertla folder into the /your/moodle/local directory.
+3. copy or link the moodle's powertla folder into the /your/moodle/local directory.
 
 ```
-> cp -r VLE-plugins/moodle/powertla /your/moodle/local/
+> cp -r VLE-plugins/moodle/local/powertla /your/moodle/local/
 ```
+
+3. create a powertla.ini from the powertla.ini.example.
 
 4. Log into your moodle as an administrator
 

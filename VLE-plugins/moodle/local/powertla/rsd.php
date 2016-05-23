@@ -51,7 +51,6 @@ chdir($TLAConfig["PowerTLA"]["include_path"]);
 foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
 
     $enginepath = $engineRoot . strtolower($serviceType);
-
     /**
      * fetch API information for each service
      *

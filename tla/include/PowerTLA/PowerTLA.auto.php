@@ -17,14 +17,14 @@
     $prefixes = explode(PATH_SEPARATOR, get_include_path());
     foreach ( $prefixes as $p )
     {
-        error_log($p);
+    //    error_log($p);
         if (file_exists($p .'/PowerTLA.auto.php' ))
         {
             $powertlapath = $p;
             break;
         }
     }
-    error_log("auto: " . $powertlapath);
+    // error_log("auto: " . $powertlapath);
 
     spl_autoload_register(function ($class) {
 
