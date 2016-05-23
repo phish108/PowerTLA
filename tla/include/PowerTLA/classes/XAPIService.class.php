@@ -67,7 +67,7 @@ class XAPIService extends VLEService
         }
 
         // load the core capabilities
-        $ctxt = new stdClass();
+        $ctxt = new \stdClass();
         $ctxt->object = $this->queryParam;
         $privs = $this->VLE->getPrivileges($ctxt);
 

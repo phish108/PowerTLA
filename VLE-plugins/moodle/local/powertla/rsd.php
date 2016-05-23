@@ -50,7 +50,9 @@ chdir($TLAConfig["PowerTLA"]["include_path"]);
 // Evaluate all Services for the 4 TLA components
 foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
 
-    $enginepath = $engineRoot . strtolower($serviceType);
+    error_log($serviceType);
+
+    $enginepath = $engineRoot . $serviceType;
     /**
      * fetch API information for each service
      *
@@ -67,10 +69,11 @@ foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
             $suffix == "php" &&
             preg_match("/Service$/", $classname)) {
 
-            $fname = "\\PowerTLA\\" . $classname.'::apiDefinition';
-            error_log('fname= ' . $fname );
+            $fname = "PowerTLA\\" . $classname.'::apiDefinition';
+//            error_log('fname= ' . $fname );
+//            error_log('dname= ' . $file->getPathname());
 
-            // try{
+            try{
                 require_once("./" . $file->getPathname());
 
 
@@ -80,10 +83,10 @@ foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
                 foreach ($tapis as $k => $v) {
                     $apis[$k] = $v;
                 }
-//            }
-//            catch(Execption $e) {
-//                // ignore
-//                error_log($e->getMessage());
+            }
+            catch(Execption $e) {
+                // ignore
+                error_log($e->getMessage());
             }
         }
     }

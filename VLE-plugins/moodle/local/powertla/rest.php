@@ -32,6 +32,8 @@ set_include_path($TLAConfig["PowerTLA"]["include_path"] . PATH_SEPARATOR .
                  $TLAConfig["RESTling"]["include_path"] . PATH_SEPARATOR .
                  get_include_path());
 
+chdir($TLAConfig["PowerTLA"]["system_path"]);
+
 // ensure that PHP has the local timezone instantiated
 date_default_timezone_set($TLAConfig["PowerTLA"]["TLA_TIMEZONE"]);
 
@@ -39,11 +41,11 @@ date_default_timezone_set($TLAConfig["PowerTLA"]["TLA_TIMEZONE"]);
 define("TLA_TOKENTYPE", $TLAConfig["PowerTLA"]["TLA_TOKENTYPE"]);
 
 // Init Autoloaders for RESTling and PowerTLA Classes
-include_once('RESTling/contrib/Restling.auto.php');
+include_once('contrib/Restling.auto.php');
 include_once('PowerTLA.auto.php');
 
 // preload the VLE System handler
-require_once('PowerTLA/' . TLA_LMS . '/SystemHandler.class.php');
+require_once( TLA_LMS . '/SystemHandler.class.php');
 
 /**
  * @function detectLMS()
@@ -51,7 +53,8 @@ require_once('PowerTLA/' . TLA_LMS . '/SystemHandler.class.php');
  * legacy function for bootstrapping PowerTLA to the LMS handler
  */
 function detectLMS() {
-    $vle  = new SystemHandler();
+    // FIXME: get the script URL and pass it on to the system handler!
+    $vle  = new PowerTLA\SystemHandler("");
     $vle->setGuestUser($TLAConfig["PowerTLA"]["TLA_GUESTUSER"]);
     return $vle;
 }
@@ -75,7 +78,7 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
     $serviceType = array_shift($pi);
     $serviceName = array_shift($pi);
 
-    array_unshift($e, $pi);
+    array_unshift($pi, $e);
     $_SERVER["PATH_INFO"] = implode("/", $pi);
 
     if (isset($serviceName) &&
@@ -84,12 +87,13 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
         isset($serviceName) &&
         !empty($serviceName)) {
 
-        $serviceName  = "\\PowerTLA\\" . ucfirst(strtolower($serviceName));
+        $serviceName  = ucfirst(strtolower($serviceName));
         $serviceName .= "Service";
 
         // preload the service class
         try {
             require_once($serviceType . "/class." . $serviceName . ".php");
+            $serviceName = 'PowerTLA\\' . $serviceName;
         }
         catch(Exception $e) {
             // Service class does not exist
@@ -108,6 +112,9 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
  */
 if (!isset($serviceName)&& empty($serviceName)) {
     $service = new \PowerTLA\ErrorService("invalid call", "Missing Service");
+}
+else {
+    error_log($serviceName);
 }
 
 // try to instantiate the service class

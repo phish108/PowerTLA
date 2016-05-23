@@ -26,9 +26,9 @@ abstract class VLEHandler extends \RESTling\Logger
 
         $this->tlahost = $_SERVER["SERVER_PROTOCOL"] . "://" . $_SERVER["SERVER_NAME"];
 
-        $this->baseurl = $this->tlahost . "/" . $this->tlapath . "/restservice";
+        $this->baseurl = $this->tlahost . "/" . $this->tlapath . "/rest.php";
 
-        $this->handler = new stdClass();
+        $this->handler = new \stdClass();
         $this->initLMS($lmspath);
     }
 
@@ -184,11 +184,11 @@ abstract class VLEHandler extends \RESTling\Logger
      */
     protected function initPrivileges($bCheckActiveUser = true)
     {
-        $privileges = new stdClass();
+        $privileges = new \stdClass();
 
         // two types of privileges
-        $privileges->personal = new stdClass();
-        $privileges->context  = new stdClass();
+        $privileges->personal = new \stdClass();
+        $privileges->context  = new \stdClass();
 
         $privileges->personal->readObject        = false;
         $privileges->personal->writeObject       = false;

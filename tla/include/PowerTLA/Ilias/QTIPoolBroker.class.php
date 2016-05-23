@@ -380,7 +380,7 @@ class QTIPoolBroker extends \RESTling\Logger
 
         foreach ($gaps as $gap)
         {
-            $thegap = new stdClass();
+            $thegap = new \stdClass();
             $thegap->type = $gap->type;
 
             $tItems = array();
