@@ -1,6 +1,8 @@
 <?php
 
-abstract class VLEHandler extends Logger
+namespace PowerTLA;
+
+abstract class VLEHandler extends \RESTling\Logger
 {
     protected $lmstype;
 

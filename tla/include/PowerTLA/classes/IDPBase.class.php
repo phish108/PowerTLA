@@ -1,5 +1,7 @@
 <?php
-abstract class IDPBase extends Logger
+namespace PowerTLA;
+
+abstract class IDPBase extends \RESTling\Logger
 {
     protected $guestuser;
     protected $idToken;

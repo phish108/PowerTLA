@@ -68,18 +68,23 @@ foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
             $suffix == "php" &&
             preg_match("/Service$/", $classname)) {
 
-            try{
-                include("./" . $file->getPathname());
+            $fname = "\\PowerTLA\\" . $classname.'::apiDefinition';
+            error_log('fname= ' . $fname );
+
+            // try{
+                require_once("./" . $file->getPathname());
+
+
                 // Note: because of call_user_func we cannot pass the apis array as reference :(
-                $tapis = call_user_func($classname.'::apiDefinition', $apis, $enginepath);
+                $tapis = call_user_func($fname, $apis, $enginepath);
 
                 foreach ($tapis as $k => $v) {
                     $apis[$k] = $v;
                 }
-            }
-            catch(Execption $e) {
-                // ignore
-                error_log($e->getMessage());
+//            }
+//            catch(Execption $e) {
+//                // ignore
+//                error_log($e->getMessage());
             }
         }
     }

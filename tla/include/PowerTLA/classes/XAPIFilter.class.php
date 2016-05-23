@@ -1,6 +1,8 @@
 <?php
 
-class XAPIFilter extends Logger
+namespace PowerTLA;
+
+class XAPIFilter extends \RESTling\Logger
 {
     private $service;
     protected $vle;

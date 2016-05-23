@@ -84,7 +84,7 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
         isset($serviceName) &&
         !empty($serviceName)) {
 
-        $serviceName = ucfirst(strtolower($serviceName));
+        $serviceName  = "\\PowerTLA\\" . ucfirst(strtolower($serviceName));
         $serviceName .= "Service";
 
         // preload the service class
@@ -93,7 +93,7 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
         }
         catch(Exception $e) {
             // Service class does not exist
-            $service = new ErrorService("loading", $e->getMessage());
+            $service = new \PowerTLA\ErrorService("loading", $e->getMessage());
         }
     }
 }
@@ -107,7 +107,7 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
  * Error Service.
  */
 if (!isset($serviceName)&& empty($serviceName)) {
-    $service = new ErrorService("invalid call", "Missing Service");
+    $service = new \PowerTLA\ErrorService("invalid call", "Missing Service");
 }
 
 // try to instantiate the service class

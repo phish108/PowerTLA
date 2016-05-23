@@ -1,9 +1,10 @@
 <?php
+namespace PowerTLA;
 
 require_once 'Modules/Course/classes/class.ilCourseParticipant.php';
 include_once 'Services/Membership/classes/class.ilParticipants.php';
 
-class MCFilter extends Logger
+class MCFilter extends \RESTling\Logger
 {
     private $service;
     protected $vle;

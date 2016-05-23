@@ -7,7 +7,7 @@
      * initialization of your root script.
      */
 
-    define("TLA_VERSION", "0.7");
+    define("TLA_VERSION", "0.8");
 
     // make the include path available to the entire system.
     global $powertlapath;
@@ -27,15 +27,26 @@
     error_log("auto: " . $powertlapath);
 
     spl_autoload_register(function ($class) {
-        global $powertlapath;
 
-    	$path = $powertlapath . '/classes/' . $class . '.class.php';
+        error_log("auto " . $class);
 
-        error_log("auto: " . $path);
-        if (file_exists($path))
-        {
-            error_log("auto ok! " );
-            include_once $path;
+        $parts = explode('\\', $class);
+        $NSRoot = array_shift($parts);
+
+        if (isset($NSRoot) &&
+            !empty($NSRoot) &&
+            $NSRoot == "PowerTLA") {
+
+            global $powertlapath;
+
+            $path = $powertlapath . '/classes/' . end($parts) . '.class.php';
+
+            error_log("auto: " . $path);
+            if (file_exists($path))
+            {
+                error_log("auto ok! " );
+                include_once $path;
+            }
         }
     });
 ?>

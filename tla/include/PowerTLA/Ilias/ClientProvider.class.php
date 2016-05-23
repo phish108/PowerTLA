@@ -1,6 +1,8 @@
 <?php
 
-class ClientProvider extends Logger
+namespace PowerTLA;
+
+class ClientProvider extends \RESTling\Logger
 {
     private $clientId;
     private $appId;

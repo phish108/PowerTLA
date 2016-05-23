@@ -1,5 +1,7 @@
 <?php
 
+namespace PowerTLA;
+
 class SystemHandler extends VLEHandler
 {
     public function __construct($tp)
@@ -72,7 +74,7 @@ class SystemHandler extends VLEHandler
             // get learning progress reading privileges
             // get learning progress update privileges
         }
-        
+
         return $privileges;
     }
 }

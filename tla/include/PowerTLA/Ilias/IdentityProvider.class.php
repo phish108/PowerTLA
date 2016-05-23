@@ -1,4 +1,5 @@
 <?php
+namespace PowerTLA;
 
 class IdentityProvider extends IDPBase
 {

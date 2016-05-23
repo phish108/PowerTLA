@@ -1,6 +1,8 @@
 <?php
 
-class VLEService extends RESTling {
+namespace PowerTLA;
+
+class VLEService extends \RESTling\RESTling {
 
     /**
      * @property $VLE

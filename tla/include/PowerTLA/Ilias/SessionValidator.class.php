@@ -1,4 +1,5 @@
 <?php
+namespace PowerTLA;
 
 class SessionValidator extends VLEValidator
 {

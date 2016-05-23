@@ -1,5 +1,7 @@
 <?php
 
+namespace PowerTLA;
+
 class PluginConfig extends PluginBase
 {
     public function getEngine($tlapath)

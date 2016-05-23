@@ -1,6 +1,8 @@
 <?php
 
-abstract class PluginBase extends Logger
+namespace PowerTLA;
+
+abstract class PluginBase extends \RESTling\Logger
 {
     private $externalURL;
 

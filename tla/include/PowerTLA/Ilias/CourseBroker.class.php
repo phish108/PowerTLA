@@ -1,10 +1,11 @@
 <?php
+namespace PowerTLA;
 
 include_once 'Services/Membership/classes/class.ilParticipants.php';
 
 require_once 'Modules/Course/classes/class.ilObjCourse.php';
 
-class CourseBroker extends Logger
+class CourseBroker extends \RESTling\Logger
 {
     private $iliasVersion;
 

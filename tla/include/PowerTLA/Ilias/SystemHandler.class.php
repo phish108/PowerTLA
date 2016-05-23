@@ -1,5 +1,7 @@
 <?php
 
+namespace PowerTLA;
+
 class SystemHandler extends VLEHandler
 {
     protected $iliasVersion;

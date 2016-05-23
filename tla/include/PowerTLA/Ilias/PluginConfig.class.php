@@ -1,4 +1,6 @@
 <?php
+namespace PowerTLA;
+
 class PluginConfig extends PluginBase
 {
     private $servername;

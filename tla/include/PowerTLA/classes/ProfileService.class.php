@@ -1,4 +1,5 @@
 <?php
+namespace PowerTLA;
 class ProfileService extends VLEService
 {
     private $provider;

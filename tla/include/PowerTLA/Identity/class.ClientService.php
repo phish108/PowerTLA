@@ -1,4 +1,6 @@
 <?php
+namespace PowerTLA;
+
 class ClientService extends VLEService
 {
     private $provider;

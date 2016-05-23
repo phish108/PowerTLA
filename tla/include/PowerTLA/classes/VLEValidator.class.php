@@ -1,5 +1,7 @@
 <?php
 
+namespace PowerTLA;
+
 /**
  * @class VLEValidator
  *
@@ -20,7 +22,7 @@
  * During the Authentication phase, the validator may also need to validate
  * a Client token.
  */
-abstract class VLEValidator extends RESTlingValidator
+abstract class VLEValidator extends \RESTling\RESTlingValidator
 {
     protected $token;
     protected $tokenType;

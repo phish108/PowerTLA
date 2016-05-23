@@ -1,4 +1,6 @@
 <?php
+namespace PowerTLA;
+
 class SessionValidator extends VLEValidator
 {
     protected function validateLocalSession()

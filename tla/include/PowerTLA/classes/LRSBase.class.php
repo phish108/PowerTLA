@@ -1,9 +1,10 @@
 <?php
+namespace PowerTLA;
 
 /**
  * Base Class for LRSManager handlers managed by the system provider.
  */
-abstract class LRSBase extends Logger
+abstract class LRSBase extends \RESTling\Logger
 {
     const VERB_VOIDED = "http://adlnet.gov/expapi/verbs/voided";
 

@@ -1,6 +1,8 @@
 
 <?php
 
+namespace PowerTLA;
+
 /**
  * REMOVE
  */

@@ -1,4 +1,6 @@
 <?php
+namespace PowerTLA;
+
 /**
  * The LRS Manager Class implements the DB Interface for the VLE
  *

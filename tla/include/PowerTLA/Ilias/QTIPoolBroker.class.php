@@ -1,5 +1,7 @@
 <?php
 
+namespace PowerTLA;
+
 include_once 'Services/Membership/classes/class.ilParticipants.php';
 
 require_once 'Modules/Course/classes/class.ilObjCourse.php';
@@ -7,7 +9,7 @@ require_once 'Modules/TestQuestionPool/classes/class.ilObjQuestionPool.php';
 require_once 'Modules/TestQuestionPool/classes/class.assQuestion.php';
 
 
-class QTIPoolBroker extends Logger
+class QTIPoolBroker extends \RESTling\Logger
 {
     private $iliasVersion;
 
