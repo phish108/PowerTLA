@@ -2,7 +2,7 @@
 
 namespace PowerTLA;
 
-class VLEService extends \RESTling\RESTling {
+class VLEService extends \RESTling\Service {
 
     /**
      * @property $VLE

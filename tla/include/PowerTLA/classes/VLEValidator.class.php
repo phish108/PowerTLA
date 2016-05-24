@@ -22,7 +22,7 @@ namespace PowerTLA;
  * During the Authentication phase, the validator may also need to validate
  * a Client token.
  */
-abstract class VLEValidator extends \RESTling\RESTlingValidator
+abstract class VLEValidator extends \RESTling\Validator
 {
     protected $token;
     protected $tokenType;
