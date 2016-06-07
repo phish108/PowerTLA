@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerTLA;
+namespace PowerTLA\Service;
 
-class VLEService extends \RESTling\Service {
+class BaseService extends \RESTling\Service {
 
     /**
      * @property $VLE

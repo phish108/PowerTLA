@@ -88,17 +88,10 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
         !empty($serviceName)) {
 
         $serviceName  = ucfirst(strtolower($serviceName));
-        $serviceName .= "Service";
+        // $serviceName .= "Service";
 
         // preload the service class
-        try {
-            require_once($serviceType . "/class." . $serviceName . ".php");
-            $serviceName = 'PowerTLA\\' . $serviceName;
-        }
-        catch(Exception $e) {
-            // Service class does not exist
-            $service = new \PowerTLA\ErrorService("loading", $e->getMessage());
-        }
+        $serviceName = 'PowerTLA\\Service\\' . $serviceType .'\\' . $serviceName;
     }
 }
 

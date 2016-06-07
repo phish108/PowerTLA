@@ -1,7 +1,9 @@
 <?php
-namespace PowerTLA;
+namespace PowerTLA\Service\Content;
 
-class CourseService extends VLEService
+use PowerTLA\Service;
+
+class Course extends BaseService
 {
     public static function apiDefinition($apis, $prefix, $link="course", $name="")
     {

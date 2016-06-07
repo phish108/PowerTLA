@@ -45,7 +45,7 @@ if ($pathname == "local") {
 
 $owd = getcwd();
 
-chdir($TLAConfig["PowerTLA"]["include_path"]);
+chdir($TLAConfig["PowerTLA"]["include_path"] . "/Service");
 
 // Evaluate all Services for the 4 TLA components
 foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
@@ -66,10 +66,9 @@ foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
         list( $pre, $classname, $suffix) = explode('.', $filename);
 
         if (!empty($classname) &&
-            $suffix == "php" &&
-            preg_match("/Service$/", $classname)) {
+            $suffix == "php") {
 
-            $fname = "PowerTLA\\" . $classname.'::apiDefinition';
+            $fname = "PowerTLA\\Service\\$serviceType\\" . $classname . '::apiDefinition';
 //            error_log('fname= ' . $fname );
 //            error_log('dname= ' . $file->getPathname());
 

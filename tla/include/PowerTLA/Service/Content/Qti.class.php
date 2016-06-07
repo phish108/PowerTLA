@@ -1,10 +1,11 @@
 <?php
-namespace PowerTLA;
+namespace PowerTLA\Service\Content;
+use PowerTLA\Service;
 
 /**
  *
  */
-class QtiService extends VLEService
+class Qti extends BaseService
 {
     public static function apiDefinition($apis, $prefix, $link="qti", $name="")
     {

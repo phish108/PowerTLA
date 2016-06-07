@@ -1,10 +1,10 @@
 <?php
-namespace PowerTLA;
-
+namespace PowerTLA\Service\LRS;
+use PowerTLA\Service;
 /**
  *
  */
-class XapiService extends VLEService
+class Xapi extends BaseService
 {
     private $lrs;
 

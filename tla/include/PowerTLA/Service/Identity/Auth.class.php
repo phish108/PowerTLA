@@ -1,11 +1,12 @@
 <?php
 
-namespace PowerTLA;
+namespace PowerTLA\Service\Identity;
+use PowerTLA\Service;
 
 /**
  * REMOVE
  */
-class AuthService extends VLEService
+class Auth extends BaseService
 {
     /**
      * @property $mode
@@ -24,7 +25,7 @@ class AuthService extends VLEService
      */
     protected function initializeRun()
     {
-    	$this->log("enter initializeRun of Auth service ");
+        $this->log("enter initializeRun of Auth service ");
         // only real service requests are allowed no web-site interaction from other locations
         // Web-sites should use their backend!
         $this->forbidCORS();
@@ -253,12 +254,12 @@ class AuthService extends VLEService
 
     protected function post_register()
     {
-    	$this->mark();
-    	$deviceID = $_PUT["UUID"];
-    	$appID = $_PUT["APPID"];
+        $this->mark();
+        $deviceID = $_PUT["UUID"];
+        $appID = $_PUT["APPID"];
 
-    	$response=json_encode($this->generateConsumerTokens($appID,$deviceID));
-    	echo($response);
+        $response=json_encode($this->generateConsumerTokens($appID,$deviceID));
+        echo($response);
     }
 
     /**
@@ -270,73 +271,73 @@ class AuthService extends VLEService
 
    protected  function generateConsumerTokens($appId, $uuid){
 
-    	global $ilDB;
+        global $ilDB;
 
-    	// creates a new database table for the registration if no one exists yet
-    	logging(" check if our table is present already ");
-    	if (!in_array("ui_uihk_xmob_reg",$ilDB->listTables())) {
-    		logging("create a new table");
-    		//create table that will store the app keys and any such info in the database
-    		//ONLY CREATE IF THE TABLE DOES NOT EXIST
+        // creates a new database table for the registration if no one exists yet
+        logging(" check if our table is present already ");
+        if (!in_array("ui_uihk_xmob_reg",$ilDB->listTables())) {
+            logging("create a new table");
+            //create table that will store the app keys and any such info in the database
+            //ONLY CREATE IF THE TABLE DOES NOT EXIST
 
-    		$fields= array(
-    				"app_id" => array(
-    						'type' => 'text',
-    						'length'=> 255
-    				),
-    				"uuid" => array(
-    						'type' => 'text',
-    						'length'=> 255
-    				),
-    				"consumer_key" => array(
-    						'type' => 'text',
-    						'length'=> 255
-    				),
-    				"consumer_secret" => array(
-    						'type' => 'text',
-    						'length'=> 255
-    				)
-    		);
+            $fields= array(
+                    "app_id" => array(
+                            'type' => 'text',
+                            'length'=> 255
+                    ),
+                    "uuid" => array(
+                            'type' => 'text',
+                            'length'=> 255
+                    ),
+                    "consumer_key" => array(
+                            'type' => 'text',
+                            'length'=> 255
+                    ),
+                    "consumer_secret" => array(
+                            'type' => 'text',
+                            'length'=> 255
+                    )
+            );
 
-    		$ilDB->createTable("isnlc_reg_info",$fields);
-    	}
-    	if (in_array("ui_uihk_xmob_reg",$ilDB->listTables())) {
-    		//if for the specified app id and uuid an client key (= app key) already exists, use this one instead of creating a new one
-    		$result = $ilDB->query("SELECT consumer_key FROM ui_uihk_xmob_reg WHERE uuid = " .$ilDB->quote($uuid, "text") . " AND app_id =" .$ilDB->quote($appId, "text"));
-    		$fetch = $ilDB->fetchAssoc($result);
-    		logging("fetch: " . json_encode($fetch));
-    		$consumerKey = $fetch["consumer_key"];
-    		$consumerSecret = $fetch["consumer_secret"];
+            $ilDB->createTable("isnlc_reg_info",$fields);
+        }
+        if (in_array("ui_uihk_xmob_reg",$ilDB->listTables())) {
+            //if for the specified app id and uuid an client key (= app key) already exists, use this one instead of creating a new one
+            $result = $ilDB->query("SELECT consumer_key FROM ui_uihk_xmob_reg WHERE uuid = " .$ilDB->quote($uuid, "text") . " AND app_id =" .$ilDB->quote($appId, "text"));
+            $fetch = $ilDB->fetchAssoc($result);
+            logging("fetch: " . json_encode($fetch));
+            $consumerKey = $fetch["consumer_key"];
+            $consumerSecret = $fetch["consumer_secret"];
 
-    		//if no consumer
-    		if ($consumerKey == null && $consumerSecret == null) {
+            //if no consumer
+            if ($consumerKey == null && $consumerSecret == null) {
 
-    			$randomSeed = rand();
-    			//$consumerKey = md5($uuid . $appId . $randomSeed);
+                $randomSeed = rand();
+                //$consumerKey = md5($uuid . $appId . $randomSeed);
 
-    			// generate consumer key and consumer secret
-    			$hash= sha1(mt_rand());
-    			$consumerKey = substr($hash,0, 30);
-    			$consumerSecret =substr($hash,30,10);
+                // generate consumer key and consumer secret
+                $hash= sha1(mt_rand());
+                $consumerKey = substr($hash,0, 30);
+                $consumerSecret =substr($hash,30,10);
 
-    			//store the new client key (= app key) in the database
-    			$affected_rows= $ilDB->manipulateF("INSERT INTO ui_uihk_xmob_reg (app_id, uuid, consumer_key, consumer_secret) VALUES ".
-    					" (%s,%s,%s)",
-    					array("text", "text", "text", "text"),
-    					array($appId, $uuid, $consumerKey,$consumerSecret));
-    			// if this fails we must not return the app key
+                //store the new client key (= app key) in the database
+                $affected_rows= $ilDB->manipulateF("INSERT INTO ui_uihk_xmob_reg (app_id, uuid, consumer_key, consumer_secret) VALUES ".
+                        " (%s,%s,%s)",
+                        array("text", "text", "text", "text"),
+                        array($appId, $uuid, $consumerKey,$consumerSecret));
+                // if this fails we must not return the app key
 
-    			logging("return consumer tokens " . $consumerKey. " and ".$consumerSecret);
-    		}
-    	}
-    	//return the consumerKey and consumerSecret in an array
+                logging("return consumer tokens " . $consumerKey. " and ".$consumerSecret);
+            }
+        }
+        //return the consumerKey and consumerSecret in an array
 
-    	$data= array(
-    			"consumerKey"=>$consumerKey,
-    			"consumerSecret"=>$consumerSecret
-    			);
+        $data= array(
+                "consumerKey"=>$consumerKey,
+                "consumerSecret"=>$consumerSecret
+                );
 
-    	return $data;
+        return $data;
       }
 }
 
