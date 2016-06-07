@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerTLA;
+namespace PowerTLA\Handler;
 
 class BaseHandler extends \RESTling\Logger {
     protected $VLE;

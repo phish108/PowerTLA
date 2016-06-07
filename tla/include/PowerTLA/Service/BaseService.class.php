@@ -8,7 +8,9 @@ class BaseService extends \RESTling\Service {
      * @property $VLE
      *
      */
-    public    $VLE;
+    public $VLE;
+
+    private $config;
 
     public static function apiDefinition($apis, $prefix, $link, $name)
     {
@@ -23,7 +25,7 @@ class BaseService extends \RESTling\Service {
         return $apis;
     }
 
-    public function __construct()
+    public function __construct($config)
     {
         parent::__construct();
         $this->setVLE();
@@ -38,28 +40,14 @@ class BaseService extends \RESTling\Service {
 
     public function setVLE()
     {
-        $vle = detectLMS();
+        $systemClass = "PowerTLA\\" . TLA_LMS . "\\Handler\\System";
+        $this->VLE = new $systemClass();
+        $this->VLE->setGuestUser($TLAConfig["PowerTLA"]["TLA_GUESTUSER"]);
 
-        if (isset($vle)) {
-            $this->VLE = $vle;
-
-            $validator = $vle->getSessionValidator();
-            if (isset($validator))
-            {
-                $myheaders = getallheaders();
-
-                if (array_key_exists("Authorization", $myheaders) &&
-                    isset($myheaders["Authorization"]) &&
-                    !empty($myheaders["Authorization"]))
-                {
-                    $authheader = $myheaders["Authorization"];
-                    $aHeadElems = explode(' ', $authheader);
-
-                    $validator->setTokenType($aHeadElems[0]);
-                    $validator->setToken($aHeadElems[1]);
-                }
-                $this->addValidator($validator);
-            }
+        $validator = $this->VLE->getSessionValidator();
+        if (isset($validator))
+        {
+            $this->addHeaderValidator($validator);
         }
     }
 

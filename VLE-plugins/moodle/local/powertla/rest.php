@@ -44,21 +44,6 @@ define("TLA_TOKENTYPE", $TLAConfig["PowerTLA"]["TLA_TOKENTYPE"]);
 include_once('contrib/Restling.auto.php');
 include_once('PowerTLA.auto.php');
 
-// preload the VLE System handler
-require_once( TLA_LMS . '/SystemHandler.class.php');
-
-/**
- * @function detectLMS()
- *
- * legacy function for bootstrapping PowerTLA to the LMS handler
- */
-function detectLMS() {
-    // FIXME: get the script URL and pass it on to the system handler!
-    $vle  = new PowerTLA\SystemHandler("");
-    $vle->setGuestUser($TLAConfig["PowerTLA"]["TLA_GUESTUSER"]);
-    return $vle;
-}
-
 /** *****************************************************************
  * Part 2: Service Discovery
  *
@@ -91,7 +76,7 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
         // $serviceName .= "Service";
 
         // preload the service class
-        $serviceName = 'PowerTLA\\Service\\' . $serviceType .'\\' . $serviceName;
+        $serviceName = "PowerTLA\\Service\\$serviceType\\$serviceName";
     }
 }
 
@@ -104,7 +89,7 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
  * Error Service.
  */
 if (!isset($serviceName)&& empty($serviceName)) {
-    $service = new \PowerTLA\ErrorService("invalid call", "Missing Service");
+    $service = new PowerTLA\Service\ErrorService("invalid call", "Missing Service");
 }
 else {
     error_log($serviceName);
@@ -115,7 +100,7 @@ try {
     $service = new $serviceName();
 }
 catch(Exception $e) {
-    $service = new ErrorService("instantiation", $e->getMessage());
+    $service = new PowerTLA\Service\ErrorService("instantiation", $e->getMessage());
 }
 
 // run the service

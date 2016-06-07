@@ -1,7 +1,9 @@
 <?php
-namespace PowerTLA;
+namespace PowerTLA\Moodle\Validator;
 
-class SessionValidator extends VLEValidator
+use PowerTLA\Validator;
+
+class Session extends BaseValidator
 {
     protected function validateLocalSession()
     {

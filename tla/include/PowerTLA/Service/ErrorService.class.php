@@ -1,9 +1,9 @@
 <?php
-namespace PowerTLA;
+namespace PowerTLA\Service;
 
 // TODO: Move this class to RESTling
 
-class ErrorService exntends \RESTling\Logger {
+class ErrorService extends \RESTling\Logger {
     private $message;
     private $type;
 

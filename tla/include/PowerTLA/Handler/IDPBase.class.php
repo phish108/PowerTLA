@@ -1,5 +1,5 @@
 <?php
-namespace PowerTLA;
+namespace PowerTLA\Handler;
 
 abstract class IDPBase extends \RESTling\Logger
 {

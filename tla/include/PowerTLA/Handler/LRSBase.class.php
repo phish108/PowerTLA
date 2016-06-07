@@ -1,5 +1,5 @@
 <?php
-namespace PowerTLA;
+namespace PowerTLA\Handler;
 
 /**
  * Base Class for LRSManager handlers managed by the system provider.

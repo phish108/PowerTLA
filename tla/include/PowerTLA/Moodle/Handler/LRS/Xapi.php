@@ -1,12 +1,14 @@
 <?php
-namespace PowerTLA;
+namespace PowerTLA\Moodle\Handler\LRS;
+
+use PowerTLA\Handler;
 
 /**
  * The LRS Manager Class implements the DB Interface for the VLE
  *
  * LRS Base provides all validatation functions
  */
-class LRSManager extends LRSBase
+class Xapi extends LRSBase
 {
     private $db;
 

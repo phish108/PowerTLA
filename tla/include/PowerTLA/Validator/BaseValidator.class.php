@@ -95,20 +95,6 @@ abstract class BaseValidator extends \RESTling\Validator
         return $this->validateLocalSession();
     }
 
-    public function run()
-    {
-        // reject forbidden tokens BEFORE we test for public APIs
-        if (isset($this->rejectTypes))
-        {
-            $id = array_search($this->tokenType, $this->rejectTypes);
-            if  ($id !== FALSE)
-            {
-                return FALSE;
-            }
-        }
-        return parent::run();
-    }
-
     protected function validateToken()
     {
         switch ($this->tokenType)

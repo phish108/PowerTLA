@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerTLA;
+namespace PowerTLA\Handler;
 
 abstract class PluginBase extends \RESTling\Logger
 {

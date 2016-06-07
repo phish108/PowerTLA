@@ -68,7 +68,7 @@ foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
         if (!empty($classname) &&
             $suffix == "php") {
 
-            $fname = "PowerTLA\\Service\\$serviceType\\" . $classname . '::apiDefinition';
+            $fname = "PowerTLA\\Service\\$serviceType\\$classname::apiDefinition";
 //            error_log('fname= ' . $fname );
 //            error_log('dname= ' . $file->getPathname());
 
