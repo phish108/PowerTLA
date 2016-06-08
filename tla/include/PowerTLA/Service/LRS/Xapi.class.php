@@ -18,7 +18,6 @@ class Xapi extends BaseService
     protected function initializeRun()
     {
         parent::initializeRun();
-
         $this->lrs = $this->VLE->getLRS();
     }
 

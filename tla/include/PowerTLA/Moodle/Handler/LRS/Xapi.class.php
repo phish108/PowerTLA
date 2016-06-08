@@ -1,7 +1,7 @@
 <?php
 namespace PowerTLA\Moodle\Handler\LRS;
 
-use PowerTLA\Handler;
+use PowerTLA\Handler\LRSBase;
 
 /**
  * The LRS Manager Class implements the DB Interface for the VLE

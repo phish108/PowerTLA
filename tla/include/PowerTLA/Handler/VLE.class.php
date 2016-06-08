@@ -236,9 +236,12 @@ abstract class VLE extends \RESTling\Logger
 
             if (!property_exists($this->handler, $pname)) {
 
-                $handlerClass = "PowerTLA\\" . $this->lmstype . "\\Handler\\" . (!empty($component) ? "$component\\" : "") . $name;
+                $handlerClass = "\\PowerTLA\\" . $this->lmstype . "\\Handler\\" . (!empty($component) ? "$component\\" : "") . $name;
+
+//                $this->log("load handler for $pname class " .$handlerClass );
                 $this->handler->$pname = new $handlerClass($this);
             }
+
             return $this->handler->$pname;
         }
         return null;

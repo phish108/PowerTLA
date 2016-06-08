@@ -58,10 +58,6 @@ class BaseService extends \RESTling\Service {
     protected function initializeRun()
     {
         $this->response_type = "json";
-        // we do not know until this point which LMS we are dealing with
-        // in order to workaround greedy systems we need to grab our data
-        // as early as possible.
-        // $this->loadData();
 
         if ($this->status == \RESTling\Service::OK)
         {
@@ -70,6 +66,7 @@ class BaseService extends \RESTling\Service {
 
             if (!$this->VLE)
             {
+                $this->fatal("VLE handler is missing");
                 $this->status = \RESTling\Service::UNINITIALIZED;
             }
             else if (!$this->VLE->getPluginManager()->isActive())

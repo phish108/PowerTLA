@@ -29,7 +29,7 @@
 
     spl_autoload_register(function ($class) {
 
-        // error_log("powertla-auto: " . $class);
+        error_log("powertla-auto: " . $class);
 
         $class = ltrim($class, "\\");
         $parts = explode('\\', $class);
@@ -42,14 +42,17 @@
             !empty($NSRoot)) {
             if($NSRoot == "PowerTLA") {
 
+//                error_log("powertla-auto: " . $class);
+
                 global $powertlapath;
                 $path = $powertlapath . '/' . implode('/', $parts) . '.class.php';
 
-                // error_log("auto: " . $path);
+//                error_log("auto: " . $path);
+
                 if (file_exists($path))
                 {
-                    // error_log("auto ok! " );
                     include_once $path;
+//                    error_log("auto ok! " );
                 }
             }
             // TODO: Provide a mechanism for VLE plugins

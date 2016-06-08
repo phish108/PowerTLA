@@ -1,7 +1,7 @@
 <?php
 
 namespace PowerTLA\Moodle\Handler\Identity;
-use PowerTLA\Handler;
+use PowerTLA\Handler\IDPBase;
 
 class Idp extends IDPBase
 {

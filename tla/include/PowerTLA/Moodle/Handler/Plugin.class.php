@@ -1,12 +1,10 @@
 <?php
-
 namespace PowerTLA\Moodle\Handler;
 use PowerTLA\Handler\PluginBase;
 
 class Plugin extends PluginBase
 {
-
-    public function getEngine()
+    public function getEngine($t)
     {
         return "Moodle";
     }
@@ -28,6 +26,7 @@ class Plugin extends PluginBase
      */
     public function isActive()
     {
+        $this->mark();
         return TRUE;
     }
 }

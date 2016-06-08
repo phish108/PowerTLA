@@ -10,11 +10,6 @@ class Course extends BaseService
         return parent::apiDefinition($apis, $prefix, $link, "powertla.content.courselist");
     }
 
-    protected function initializeRun()
-    {
-        $this->VLE->getSessionValidator()->rejectTokenType("Client");
-    }
-
     /**
      * @protected @function get()
      *

@@ -1,13 +1,14 @@
 <?php
 namespace PowerTLA\Handler;
 
-abstract class IDPBase extends \RESTling\Logger
+abstract class IDPBase extends BaseHandler
 {
     protected $guestuser;
     protected $idToken;
 
-    public function __construct($guestuserid)
+    public function __construct($system, $guestuserid)
     {
+        parent::__construct($system);
         $this->guestuser = $guestuserid;
     }
 

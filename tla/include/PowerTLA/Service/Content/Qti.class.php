@@ -12,11 +12,6 @@ class Qti extends BaseService
         return parent::apiDefinition($apis, $prefix, $link, "powertla.content.imsqti");
     }
 
-    protected function initializeRun()
-    {
-        $this->VLE->getSEssionValidator()->rejectTokenType("Client");
-    }
-
     protected function findOperation($method, $path)
     {
         $ops = array("course", "questionpool");
