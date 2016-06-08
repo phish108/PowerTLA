@@ -7,7 +7,7 @@
      * initialization of your root script.
      */
 
-    define("TLA_VERSION", "0.8");
+    define("TLA_VERSION", "0.9");
 
     // make the include path available to the entire system.
     global $powertlapath;
@@ -15,9 +15,10 @@
     // determine the relevant include path only once.
     $powertlapath = "";
     $prefixes = explode(PATH_SEPARATOR, get_include_path());
+
     foreach ( $prefixes as $p )
     {
-    //    error_log($p);
+        //    error_log($p);
         if (file_exists($p .'/PowerTLA.auto.php' ))
         {
             $powertlapath = $p;
@@ -28,25 +29,34 @@
 
     spl_autoload_register(function ($class) {
 
-        error_log("auto " . $class);
+        error_log("powertla-auto: " . $class);
 
+        $class = ltrim($class, "\\");
         $parts = explode('\\', $class);
+
         $NSRoot = array_shift($parts);
 
+        // error_log("powertla-auto: " . $NSRoot);
+
         if (isset($NSRoot) &&
-            !empty($NSRoot) &&
-            $NSRoot == "PowerTLA") {
+            !empty($NSRoot)) {
+            if($NSRoot == "PowerTLA") {
 
-            global $powertlapath;
+//                error_log("powertla-auto: " . $class);
 
-            $path = $powertlapath . '/classes/' . end($parts) . '.class.php';
+                global $powertlapath;
+                $path = $powertlapath . '/' . implode('/', $parts) . '.class.php';
 
-            error_log("auto: " . $path);
-            if (file_exists($path))
-            {
-                error_log("auto ok! " );
-                include_once $path;
+//                error_log("auto: " . $path);
+
+                if (file_exists($path))
+                {
+                    include_once $path;
+//                    error_log("auto ok! " );
+                }
             }
+            // TODO: Provide a mechanism for VLE plugins
         }
+
     });
 ?>

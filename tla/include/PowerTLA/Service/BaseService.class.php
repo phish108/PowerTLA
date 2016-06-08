@@ -1,14 +1,16 @@
 <?php
 
-namespace PowerTLA;
+namespace PowerTLA\Service;
 
-class VLEService extends \RESTling\Service {
+class BaseService extends \RESTling\Service {
 
     /**
      * @property $VLE
      *
      */
-    public    $VLE;
+    public $VLE;
+
+    private $config;
 
     public static function apiDefinition($apis, $prefix, $link, $name)
     {
@@ -23,9 +25,10 @@ class VLEService extends \RESTling\Service {
         return $apis;
     }
 
-    public function __construct()
+    public function __construct($config)
     {
         parent::__construct();
+        $this->config = $config;
         $this->setVLE();
 
         // CORS should be OK for the testing.
@@ -38,28 +41,14 @@ class VLEService extends \RESTling\Service {
 
     public function setVLE()
     {
-        $vle = detectLMS();
+        $systemClass = "\\PowerTLA\\" . TLA_LMS . "\\Handler\\System";
+        $this->VLE = new $systemClass();
+        $this->VLE->setGuestUser($this->config["PowerTLA"]["TLA_GUESTUSER"]);
 
-        if (isset($vle)) {
-            $this->VLE = $vle;
-
-            $validator = $vle->getSessionValidator();
-            if (isset($validator))
-            {
-                $myheaders = getallheaders();
-
-                if (array_key_exists("Authorization", $myheaders) &&
-                    isset($myheaders["Authorization"]) &&
-                    !empty($myheaders["Authorization"]))
-                {
-                    $authheader = $myheaders["Authorization"];
-                    $aHeadElems = explode(' ', $authheader);
-
-                    $validator->setTokenType($aHeadElems[0]);
-                    $validator->setToken($aHeadElems[1]);
-                }
-                $this->addValidator($validator);
-            }
+        $validator = $this->VLE->getSessionValidator();
+        if (isset($validator))
+        {
+            $this->addHeaderValidator($validator);
         }
     }
 
@@ -69,25 +58,22 @@ class VLEService extends \RESTling\Service {
     protected function initializeRun()
     {
         $this->response_type = "json";
-        // we do not know until this point which LMS we are dealing with
-        // in order to workaround greedy systems we need to grab our data
-        // as early as possible.
-        // $this->loadData();
 
-        if ($this->status == RESTling::OK)
+        if ($this->status == \RESTling\Service::OK)
         {
             // now the lms can work.
             // moodle might be confused that something snatched the data first.
 
             if (!$this->VLE)
             {
-                $this->status = RESTling::UNINITIALIZED;
+                $this->fatal("VLE handler is missing");
+                $this->status = \RESTling\Service::UNINITIALIZED;
             }
             else if (!$this->VLE->getPluginManager()->isActive())
             {
                 $this->log("PowerTLA has been deactivated!");
                 // we need a different status for this case.
-                $this->status = RESTling::UNINITIALIZED;
+                $this->status = \RESTling\Service::UNINITIALIZED;
                 // TODO: add additional information if in maintenace mode
             }
             else

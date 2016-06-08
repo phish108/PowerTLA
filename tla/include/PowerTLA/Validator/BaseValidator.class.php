@@ -1,9 +1,11 @@
 <?php
 
-namespace PowerTLA;
+namespace PowerTLA\Validator;
 
 /**
  * @class VLEValidator
+ *
+ * ATTENTION! DON'T USE THIS VALIDATOR
  *
  * The VLEValidator class validates whether a request to a VLEService
  * should be granted. The VLEValidator integrates two validator components.
@@ -22,7 +24,7 @@ namespace PowerTLA;
  * During the Authentication phase, the validator may also need to validate
  * a Client token.
  */
-abstract class VLEValidator extends \RESTling\Validator
+abstract class BaseValidator extends \RESTling\Validator
 {
     protected $token;
     protected $tokenType;
@@ -93,20 +95,6 @@ abstract class VLEValidator extends \RESTling\Validator
             return TRUE;
         }
         return $this->validateLocalSession();
-    }
-
-    public function run()
-    {
-        // reject forbidden tokens BEFORE we test for public APIs
-        if (isset($this->rejectTypes))
-        {
-            $id = array_search($this->tokenType, $this->rejectTypes);
-            if  ($id !== FALSE)
-            {
-                return FALSE;
-            }
-        }
-        return parent::run();
     }
 
     protected function validateToken()

@@ -1,19 +1,15 @@
 <?php
-namespace PowerTLA;
+namespace PowerTLA\Service\Content;
+use \PowerTLA\Service\BaseService;
 
 /**
  *
  */
-class QtiService extends VLEService
+class Qti extends BaseService
 {
     public static function apiDefinition($apis, $prefix, $link="qti", $name="")
     {
         return parent::apiDefinition($apis, $prefix, $link, "powertla.content.imsqti");
-    }
-
-    protected function initializeRun()
-    {
-        $this->VLE->getSEssionValidator()->rejectTokenType("Client");
     }
 
     protected function findOperation($method, $path)

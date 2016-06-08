@@ -1,8 +1,9 @@
 <?php
 
-namespace PowerTLA;
+namespace PowerTLA\Moodle\Handler\Identity;
+use PowerTLA\Handler\IDPBase;
 
-class IdentityProvider extends IDPBase
+class Idp extends IDPBase
 {
     public function authenticate($credentials, $clientToken)
     {

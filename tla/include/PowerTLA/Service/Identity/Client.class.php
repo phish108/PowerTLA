@@ -1,7 +1,9 @@
 <?php
-namespace PowerTLA;
+namespace PowerTLA\Service\Identity;
 
-class ClientService extends VLEService
+use \PowerTLA\Service\BaseService;
+
+class Client extends BaseService
 {
     private $provider;
 

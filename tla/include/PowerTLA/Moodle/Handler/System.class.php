@@ -1,18 +1,20 @@
 <?php
 
-namespace PowerTLA;
+namespace PowerTLA\Moodle\Handler;
 
-class SystemHandler extends VLEHandler
+use PowerTLA\Handler\VLE;
+
+class System extends VLE
 {
-    public function __construct($tp)
+    public function __construct()
     {
         // assume that PowerTLA lives in the same include path.
         // We require a configuration variable that informs us about the LMS include path.
 
-        parent::__construct($tp, 'Moodle');
+        parent::__construct('Moodle');
     }
 
-    protected function initLMS($tp)
+    protected function initLMS()
     {
         //inform Moodle that it will run as a service.
 
@@ -29,9 +31,8 @@ class SystemHandler extends VLEHandler
         // tons of black magic is happening now
     }
 
-    // ignore guest user settings in moodle for the time being
-    public function setGuestUser($username)
-    {}
+    // ignore guest user settings in moodle
+    public function setGuestUser($username) {}
 
     protected function checkPrivileges($context, $privileges)
     {
