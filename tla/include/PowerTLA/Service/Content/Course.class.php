@@ -1,7 +1,7 @@
 <?php
 namespace PowerTLA\Service\Content;
 
-use PowerTLA\Service;
+use \PowerTLA\Service\BaseService;
 
 class Course extends BaseService
 {

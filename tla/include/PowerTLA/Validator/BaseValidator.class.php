@@ -5,6 +5,8 @@ namespace PowerTLA\Validator;
 /**
  * @class VLEValidator
  *
+ * ATTENTION! DON'T USE THIS VALIDATOR
+ *
  * The VLEValidator class validates whether a request to a VLEService
  * should be granted. The VLEValidator integrates two validator components.
  *

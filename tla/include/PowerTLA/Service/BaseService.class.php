@@ -28,6 +28,7 @@ class BaseService extends \RESTling\Service {
     public function __construct($config)
     {
         parent::__construct();
+        $this->config = $config;
         $this->setVLE();
 
         // CORS should be OK for the testing.
@@ -40,9 +41,9 @@ class BaseService extends \RESTling\Service {
 
     public function setVLE()
     {
-        $systemClass = "PowerTLA\\" . TLA_LMS . "\\Handler\\System";
+        $systemClass = "\\PowerTLA\\" . TLA_LMS . "\\Handler\\System";
         $this->VLE = new $systemClass();
-        $this->VLE->setGuestUser($TLAConfig["PowerTLA"]["TLA_GUESTUSER"]);
+        $this->VLE->setGuestUser($this->config["PowerTLA"]["TLA_GUESTUSER"]);
 
         $validator = $this->VLE->getSessionValidator();
         if (isset($validator))
@@ -62,20 +63,20 @@ class BaseService extends \RESTling\Service {
         // as early as possible.
         // $this->loadData();
 
-        if ($this->status == RESTling::OK)
+        if ($this->status == \RESTling\Service::OK)
         {
             // now the lms can work.
             // moodle might be confused that something snatched the data first.
 
             if (!$this->VLE)
             {
-                $this->status = RESTling::UNINITIALIZED;
+                $this->status = \RESTling\Service::UNINITIALIZED;
             }
             else if (!$this->VLE->getPluginManager()->isActive())
             {
                 $this->log("PowerTLA has been deactivated!");
                 // we need a different status for this case.
-                $this->status = RESTling::UNINITIALIZED;
+                $this->status = \RESTling\Service::UNINITIALIZED;
                 // TODO: add additional information if in maintenace mode
             }
             else

@@ -1,6 +1,7 @@
 <?php
 namespace PowerTLA\Service\LRS;
-use PowerTLA\Service;
+
+use \PowerTLA\Service\BaseService;
 /**
  *
  */
@@ -18,7 +19,6 @@ class Xapi extends BaseService
     {
         parent::initializeRun();
 
-        $this->VLE->getSessionValidator()->rejectTokenType("Client");
         $this->lrs = $this->VLE->getLRS();
     }
 

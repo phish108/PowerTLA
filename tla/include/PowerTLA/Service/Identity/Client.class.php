@@ -1,6 +1,7 @@
 <?php
 namespace PowerTLA\Service\Identity;
-use PowerTLA\Service;
+
+use \PowerTLA\Service\BaseService;
 
 class Client extends BaseService
 {

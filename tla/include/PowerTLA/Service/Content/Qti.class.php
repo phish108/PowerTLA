@@ -1,6 +1,6 @@
 <?php
 namespace PowerTLA\Service\Content;
-use PowerTLA\Service;
+use \PowerTLA\Service\BaseService;
 
 /**
  *

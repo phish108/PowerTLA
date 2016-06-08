@@ -92,17 +92,16 @@ if (!isset($serviceName)&& empty($serviceName)) {
     $service = new PowerTLA\Service\ErrorService("invalid call", "Missing Service");
 }
 else {
-    error_log($serviceName);
-}
+    // error_log($serviceName);
 
-// try to instantiate the service class
-try {
-    $service = new $serviceName();
+    // try to instantiate the service class
+    try {
+        $service = new $serviceName($TLAConfig);
+    }
+    catch(Exception $e) {
+        $service = new PowerTLA\Service\ErrorService("instantiation", $e->getMessage());
+    }
 }
-catch(Exception $e) {
-    $service = new PowerTLA\Service\ErrorService("instantiation", $e->getMessage());
-}
-
 // run the service
 $service->run();
 

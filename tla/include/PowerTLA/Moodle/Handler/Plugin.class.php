@@ -1,10 +1,16 @@
 <?php
 
 namespace PowerTLA\Moodle\Handler;
-use PowerTLA\Handler;
+use PowerTLA\Handler\PluginBase;
 
 class Plugin extends PluginBase
 {
+
+    public function getEngine()
+    {
+        return "Moodle";
+    }
+
     public function getDisplayName()
     {
         global $SITE;

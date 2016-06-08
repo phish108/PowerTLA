@@ -29,15 +29,21 @@
 
     spl_autoload_register(function ($class) {
 
-        $class = ltrim('\\', $class);
-        list ($NSRoot, $parts) = explode('\\', $class, 2);
+        // error_log("powertla-auto: " . $class);
+
+        $class = ltrim($class, "\\");
+        $parts = explode('\\', $class);
+
+        $NSRoot = array_shift($parts);
+
+        // error_log("powertla-auto: " . $NSRoot);
 
         if (isset($NSRoot) &&
             !empty($NSRoot)) {
             if($NSRoot == "PowerTLA") {
 
                 global $powertlapath;
-                $path = $powertlapath . '/' . implode('/', explode('\\', $parts)) . '.class.php';
+                $path = $powertlapath . '/' . implode('/', $parts) . '.class.php';
 
                 // error_log("auto: " . $path);
                 if (file_exists($path))

@@ -2,7 +2,7 @@
 
 namespace PowerTLA\Moodle\Handler;
 
-use PowerTLA\Handler;
+use PowerTLA\Handler\VLE;
 
 class System extends VLE
 {
