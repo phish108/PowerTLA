@@ -1,26 +1,18 @@
 <?php
 namespace PowerTLA\Service\Content;
-
 use \PowerTLA\Service\BaseService;
 
 class File extends BaseService
 {
     public static function apiDefinition($apis, $prefix, $link="file", $name="")
     {
-        return parent::apiDefinition($apis, $prefix, $link, "powertla.content.courselist");
+        return parent::apiDefinition($apis, $prefix, $link, "powertla.content.filestream");
     }
 
     /**
-     * @protected @function get()
+     * @protected @function get_user()
      *
-     * returns the courselist of the present user.
-     *
-     * if no user is authenticated (!VLESession->active()) then the function
-     * will return a dummy course for the public data. Each public data will get
-     * wrapped into a dummy course with a single item.
-     *
-     * if the guest user is enrolled into a course then the service will return these
-     * courses, too.
+     * streams a file
      */
     protected function get_user()
     {
@@ -37,7 +29,7 @@ class File extends BaseService
         }
         else {
             // figure out content type
-            $this->streamingData();
+            $this->streamData();
         }
     }
 
