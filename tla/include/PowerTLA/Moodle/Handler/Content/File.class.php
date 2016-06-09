@@ -1,4 +1,6 @@
 <?php
+namespace PowerTLA\Moodle\Handler\Content;
+use PowerTLA\Handler\BaseHandler;
 
 class File extends BaseHandler
 {
@@ -19,7 +21,7 @@ class File extends BaseHandler
         // get owner context
         if (isset($opt["owner"]) && !empty($opt["owner"]))
         {
-        	$ownercontext = context_user::instance($opt["owner"]);
+        	$this->ownercontext = \context_user::instance($opt["owner"]);
         }
         
         // add path slashes
@@ -36,8 +38,8 @@ class File extends BaseHandler
     }
 
     public function exists() {
-    	$this->$fileref = $this->getFile();
-		if ($this->$fileref)
+    	$this->fileref = $this->getFile();
+		if ($this->fileref)
 		{
 			return true;
 		}
@@ -48,15 +50,17 @@ class File extends BaseHandler
     }
 
     public function streamFileContent() {
-    	if (!$this->$fileref)
+    	if (!$this->fileref)
     	{
-    		$this->$fileref = $this->getFile();
+    		$this->fileref = $this->getFile();
     	}
-		send_stored_file($this->$fileref);
+		\send_stored_file($this->fileref);
     }
     
     private function getFile(){
-    	return $fs->get_file($ownercontext->id, 'user', 'private', 0, $opt['path'], $opt['filename']);
+    	$fs = \get_file_storage();
+    	
+    	return $fs->get_file($this->ownercontext->id, 'user', 'private', 0, $this->file['path'], $this->file['filename']);
     }
 }
 
