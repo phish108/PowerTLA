@@ -22,6 +22,7 @@ class Session extends \RESTling\Validator
             return TRUE;
         }
 
+        $this->service->forbidden();
         return FALSE;
     }
 }
