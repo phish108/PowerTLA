@@ -37,7 +37,6 @@ abstract class BaseValidator extends \RESTling\Validator
     abstract protected function validateLocalSession();
     abstract protected function validateBearerToken();
     abstract protected function validateMACToken();
-    abstract protected function validateRequestToken();
 
     protected function getRequestURI()
     {
@@ -106,9 +105,6 @@ abstract class BaseValidator extends \RESTling\Validator
                 break;
             case "MAC":
                 return $this->validateMACToken();
-                break;
-            case "Request":
-                return $this->validateRequestToken();
                 break;
             default:
                 break;

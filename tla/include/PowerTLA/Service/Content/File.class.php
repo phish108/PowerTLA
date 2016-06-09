@@ -32,6 +32,7 @@ class File extends BaseService
         $fh->setFile(array("owner"=>$ownerid,
                            "filename"=> $filename,
                            "path" => $path));
+
         if (!$fh->exists()) {
             $this->not_found();
         }
