@@ -41,7 +41,7 @@ date_default_timezone_set($TLAConfig["PowerTLA"]["TLA_TIMEZONE"]);
 define("TLA_TOKENTYPE", $TLAConfig["PowerTLA"]["TLA_TOKENTYPE"]);
 
 // Init Autoloaders for RESTling and PowerTLA Classes
-include_once('contrib/Restling.auto.php');
+include_once('RESTling/contrib/Restling.auto.php');
 include_once('PowerTLA.auto.php');
 
 /** *****************************************************************
