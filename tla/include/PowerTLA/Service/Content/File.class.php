@@ -28,11 +28,17 @@ class File extends BaseService
         $filename = array_pop($this->path_info);
         $path     = implode("/", $this->path_info);
 
-        $this->VLE->getHandler("File", "Content")->setFile(array("owner"=>$ownerid,
-                                                                 "filename"=> $filename,
-                                                                 "path" => $path));
-        // figure out content type
-        $this->streamingData();
+        $fh = $this->VLE->getHandler("File", "Content");
+        $fh->setFile(array("owner"=>$ownerid,
+                           "filename"=> $filename,
+                           "path" => $path));
+        if (!$fh->exists()) {
+            $this->not_found();
+        }
+        else {
+            // figure out content type
+            $this->streamingData();
+        }
     }
 
     protected function stream() {
