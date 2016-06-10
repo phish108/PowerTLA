@@ -60,15 +60,25 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
 
     $pi = explode("/", $_SERVER["PATH_INFO"]);
     $e = array_shift($pi);
-    $serviceType = array_shift($pi);
+    $serviceType = strtolower(array_shift($pi));
     $serviceName = array_shift($pi);
 
     array_unshift($pi, $e);
     $_SERVER["PATH_INFO"] = implode("/", $pi);
 
+    $typemap = array(
+        "xapi"        => "LRS",
+        "lrs"         => "LRS",
+        "content"     => "Content",
+        "identity"    => "Identity",
+        "idp"         => "Identity",
+        "competence"  => "Competences",
+        "assessment"  => "Competences"
+    );
+
     if (isset($serviceName) &&
         !empty($serviceName) &&
-        in_array($serviceType, array("LRS", "Content", "Identity", "Competences")) &&
+        in_array($serviceType, array_keys($typemap)) &&
         isset($serviceName) &&
         !empty($serviceName)) {
 
@@ -76,7 +86,7 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
         // $serviceName .= "Service";
 
         // preload the service class
-        $serviceName = "PowerTLA\\Service\\$serviceType\\$serviceName";
+        $serviceName = "PowerTLA\\Service\\".$typemap[$serviceType]."\\$serviceName";
     }
 }
 
