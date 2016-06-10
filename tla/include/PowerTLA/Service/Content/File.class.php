@@ -7,7 +7,7 @@ class File extends BaseService
 {
     public static function apiDefinition($apis, $prefix, $link="file", $name="")
     {
-        return parent::apiDefinition($apis, $prefix, $link, "powertla.content.courselist");
+        return parent::apiDefinition($apis, $prefix, $link, "powertla.content.fileaccess");
     }
 
     /**
@@ -29,16 +29,16 @@ class File extends BaseService
         $path     = implode("/", $this->path_info);
 
         $fh = $this->VLE->getHandler("File", "Content");
-        $fh->setFile(array("owner"=>$ownerid,
-                           "filename"=> $filename,
-                           "path" => $path));
+        $fh->setFile(array("owner"    => $ownerid,
+                           "filename" => $filename,
+                           "path"     => $path));
 
         if (!$fh->exists()) {
             $this->not_found();
         }
         else {
             // figure out content type
-            $this->streamingData();
+            $this->streamData();
         }
     }
 
