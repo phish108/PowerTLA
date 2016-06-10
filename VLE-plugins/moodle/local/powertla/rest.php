@@ -29,7 +29,6 @@ $TLAConfig = parse_ini_file("powertla.ini", true);
 
 // set the include paths so we can host the common include files outside the LMS folder
 set_include_path($TLAConfig["PowerTLA"]["include_path"] . PATH_SEPARATOR .
-                 $TLAConfig["RESTling"]["include_path"] . PATH_SEPARATOR .
                  get_include_path());
 
 chdir($TLAConfig["PowerTLA"]["system_path"]);
@@ -41,8 +40,8 @@ date_default_timezone_set($TLAConfig["PowerTLA"]["TLA_TIMEZONE"]);
 define("TLA_TOKENTYPE", $TLAConfig["PowerTLA"]["TLA_TOKENTYPE"]);
 
 // Init Autoloaders for RESTling and PowerTLA Classes
-include_once('RESTling/contrib/Restling.auto.php');
-include_once('PowerTLA.auto.php');
+//include_once('RESTling/contrib/Restling.auto.php');
+include_once('PowerTLA/PowerTLA.auto.php');
 
 /** *****************************************************************
  * Part 2: Service Discovery
