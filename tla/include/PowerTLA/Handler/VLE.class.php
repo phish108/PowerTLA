@@ -56,7 +56,7 @@ abstract class VLE extends \RESTling\Logger
      */
     public function validateAgent($agent)
     {
-        if(isset($agent) && gettype($agent) == "array")
+        if(!empty($agent) && is_array($agent))
         {
             $idp = $this->getIdentityProvider();
 
@@ -103,7 +103,7 @@ abstract class VLE extends \RESTling\Logger
 
     public function setGuestUser($username)
     {
-        if (isset($username) && !empty($username))
+        if (!empty($username))
         {
             $this->guestuserid = $username;
         }
@@ -222,14 +222,12 @@ abstract class VLE extends \RESTling\Logger
     }
 
     final public function getHandler($name, $component="") {
-        if (isset($name) &&
-            !empty($name) &&
+        if (!empty($name) &&
             is_string($name)) {
 
             $pname = $name = ucfirst(strtolower($name));
 
-            if (isset($component) &&
-                !empty($component)) {
+            if (!empty($component)) {
 
                 $pname = $name . "_". $component;
             }
