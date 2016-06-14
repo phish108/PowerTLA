@@ -25,7 +25,7 @@ class File extends BaseHandler
         }
 
         // add path slashes
-        if (i!empty($opt["owner"]))
+        if (!empty($opt["owner"]))
         {
         	$opt['path'] = '/' . $opt['path'] . '/';
         }
