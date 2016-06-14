@@ -34,7 +34,7 @@
 
         $root = array_shift($parts);
 
-        if (isset($root) && !empty($root)) {
+        if (!empty($root)) {
             $cpath = array();
             // direct namespace
             $cpath[] = $root .DIRECTORY_SEPARATOR. implode(DIRECTORY_SEPARATOR, $parts) . ".class.php";

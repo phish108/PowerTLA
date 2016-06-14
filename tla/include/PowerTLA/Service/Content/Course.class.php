@@ -31,7 +31,7 @@ class Course extends BaseService
         {
             // check for course id
             $cid = $this->path_info[0];
-            if (isset($cid) && !empty($cid))
+            if (!empty($cid))
             {
                 $this->log("load course id " . $cid);
                 $this->data = $cbH->getUserCourse($cid);
