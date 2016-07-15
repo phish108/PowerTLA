@@ -100,16 +100,11 @@ if(array_key_exists("PATH_INFO", $_SERVER) &&
 if (!isset($serviceName)&& empty($serviceName)) {
     $service = new PowerTLA\Service\ErrorService("invalid call", "Missing Service");
 }
+else if (class_exists($serviceName, true)) {
+    $service = new $serviceName($TLAConfig);
+}
 else {
-    // error_log($serviceName);
-
-    // try to instantiate the service class
-    try {
-        $service = new $serviceName($TLAConfig);
-    }
-    catch(Exception $e) {
-        $service = new PowerTLA\Service\ErrorService("instantiation", $e->getMessage());
-    }
+    $service = new PowerTLA\Service\ErrorService("instantiation", "service $serviceType/$serviceNam does not exist");
 }
 // run the service
 $service->run();

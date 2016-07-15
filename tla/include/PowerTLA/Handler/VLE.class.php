@@ -215,10 +215,32 @@ abstract class VLE extends \RESTling\Logger
         if (!property_exists($this->handler, "validator"))
         {
             $validatorClass = "PowerTLA\\" . $this->lmstype . "\\Validator\\Session";
-            $this->handler->validator = new $validatorClass($this);
+
+            if (class_exists($validatorClass, true)) {
+                $this->handler->validator = new $validatorClass($this);
+            }
         }
 
-        return $this->handler->validator;
+        if (!property_exists($this->handler, "validator")) {
+            return $this->handler->validator;
+        }
+        return null;
+    }
+
+    public function getTokenValidator()
+    {
+        if (!property_exists($this->handler, "token_validator"))
+        {
+            $validatorClass = "PowerTLA\\" . $this->lmstype . "\\Validator\\Token";
+            if (class_exists($validatorClass, true)) {
+                $this->handler->token_validator = new $validatorClass($this);
+            }
+        }
+
+        if (!property_exists($this->handler, "token_validator")) {
+            return $this->handler->token_validator;
+        }
+        return null;
     }
 
     final public function getHandler($name, $component="") {
@@ -237,10 +259,16 @@ abstract class VLE extends \RESTling\Logger
                 $handlerClass = "\\PowerTLA\\" . $this->lmstype . "\\Handler\\" . (!empty($component) ? "$component\\" : "") . $name;
 
 //                $this->log("load handler for $pname class " .$handlerClass );
-                $this->handler->$pname = new $handlerClass($this);
+                if (class_exists($handlerClass, true)) {
+                    $this->handler->$pname = new $handlerClass($this);
+                }
             }
 
-            return $this->handler->$pname;
+            // be 100% certain that the property now exists
+            // (may not becaue the class is missing)
+            if (!property_exists($this->handler, $pname)) {
+                return $this->handler->$pname;
+            }
         }
         return null;
     }

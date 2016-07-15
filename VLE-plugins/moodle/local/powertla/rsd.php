@@ -61,25 +61,23 @@ foreach (array("LRS", "Content", "Identity", "Competences") as $serviceType) {
             if (!empty($classname) &&
                 $suffix == "class.php") {
 
-                $fname = "\\PowerTLA\\Service\\$serviceType\\$classname::apiDefinition";
+                $class = "\\PowerTLA\\Service\\$serviceType\\$classname";
+                $fname = "$class::apiDefinition";
     //            error_log('fname= ' . $fname );
     //            error_log('dname= ' . $file->getPathname());
 
-                try{
+
                     // require_once("." .DIRECTORY_SEPARATOR. $file->getPathname());
 
 
                     // Note: because of call_user_func we cannot pass the apis array as reference :(
-                    $tapis = call_user_func($fname, $apis, $enginepath);
+                    if (class_exists($class, true) && is_callable($fname)) {
+                        $tapis = call_user_func($fname, $apis, $enginepath);
 
-                    foreach ($tapis as $k => $v) {
-                        $apis[$k] = $v;
+                        foreach ($tapis as $k => $v) {
+                            $apis[$k] = $v;
+                        }
                     }
-                }
-                catch(Execption $e) {
-                    // ignore
-                    error_log($e->getMessage());
-                }
             }
         }
     }
