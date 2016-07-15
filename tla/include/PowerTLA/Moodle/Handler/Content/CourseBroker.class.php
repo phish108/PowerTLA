@@ -54,6 +54,13 @@ class CourseBroker extends BaseHandler
 
         return $retval;
     }
+
+    public function getPublicCourses()
+    {
+        // should return all available public courses in the system
+        //  public is either with guest access or self enrollment
+        return [];
+    }
 }
 
 ?>
