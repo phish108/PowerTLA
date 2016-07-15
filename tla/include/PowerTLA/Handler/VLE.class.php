@@ -221,7 +221,7 @@ abstract class VLE extends \RESTling\Logger
             }
         }
 
-        if (!property_exists($this->handler, "validator")) {
+        if (property_exists($this->handler, "validator")) {
             return $this->handler->validator;
         }
         return null;
@@ -237,7 +237,7 @@ abstract class VLE extends \RESTling\Logger
             }
         }
 
-        if (!property_exists($this->handler, "token_validator")) {
+        if (property_exists($this->handler, "token_validator")) {
             return $this->handler->token_validator;
         }
         return null;
@@ -258,7 +258,7 @@ abstract class VLE extends \RESTling\Logger
 
                 $handlerClass = "\\PowerTLA\\" . $this->lmstype . "\\Handler\\" . (!empty($component) ? "$component\\" : "") . $name;
 
-//                $this->log("load handler for $pname class " .$handlerClass );
+                // $this->log("load handler for $pname class " .$handlerClass );
                 if (class_exists($handlerClass, true)) {
                     $this->handler->$pname = new $handlerClass($this);
                 }
@@ -266,7 +266,7 @@ abstract class VLE extends \RESTling\Logger
 
             // be 100% certain that the property now exists
             // (may not becaue the class is missing)
-            if (!property_exists($this->handler, $pname)) {
+            if (property_exists($this->handler, $pname)) {
                 return $this->handler->$pname;
             }
         }

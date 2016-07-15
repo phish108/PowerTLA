@@ -30,8 +30,8 @@ class Token extends \RESTling\Validator
             return false;
         }
 
-        $recToken = $DB->get_records('external_tokens',
-                                     array('token' => $this->token));
+        $recToken = (object)$DB->get_record('external_tokens',
+                                             array('token' => $this->token));
 
         if (empty($recToken)) {
             // token unknown; respond 403
@@ -48,8 +48,8 @@ class Token extends \RESTling\Validator
 
         // if we reached this point we assume silently that the users have the
         // rights to use rest services
-        $user = $DB->get_records('user',
-                                 array('id' => $recToken->userid));
+        $user = (object)$DB->get_record('user',
+                                        array('id' => $recToken->userid));
 
         if (!($user &&
               $user->id))
@@ -60,6 +60,8 @@ class Token extends \RESTling\Validator
         }
 
         $USER = $user;
+
+        global $CFG;
 
         $this->clientId = $USER->id;
         // update last access

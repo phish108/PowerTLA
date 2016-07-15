@@ -3,18 +3,26 @@ namespace PowerTLA\Moodle\Handler\Content;
 
 use PowerTLA\Handler\BaseHandler;
 
-include_once($CFG->libdir . '/moodlelib.php');
-include_once($CFG->dirroot . '/course/lib.php');
-include_once($CFG->libdir . '/coursecatlib.php');
-
-class CourseBroker extends BaseHandler
+class Course extends BaseHandler
 {
 
+    public function __construct($system) {
+        parent::__construct($system);
+
+        global $CFG;
+
+        include_once($CFG->libdir . '/moodlelib.php');
+        include_once($CFG->dirroot . '/course/lib.php');
+        include_once($CFG->libdir . '/coursecatlib.php');
+    }
+    /**
+     * get course details
+     */
     public function getUserCourse($courseId)
     {
         global $DB;
 
-        // return course details
+        // return course details, including a list list of available content types
 
         return null;
     }
@@ -23,8 +31,8 @@ class CourseBroker extends BaseHandler
     {
         $fieldMap = [
             "id" => "course_id",
-            "short_name" => "shortname",
-            "display_name" => "fullname"
+            "shortname" => "short_name",
+            "fullname" => "display_name"
         ];
 
         $retval = [];
@@ -32,8 +40,9 @@ class CourseBroker extends BaseHandler
         $sortorder = 'visible DESC, sortorder ASC';
 
         if ($courses = enrol_get_my_courses(NULL, $sortorder)) {
-            foreach ($courses as $course) {
-                if (!$course->visible) {
+            foreach ($courses as $k => $course) {
+                $this->mark($course->id . " " . $course->visible);
+                if ($course->visible < 1) {
                     next;
                 }
 
