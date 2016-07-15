@@ -42,5 +42,11 @@ class Course extends BaseService
             }
         }
     }
+
+    protected function get_system()
+    {
+        // dummy stub for system courses
+        $this->data = array();
+    }
 }
 ?>
