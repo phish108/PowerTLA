@@ -6,7 +6,7 @@ abstract class IDPBase extends BaseHandler
     protected $guestuser;
     protected $idToken;
 
-    public function __construct($system, $guestuserid)
+    public function __construct($system, $guestuserid=0)
     {
         parent::__construct($system);
         $this->guestuser = $guestuserid;

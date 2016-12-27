@@ -17,7 +17,7 @@ class Auth extends BaseService
 
     public static function apiDefinition($apis, $prefix, $link="auth", $name="")
     {
-        return parent::apiDefinition($apis, $prefix, $link, "org.ietf.oauth2");
+        return parent::apiDefinition($apis, $prefix, $link, "org.ietf.oauth");
     }
 
     /**

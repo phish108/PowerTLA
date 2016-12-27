@@ -12,7 +12,17 @@
     var RSD = {},
         apis = {};
     var jq,
-        rsd;
+        rsd,
+        console;
+
+    if (glob.console) {
+        console = glob.console;
+    }
+    else {
+        console = {
+            log: function (s) {return null;}
+        };
+    }
 
     /**
      * moves one directory up on a given path.
@@ -57,18 +67,21 @@
         }
 
         var host, dir;
+
         if (glob.document &&
             glob.document.location) {
             host  = glob.document.location.origin;
             dir   = glob.document.location.pathname;
         }
 
+        console.log("host: " + host);
+
         function tryRSDPath(path) {
             if (jq && jq.ajax) {
                 var purl = host + path;
-                if (path.indexOf("https://") == 0 ||
-                    path.indexOf("http://") == 0 ||
-                    path.indexOf("//") == 0) {
+                if (path.indexOf("https://") === 0 ||
+                    path.indexOf("http://") === 0 ||
+                    path.indexOf("//") === 0) {
                     purl = path;
                 }
 
@@ -113,7 +126,7 @@
                                 var ass = line.split(";");
                                 ass[0] = ass[0].trim();
                                 ass[1] = ass[1].trim();
-                                if (ass[0] == serviceType) {
+                                if (ass[0] === serviceType) {
                                     tryRSDPath(ass[1]);
                                 }
                             }

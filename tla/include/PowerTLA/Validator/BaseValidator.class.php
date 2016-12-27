@@ -35,8 +35,9 @@ abstract class BaseValidator extends \RESTling\Validator
     protected $tokenKey;
 
     abstract protected function validateLocalSession();
-    abstract protected function validateBearerToken();
-    abstract protected function validateMACToken();
+    abstract protected function findToken($token);
+//    abstract protected function validateBearerToken();
+    // abstract protected function validateMACToken(); // obsolete
 
     protected function getRequestURI()
     {
@@ -88,28 +89,37 @@ abstract class BaseValidator extends \RESTling\Validator
 
     public function validate()
     {
-        if (!empty($this->token) &&
-            $this->validateToken())
-        {
-            return TRUE;
-        }
-        return $this->validateLocalSession();
+        return $this->validateToken() || $this->validateLocalSession();
     }
 
-    protected function validateToken()
-    {
-        switch ($this->tokenType)
-        {
-            case "Bearer":
-                return $this->validateBearerToken();
-                break;
-            case "MAC":
-                return $this->validateMACToken();
-                break;
-            default:
-                break;
+    protected function validateToken() {
+
+        $headers = getallheaders();
+
+        if (empty($headers)) {
+            // should never happen
+            return false;
         }
-        return FALSE;
+
+        if (!array_key_exists("Authorization", $headers) ||
+            empty($headers["Authorization"]))
+        {
+            return false;
+        }
+
+        $aHeadElems = explode(' ',  $headers["Authorization"]);
+
+        if ($aHeadElems[0] != "Bearer") {
+            return false;
+        }
+
+        $this->token  = $aHeadElems[1];
+
+        if (!$this->findToken($this->token)) {
+            return FALSE;
+        }
+
+        return TRUE;
     }
 
     protected function extractToken()

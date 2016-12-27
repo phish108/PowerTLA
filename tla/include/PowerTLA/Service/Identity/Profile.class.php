@@ -1,6 +1,7 @@
 <?php
 namespace PowerTLA\Service\Identity;
 use \PowerTLA\Service\BaseService;
+use \RESTling\Service as RESTling;
 
 class Profile extends BaseService
 {

@@ -8,7 +8,7 @@ namespace PowerTLA\Moodle\Validator;
  * Note: Moodle runs PowerTLA as Ajax Services and not as web-services. Therefore we
  * will not receive any user information at this point, but have to build it from the token.
  */
-class Token extends \RESTling\Validator
+class Token extends \PowerTLA\Validator\BaseValidator
 {
     private $token;
 
@@ -83,8 +83,8 @@ class Token extends \RESTling\Validator
             return false;
         }
 
-        if (!array_key_exists("Authorization", $headers) &&
-            !empty($headers["Authorization"]))
+        if (!array_key_exists("Authorization", $headers) ||
+            empty($headers["Authorization"]))
         {
             return false;
         }
@@ -96,6 +96,7 @@ class Token extends \RESTling\Validator
         }
 
         $this->token  = $aHeadElems[1];
+
 
         return true;
     }
