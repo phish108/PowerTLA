@@ -1,5 +1,5 @@
 {
-    "name": "PowerTLA",
+    "name": "phish108/powertla",
     "type": "library",
     "description": "A TLA Service Implementation for Ilias and Moodle",
     "homepage": "https://github.com/phish108/PowerTLA",
@@ -12,7 +12,7 @@
     },
     "require": {
         "php": ">=5.5.0",
-        "phish108/RESTling": "v2.0.1"
+        "phish108/restling": ">v2.0.0-dev"
     },
     "repositories": [
         {
