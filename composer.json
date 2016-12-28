@@ -1,0 +1,23 @@
+{
+    "name": "PowerTLA",
+    "type": "library",
+    "description": "A TLA Service Implementation for Ilias and Moodle",
+    "homepage": "https://github.com/phish108/PowerTLA",
+    "license": "AGPL-3.0",
+    "version": "2.0.0-dev",
+    "autoload": {
+        "psr-4": {
+            "PowerTLA\\":  "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.5.0",
+        "mobinaut/RESTling": "version2"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/phish108/RESTling"
+        }
+    ]
+}

@@ -9,3 +9,6 @@ include/PowerTLA/.DS_Store
 
 VLE-plugins/*.ini
 /.project
+
+composer.lock
+vendor
