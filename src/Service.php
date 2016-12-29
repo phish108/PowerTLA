@@ -4,7 +4,7 @@ namespace PowerTLA;
 class Service extends \RESTling\OpenAPI {
     private $specLoader = [];
 
-    public function addLoader($loader) {
+    public function addApiLoader($loader) {
         if (!($loader && $loader instanceof \PowerTLA\Interfaces\Loader)) {
             throw new Exception\LoaderInterfaceMismatch();
         }

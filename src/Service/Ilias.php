@@ -6,8 +6,17 @@ class Ilias extends \PowerTLA\Service {
     private $lmsRoot;
     private $lmsVersion;
 
+    public function __construct() {
+        parent::__construct();
+
+        // connect moodle's security model
+        $this->setSecurityModel(new PowerTLA\Security\Ilias());
+    }
+
+
     protected function loadTagModel($taglist) {
-        $taglist[] = "Moodle";
+        // add Ilias to the end of the tag list that identifies the model.
+        $taglist[] = "Ilias";
         parent::loadTagModel($taglist);
     }
 
@@ -45,7 +54,15 @@ class Ilias extends \PowerTLA\Service {
         set_include_path($lmsPath . PATH_SEPARATOR .
                          get_include_path());
 
-        switch ($vstring)
+        $this->lmsVersion = $vstring;
+
+        require_once $classname;
+    }
+
+    protected function verifyModel() {
+        $this->findVLE();
+
+        switch ($this->lmsVersion)
         {
             case '4_2':
                 $ilInit = new $classname();
@@ -63,11 +80,6 @@ class Ilias extends \PowerTLA\Service {
                 throw new \PowerTLA\Exception\UnsupportedLearningEnvironment();
                 break;
         }
-
-    }
-
-    protected function verifyModel() {
-        $this->findVLE();
         parent::verifyModel();
     }
 }
