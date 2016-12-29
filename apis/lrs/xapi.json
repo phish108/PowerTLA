@@ -135,7 +135,7 @@
                 }
             },
             "put": {
-                "summary": "stores one or more statements",
+                "summary": "stores one statements",
                 "operationId": "storeSingleStatement",
                 "consumes": [
                     "application/json"

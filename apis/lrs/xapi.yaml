@@ -9,16 +9,16 @@ info:
   title: XAPI LRS
   x-protocol: gov.adlnet.xapi.communication
   description: |
-    Implements an [XAPI Version 1.0.3](https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md) 
+    Implements an [XAPI Version 1.0.3](https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md)
     communication service.
 tags:
   -
     name: PowerTLA
-  - 
+  -
     name: Model
-  - 
+  -
     name: LRS
-  - 
+  -
     name: XAPI
 
 # Describe your paths here
@@ -31,18 +31,18 @@ paths:
       description: Returns the XAPI Version.
       # This is array of GET operation parameters:
       operationId: xapiVersion
-      produces: 
+      produces:
         - application/json
       # Expected responses for this operation:
       responses:
         # Response code
         200:
           description: Successful response
-  /statements: 
-    get: 
+  /statements:
+    get:
       summary: statement query interface
       operationId: queryStatements
-      produces: 
+      produces:
         - application/json
       parameters:
         - name: statementId
@@ -52,7 +52,7 @@ paths:
           type: string
         - name: voidedStatementId
           in: query
-          description: | 
+          description: |
             Id of voided Statement to fetch.
           type: string
         - name: agent
@@ -111,20 +111,20 @@ paths:
         - name: until
           in: query
           description: |
-            Only Statements stored at or before the specified 
+            Only Statements stored at or before the specified
             Timestamp are returned.
           type: string
         - name: limit
           in: query
           description: |
-            Maximum number of Statements to return. 0 indicates return 
+            Maximum number of Statements to return. 0 indicates return
             the maximum the server will allow.
           type: integer
         - name: format
           in: query
           description: |
             defines the statement format. Possible values are ids, exact,
-            and cannonical  
+            and cannonical
           type: string
         - name: attachments
           in: query
@@ -143,8 +143,8 @@ paths:
         # Response code
         200:
           description: Successful response
-    put: 
-      summary: stores one or more statements
+    put:
+      summary: stores one statements
       operationId: storeSingleStatement
       consumes:
         - application/json
@@ -158,7 +158,7 @@ paths:
         # Response code
         204:
           description: Successful response
-    post: 
+    post:
       summary: stores one or more statements
       operationId: storeStatements
       consumes:
@@ -167,11 +167,11 @@ paths:
         # Response code
         204:
           description: Successful response
-  /activities: 
-    get: 
+  /activities:
+    get:
       summary: statement query interface
       operationId: loadActivityDescription
-      produces: 
+      produces:
         - application/json
       responses:
         # Response code
@@ -184,11 +184,11 @@ paths:
            The Activity id associated with this state.
           type: string
           required: true
-  /agents: 
-    get: 
+  /agents:
+    get:
       summary: statement query interface
       operationId: loadAgentResource
-      produces: 
+      produces:
         - application/json
       responses:
         # Response code
@@ -202,10 +202,10 @@ paths:
           type: string
           required: true
   /agents/profile:
-    get: 
+    get:
       summary: return agent profiles
       operationId: queryAgentProfiles
-      produces: 
+      produces:
         - application/json
       responses:
         # Response code
@@ -228,7 +228,7 @@ paths:
             The Agent associated with this profile document. (JSON object)
           type: string
           required: true
-    put: 
+    put:
       summary: return agent profiles
       operationId: storeAgentProfile
       consumes:
@@ -250,7 +250,7 @@ paths:
             The Agent associated with this profile document. (JSON object)
           type: string
           required: true
-    post: 
+    post:
       summary: return agent profiles
       operationId: updateAgentProfile
       consumes:
@@ -272,7 +272,7 @@ paths:
             The Agent associated with this profile document. (JSON object)
           type: string
           required: true
-    delete: 
+    delete:
       summary: return agent profiles
       operationId: deleteAgentProfile
       responses:
@@ -293,10 +293,10 @@ paths:
           type: string
           required: true
   /activities/profile:
-    get: 
+    get:
       summary: return activity profiles
       operationId: queryActivityProfiles
-      produces: 
+      produces:
         - application/json
       responses:
         # Response code
@@ -319,7 +319,7 @@ paths:
             The Activity id associated with this Profile document.
           type: string
           required: true
-    put: 
+    put:
       summary: return agent profiles
       operationId: storeActivityProfile
       consumes:
@@ -341,7 +341,7 @@ paths:
             The Activity id associated with this Profile document.
           type: string
           required: true
-    post: 
+    post:
       summary: return agent profiles
       operationId: updateActivityProfile
       consumes:
@@ -363,7 +363,7 @@ paths:
             The Activity id associated with this Profile document.
           type: string
           required: true
-    delete: 
+    delete:
       summary: return agent profiles
       operationId: deleteActivityProfile
       responses:
@@ -384,10 +384,10 @@ paths:
           type: string
           required: true
   /activities/state:
-    get: 
+    get:
       summary: return activity profiles
       operationId: queryActivityStates
-      produces: 
+      produces:
         - application/json
       responses:
         # Response code
@@ -414,7 +414,7 @@ paths:
         - name: stateid
           in: query
           description: |
-            The id for this state, within the given context. 
+            The id for this state, within the given context.
             Required for retrieving a single state
           type: string
         - name: since
@@ -423,7 +423,7 @@ paths:
             Only ids of states stored since the specified Timestamp
             (exclusive) are returned.
           type: string
-    put: 
+    put:
       summary: return agent profiles
       operationId: storeActivityState
       consumes:
@@ -453,11 +453,11 @@ paths:
         - name: stateid
           in: query
           description: |
-            The id for this state, within the given context. 
+            The id for this state, within the given context.
             Required for retrieving a single state
           type: string
           required: true
-    post: 
+    post:
       summary: return agent profiles
       operationId: updateActivityState
       consumes:
@@ -487,11 +487,11 @@ paths:
         - name: stateid
           in: query
           description: |
-            The id for this state, within the given context. 
+            The id for this state, within the given context.
             Required for retrieving a single state
           type: string
           required: true
-    delete: 
+    delete:
       summary: return agent profiles
       operationId: deleteActivityState
       responses:
