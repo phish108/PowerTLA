@@ -1,0 +1,610 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.3",
+        "title": "XAPI LRS",
+        "x-protocol": "gov.adlnet.xapi.communication",
+        "description": "Implements an [XAPI Version 1.0.3](https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md) \ncommunication service.\n"
+    },
+    "tags": [
+        {
+            "name": "PowerTLA"
+        },
+        {
+            "name": "Model"
+        },
+        {
+            "name": "LRS"
+        },
+        {
+            "name": "XAPI"
+        }
+    ],
+    "paths": {
+        "/about": {
+            "get": {
+                "description": "Returns the XAPI Version.",
+                "operationId": "xapiVersion",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/statements": {
+            "get": {
+                "summary": "statement query interface",
+                "operationId": "queryStatements",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "statementId",
+                        "in": "query",
+                        "description": "Id of Statement to fetch\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "voidedStatementId",
+                        "in": "query",
+                        "description": "Id of voided Statement to fetch.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "agent",
+                        "in": "query",
+                        "description": "Filter, only return Statements for which the specified Agent\nor Group is the Actor or Object of the Statement.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "verb",
+                        "in": "query",
+                        "description": "Filter, only return Statements matching the specified Verb id.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "activity",
+                        "in": "query",
+                        "description": "Filter, only return Statements for which the Object of the\nStatement is an Activity with the specified id.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "registration",
+                        "in": "query",
+                        "description": "Filter, only return Statements matching the specified\nregistration id. Note that although frequently a unique\nregistration will be used for one Actor assigned to one\nActivity, this cannot be assumed. If only Statements for a\ncertain Actor or Activity are required, those parameters also\nneed to be specified.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "related_activities",
+                        "in": "query",
+                        "description": "Apply the Activity filter broadly. Include Statements for\nwhich the Object, any of the context Activities, or any of\nthose properties in a contained SubStatement match the\nActivity parameter, instead of that parameter's normal\nbehavior. Matching is defined in the same way it is for the\n\"activity\" parameter.\n",
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "related_agents",
+                        "in": "query",
+                        "description": "Apply the Agent filter broadly. Include Statements for which\nthe Actor, Object, Authority, Instructor, Team, or any of\nthese properties in a contained SubStatement match the Agent\nparameter, instead of that parameter's normal behavior.\nMatching is defined in the same way it is for the \"agent\"\nparameter.\n",
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "description": "Only Statements stored since the specified Timestamp\n(exclusive) are returned.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "until",
+                        "in": "query",
+                        "description": "Only Statements stored at or before the specified \nTimestamp are returned.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Maximum number of Statements to return. 0 indicates return \nthe maximum the server will allow.\n",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "defines the statement format. Possible values are ids, exact,\nand cannonical  \n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "attachments",
+                        "in": "query",
+                        "description": "If true, the LRS uses the multipart response format and\nincludes all attachments as described previously. If false,\nthe LRS sends the prescribed response with Content-Type\napplication/json and does not send attachment data.\n",
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "ascending",
+                        "in": "query",
+                        "description": "If true, return results in ascending order of stored time\n",
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            },
+            "put": {
+                "summary": "stores one or more statements",
+                "operationId": "storeSingleStatement",
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "statementId",
+                        "in": "query",
+                        "description": "Id of Statement to update\n",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                }
+            },
+            "post": {
+                "summary": "stores one or more statements",
+                "operationId": "storeStatements",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/activities": {
+            "get": {
+                "summary": "statement query interface",
+                "operationId": "loadActivityDescription",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "activityId",
+                        "in": "query",
+                        "description": "The Activity id associated with this state.\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/agents": {
+            "get": {
+                "summary": "statement query interface",
+                "operationId": "loadAgentResource",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "agent",
+                        "in": "query",
+                        "description": "The Agent associated with this state. (JSON object)\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/agents/profile": {
+            "get": {
+                "summary": "return agent profiles",
+                "operationId": "queryAgentProfiles",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "profileID",
+                        "in": "query",
+                        "description": "The profile id associated with this Profile document.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "description": "Only ids of Profiles stored since the specified Timestamp (exclusive) are returned.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "agent",
+                        "in": "query",
+                        "description": "The Agent associated with this profile document. (JSON object)\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "put": {
+                "summary": "return agent profiles",
+                "operationId": "storeAgentProfile",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "profileID",
+                        "in": "query",
+                        "description": "The profile id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "agent",
+                        "in": "query",
+                        "description": "The Agent associated with this profile document. (JSON object)\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "post": {
+                "summary": "return agent profiles",
+                "operationId": "updateAgentProfile",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "profileID",
+                        "in": "query",
+                        "description": "The profile id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "agent",
+                        "in": "query",
+                        "description": "The Agent associated with this profile document. (JSON object)\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "return agent profiles",
+                "operationId": "deleteAgentProfile",
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "profileID",
+                        "in": "query",
+                        "description": "The profile id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "agent",
+                        "in": "query",
+                        "description": "The Agent associated with this profile document. (JSON object)\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/activities/profile": {
+            "get": {
+                "summary": "return activity profiles",
+                "operationId": "queryActivityProfiles",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "profileID",
+                        "in": "query",
+                        "description": "The profile id associated with this Profile document.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "description": "Only ids of Profiles stored since the specified Timestamp (exclusive) are returned.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "activityId",
+                        "in": "query",
+                        "description": "The Activity id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "put": {
+                "summary": "return agent profiles",
+                "operationId": "storeActivityProfile",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "profileID",
+                        "in": "query",
+                        "description": "The profile id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "activityId",
+                        "in": "query",
+                        "description": "The Activity id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "post": {
+                "summary": "return agent profiles",
+                "operationId": "updateActivityProfile",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "profileID",
+                        "in": "query",
+                        "description": "The profile id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "activityId",
+                        "in": "query",
+                        "description": "The Activity id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "return agent profiles",
+                "operationId": "deleteActivityProfile",
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "profileID",
+                        "in": "query",
+                        "description": "The profile id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "activityId",
+                        "in": "query",
+                        "description": "The Activity id associated with this Profile document.\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/activities/state": {
+            "get": {
+                "summary": "return activity profiles",
+                "operationId": "queryActivityStates",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "activityId",
+                        "in": "query",
+                        "description": "The Activity id associated with this state.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "actor",
+                        "in": "query",
+                        "description": "The Agent associated with this state. (JSON object)\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "registration",
+                        "in": "query",
+                        "description": "The Agent associated with this state.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "stateid",
+                        "in": "query",
+                        "description": "The id for this state, within the given context. \nRequired for retrieving a single state\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "description": "Only ids of states stored since the specified Timestamp\n(exclusive) are returned.\n",
+                        "type": "string"
+                    }
+                ]
+            },
+            "put": {
+                "summary": "return agent profiles",
+                "operationId": "storeActivityState",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "activityId",
+                        "in": "query",
+                        "description": "The Activity id associated with this state.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "actor",
+                        "in": "query",
+                        "description": "The Agent associated with this state. (JSON object)\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "registration",
+                        "in": "query",
+                        "description": "The Agent associated with this state.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "stateid",
+                        "in": "query",
+                        "description": "The id for this state, within the given context. \nRequired for retrieving a single state\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "post": {
+                "summary": "return agent profiles",
+                "operationId": "updateActivityState",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "activityId",
+                        "in": "query",
+                        "description": "The Activity id associated with this state.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "actor",
+                        "in": "query",
+                        "description": "The Agent associated with this state. (JSON object)\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "registration",
+                        "in": "query",
+                        "description": "The Agent associated with this state.\n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "stateid",
+                        "in": "query",
+                        "description": "The id for this state, within the given context. \nRequired for retrieving a single state\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "return agent profiles",
+                "operationId": "deleteActivityState",
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "activityId",
+                        "in": "query",
+                        "description": "The Activity id associated with this state.\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "actor",
+                        "in": "query",
+                        "description": "The Agent associated with this state. (JSON object)\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "registration",
+                        "in": "query",
+                        "description": "The Agent associated with this state.\n",
+                        "type": "string"
+                    }
+                ]
+            }
+        }
+    }
+}

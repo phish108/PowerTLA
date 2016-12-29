@@ -1,0 +1,518 @@
+# Example YAML to get you started quickly.
+# Be aware that YAML has indentation based scoping.
+# Code completion support is available so start typing for available options.
+swagger: '2.0'
+
+# This is your document metadata
+info:
+  version: 1.0.3
+  title: XAPI LRS
+  x-protocol: gov.adlnet.xapi.communication
+  description: |
+    Implements an [XAPI Version 1.0.3](https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md) 
+    communication service.
+tags:
+  -
+    name: PowerTLA
+  - 
+    name: Model
+  - 
+    name: LRS
+  - 
+    name: XAPI
+
+# Describe your paths here
+paths:
+  # This is a path endpoint. Change it.
+  /about:
+    # This is a HTTP operation
+    get:
+      # Describe this verb here. Note: you can use markdown
+      description: Returns the XAPI Version.
+      # This is array of GET operation parameters:
+      operationId: xapiVersion
+      produces: 
+        - application/json
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+  /statements: 
+    get: 
+      summary: statement query interface
+      operationId: queryStatements
+      produces: 
+        - application/json
+      parameters:
+        - name: statementId
+          in: query
+          description: |
+            Id of Statement to fetch
+          type: string
+        - name: voidedStatementId
+          in: query
+          description: | 
+            Id of voided Statement to fetch.
+          type: string
+        - name: agent
+          in: query
+          description: |
+            Filter, only return Statements for which the specified Agent
+            or Group is the Actor or Object of the Statement.
+          type: string
+        - name: verb
+          in: query
+          description: |
+            Filter, only return Statements matching the specified Verb id.
+          type: string
+        - name: activity
+          in: query
+          description: |
+            Filter, only return Statements for which the Object of the
+            Statement is an Activity with the specified id.
+          type: string
+        - name: registration
+          in: query
+          description: |
+            Filter, only return Statements matching the specified
+            registration id. Note that although frequently a unique
+            registration will be used for one Actor assigned to one
+            Activity, this cannot be assumed. If only Statements for a
+            certain Actor or Activity are required, those parameters also
+            need to be specified.
+          type: string
+        - name: related_activities
+          in: query
+          description: |
+            Apply the Activity filter broadly. Include Statements for
+            which the Object, any of the context Activities, or any of
+            those properties in a contained SubStatement match the
+            Activity parameter, instead of that parameter's normal
+            behavior. Matching is defined in the same way it is for the
+            "activity" parameter.
+          type: boolean
+        - name: related_agents
+          in: query
+          description: |
+            Apply the Agent filter broadly. Include Statements for which
+            the Actor, Object, Authority, Instructor, Team, or any of
+            these properties in a contained SubStatement match the Agent
+            parameter, instead of that parameter's normal behavior.
+            Matching is defined in the same way it is for the "agent"
+            parameter.
+          type: boolean
+        - name: since
+          in: query
+          description: |
+            Only Statements stored since the specified Timestamp
+            (exclusive) are returned.
+          type: string
+        - name: until
+          in: query
+          description: |
+            Only Statements stored at or before the specified 
+            Timestamp are returned.
+          type: string
+        - name: limit
+          in: query
+          description: |
+            Maximum number of Statements to return. 0 indicates return 
+            the maximum the server will allow.
+          type: integer
+        - name: format
+          in: query
+          description: |
+            defines the statement format. Possible values are ids, exact,
+            and cannonical  
+          type: string
+        - name: attachments
+          in: query
+          description: |
+            If true, the LRS uses the multipart response format and
+            includes all attachments as described previously. If false,
+            the LRS sends the prescribed response with Content-Type
+            application/json and does not send attachment data.
+          type: boolean
+        - name: ascending
+          in: query
+          description: |
+            If true, return results in ascending order of stored time
+          type: boolean
+      responses:
+        # Response code
+        200:
+          description: Successful response
+    put: 
+      summary: stores one or more statements
+      operationId: storeSingleStatement
+      consumes:
+        - application/json
+      parameters:
+        - name: statementId
+          in: query
+          description: |
+            Id of Statement to update
+          type: string
+      responses:
+        # Response code
+        204:
+          description: Successful response
+    post: 
+      summary: stores one or more statements
+      operationId: storeStatements
+      consumes:
+        - application/json
+      responses:
+        # Response code
+        204:
+          description: Successful response
+  /activities: 
+    get: 
+      summary: statement query interface
+      operationId: loadActivityDescription
+      produces: 
+        - application/json
+      responses:
+        # Response code
+        200:
+          description: Successful response
+      parameters:
+        - name: activityId
+          in: query
+          description: |
+           The Activity id associated with this state.
+          type: string
+          required: true
+  /agents: 
+    get: 
+      summary: statement query interface
+      operationId: loadAgentResource
+      produces: 
+        - application/json
+      responses:
+        # Response code
+        200:
+          description: Successful response
+      parameters:
+        - name: agent
+          in: query
+          description: |
+            The Agent associated with this state. (JSON object)
+          type: string
+          required: true
+  /agents/profile:
+    get: 
+      summary: return agent profiles
+      operationId: queryAgentProfiles
+      produces: 
+        - application/json
+      responses:
+        # Response code
+        200:
+          description: Successful response
+      parameters:
+        - name: profileID
+          in: query
+          description: |
+           The profile id associated with this Profile document.
+          type: string
+        - name: since
+          in: query
+          description: |
+           Only ids of Profiles stored since the specified Timestamp (exclusive) are returned.
+          type: string
+        - name: agent
+          in: query
+          description: |
+            The Agent associated with this profile document. (JSON object)
+          type: string
+          required: true
+    put: 
+      summary: return agent profiles
+      operationId: storeAgentProfile
+      consumes:
+        - application/json
+      responses:
+        # Response code
+        204:
+          description: Successful response
+      parameters:
+        - name: profileID
+          in: query
+          description: |
+           The profile id associated with this Profile document.
+          type: string
+          required: true
+        - name: agent
+          in: query
+          description: |
+            The Agent associated with this profile document. (JSON object)
+          type: string
+          required: true
+    post: 
+      summary: return agent profiles
+      operationId: updateAgentProfile
+      consumes:
+        - application/json
+      responses:
+        # Response code
+        204:
+          description: Successful response
+      parameters:
+        - name: profileID
+          in: query
+          description: |
+           The profile id associated with this Profile document.
+          type: string
+          required: true
+        - name: agent
+          in: query
+          description: |
+            The Agent associated with this profile document. (JSON object)
+          type: string
+          required: true
+    delete: 
+      summary: return agent profiles
+      operationId: deleteAgentProfile
+      responses:
+        # Response code
+        204:
+          description: Successful response
+      parameters:
+        - name: profileID
+          in: query
+          description: |
+           The profile id associated with this Profile document.
+          type: string
+          required: true
+        - name: agent
+          in: query
+          description: |
+            The Agent associated with this profile document. (JSON object)
+          type: string
+          required: true
+  /activities/profile:
+    get: 
+      summary: return activity profiles
+      operationId: queryActivityProfiles
+      produces: 
+        - application/json
+      responses:
+        # Response code
+        200:
+          description: Successful response
+      parameters:
+        - name: profileID
+          in: query
+          description: |
+           The profile id associated with this Profile document.
+          type: string
+        - name: since
+          in: query
+          description: |
+           Only ids of Profiles stored since the specified Timestamp (exclusive) are returned.
+          type: string
+        - name: activityId
+          in: query
+          description: |
+            The Activity id associated with this Profile document.
+          type: string
+          required: true
+    put: 
+      summary: return agent profiles
+      operationId: storeActivityProfile
+      consumes:
+        - application/json
+      responses:
+        # Response code
+        204:
+          description: Successful response
+      parameters:
+        - name: profileID
+          in: query
+          description: |
+           The profile id associated with this Profile document.
+          type: string
+          required: true
+        - name: activityId
+          in: query
+          description: |
+            The Activity id associated with this Profile document.
+          type: string
+          required: true
+    post: 
+      summary: return agent profiles
+      operationId: updateActivityProfile
+      consumes:
+        - application/json
+      responses:
+        # Response code
+        204:
+          description: Successful response
+      parameters:
+        - name: profileID
+          in: query
+          description: |
+           The profile id associated with this Profile document.
+          type: string
+          required: true
+        - name: activityId
+          in: query
+          description: |
+            The Activity id associated with this Profile document.
+          type: string
+          required: true
+    delete: 
+      summary: return agent profiles
+      operationId: deleteActivityProfile
+      responses:
+        # Response code
+        204:
+          description: Successful response
+      parameters:
+        - name: profileID
+          in: query
+          description: |
+           The profile id associated with this Profile document.
+          type: string
+          required: true
+        - name: activityId
+          in: query
+          description: |
+            The Activity id associated with this Profile document.
+          type: string
+          required: true
+  /activities/state:
+    get: 
+      summary: return activity profiles
+      operationId: queryActivityStates
+      produces: 
+        - application/json
+      responses:
+        # Response code
+        200:
+          description: Successful response
+      parameters:
+        - name: activityId
+          in: query
+          description: |
+           The Activity id associated with this state.
+          type: string
+          required: true
+        - name: actor
+          in: query
+          description: |
+            The Agent associated with this state. (JSON object)
+          type: string
+          required: true
+        - name: registration
+          in: query
+          description: |
+            The Agent associated with this state.
+          type: string
+        - name: stateid
+          in: query
+          description: |
+            The id for this state, within the given context. 
+            Required for retrieving a single state
+          type: string
+        - name: since
+          in: query
+          description: |
+            Only ids of states stored since the specified Timestamp
+            (exclusive) are returned.
+          type: string
+    put: 
+      summary: return agent profiles
+      operationId: storeActivityState
+      consumes:
+        - application/json
+      responses:
+        # Response code
+        204:
+          description: Successful response
+      parameters:
+        - name: activityId
+          in: query
+          description: |
+           The Activity id associated with this state.
+          type: string
+          required: true
+        - name: actor
+          in: query
+          description: |
+            The Agent associated with this state. (JSON object)
+          type: string
+          required: true
+        - name: registration
+          in: query
+          description: |
+            The Agent associated with this state.
+          type: string
+        - name: stateid
+          in: query
+          description: |
+            The id for this state, within the given context. 
+            Required for retrieving a single state
+          type: string
+          required: true
+    post: 
+      summary: return agent profiles
+      operationId: updateActivityState
+      consumes:
+        - application/json
+      responses:
+        # Response code
+        204:
+          description: Successful response
+      parameters:
+        - name: activityId
+          in: query
+          description: |
+           The Activity id associated with this state.
+          type: string
+          required: true
+        - name: actor
+          in: query
+          description: |
+            The Agent associated with this state. (JSON object)
+          type: string
+          required: true
+        - name: registration
+          in: query
+          description: |
+            The Agent associated with this state.
+          type: string
+        - name: stateid
+          in: query
+          description: |
+            The id for this state, within the given context. 
+            Required for retrieving a single state
+          type: string
+          required: true
+    delete: 
+      summary: return agent profiles
+      operationId: deleteActivityState
+      responses:
+        # Response code
+        204:
+          description: Successful response
+      parameters:
+        - name: activityId
+          in: query
+          description: |
+           The Activity id associated with this state.
+          type: string
+          required: true
+        - name: actor
+          in: query
+          description: |
+            The Agent associated with this state. (JSON object)
+          type: string
+          required: true
+        - name: registration
+          in: query
+          description: |
+            The Agent associated with this state.
+          type: string
