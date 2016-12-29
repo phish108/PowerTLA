@@ -5,6 +5,13 @@ namespace PowerTLA\Service;
 class Moodle extends \PowerTLA\Service {
     private $lmsRoot;
 
+    public function __construct() {
+        parent::__construct();
+
+        // connect moodle's security model
+        $this->setSecurityModel(new PowerTLA\Security\Moodle());
+    }
+
     protected function loadTagModel($taglist) {
         // add moodle to the end of the tag list that identifies the model.
         $taglist[] = "Moodle";
