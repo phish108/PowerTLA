@@ -6,6 +6,7 @@ class Moodle extends \PowerTLA\Service {
     private $lmsRoot;
 
     protected function loadTagModel($taglist) {
+        // add moodle to the end of the tag list that identifies the model.
         $taglist[] = "Moodle";
         parent::loadTagModel($taglist);
     }
