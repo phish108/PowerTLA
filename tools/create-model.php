@@ -113,6 +113,7 @@ function createModel($fname, $tags, $pathList, $parent=null) {
                         }
 
                         $funcName = selectFuncName($path, $op, $opObj);
+                        $summary = "";
                         if (array_key_exists("summary", $opObj)) {
                             $summary = $opObj["summary"];
                         }
@@ -130,6 +131,8 @@ function createModel($fname, $tags, $pathList, $parent=null) {
 
             if (!$parent) {
                 preprocessPaths($fh, $pathList);
+                apiVersion($fh);
+                apiProtocol($fh);
             }
             fwrite($fh, "}\n\n");
             fwrite($fh, "?>\n");
@@ -161,6 +164,36 @@ function createMethod($fh, $mName, $parent, $summary) {
             fwrite($fh, indent(2) . "parent::$mName(\$input);\n");
         }
         fwrite($fh, "\n" . indent(1) . "}\n");
+    }
+}
+
+function apiVersion($fh) {
+    global $oaiConfig;
+    $info = $oaiConfig->getInfo();
+
+    $summary = "Returns the version of the API spec";
+
+    if (array_key_exists("version", $info)) {
+        summaryComment($fh, $summary, 1);
+
+        fwrite($fh, indent(1) . "final public function getVersion() {\n");
+        fwrite($fh, indent(2) . "return '" . $info["version"] . "';\n");
+        fwrite($fh, indent(1) . "}\n");
+    }
+}
+
+function apiProtocol($fh) {
+    global $oaiConfig;
+    $info = $oaiConfig->getInfo();
+
+    $summary = "Returns the rsd protocol of the API";
+
+    if (array_key_exists("x-protocol", $info)) {
+        summaryComment($fh, $summary, 1);
+
+        fwrite($fh, indent(1) . "final public function getProtocol() {\n");
+        fwrite($fh, indent(2) . "return '" . $info["x-protocol"] . "';\n");
+        fwrite($fh, indent(1) . "}\n");
     }
 }
 
