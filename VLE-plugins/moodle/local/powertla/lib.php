@@ -1,4 +1,0 @@
-<?php
-// nothing here, yet.
-
-?>
