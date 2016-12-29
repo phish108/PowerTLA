@@ -116,13 +116,20 @@ function createModel($fname, $tags, $pathList, $parent=null) {
                         if (array_key_exists("summary", $opObj)) {
                             $summary = $opObj["summary"];
                         }
+
+                        if (array_key_exists("summary", $opObj)) {
+                            unset($pathList[$path][$op]["summary"]);
+                        }
+                        if (array_key_exists("description", $opObj)) {
+                            unset($pathList[$path][$op]["description"]);
+                        }
                         createMethod($fh, $funcName, $parent, $summary);
                     }
                 }
             }
 
             if (!$parent) {
-                preprocessPaths($fh);
+                preprocessPaths($fh, $pathList);
             }
             fwrite($fh, "}\n\n");
             fwrite($fh, "?>\n");
@@ -157,11 +164,11 @@ function createMethod($fh, $mName, $parent, $summary) {
     }
 }
 
-function preprocessPaths($fh) {
+function preprocessPaths($fh, $paths) {
     global $oaiConfig;
     $pathMap = [];
 
-    $paths = $oaiConfig->getPaths();
+    // $paths = $oaiConfig->getPaths();
 
     $oPathMap = [];
     foreach ($paths as $path => $pathobj) {
@@ -185,6 +192,12 @@ function preprocessPaths($fh) {
             }
 
             $repath = '/^' . implode('\\/', $rpath) . '(?:\\/(.+))?$/';
+            if (array_key_exists("summary", $pathobj)) {
+                unset($pathobj["summary"]);
+            }
+            if (array_key_exists("description", $pathobj)) {
+                unset($pathobj["description"]);
+            }
 
             $oPathMap[] = [
                 "pattern" => $repath,
@@ -197,9 +210,12 @@ function preprocessPaths($fh) {
 
     usort($oPathMap, function ($a,$b){return strlen($b["pattern"]) - strlen($a["pattern"]);});
 
-    $summary = "Returns the pathmap of the model.\n\n";
-    $summary.= "This is automatically generated from the API specification. You can safely ignore this part.\n\n";
-    $summary.= "Note: on API changes, this method may change too.";
+    $summary = "Returns the pathmap of the model.
+
+This is automatically generated from the API specification. You can
+safely ignore this part.
+
+Note: on API changes, this method may change too.";
 
     summaryComment($fh, $summary, 1);
 
