@@ -4,7 +4,7 @@
     "description": "A TLA Service Implementation for Ilias and Moodle",
     "homepage": "https://github.com/phish108/PowerTLA",
     "license": "AGPL-3.0",
-    "version": "2.0.2-dev",
+    "version": "2.0.2",
     "autoload": {
         "psr-4": {
             "PowerTLA\\":  "src/"
@@ -12,7 +12,7 @@
     },
     "require": {
         "php": ">=5.5.0",
-        "mobinaut/restling": ">v2.0.0-dev"
+        "mobinaut/restling": "dev-dev-v2.0.1"
     },
     "repositories": [
         {
