@@ -13,10 +13,12 @@ class Ilias extends \PowerTLA\Service {
         $this->setSecurityModel(new PowerTLA\Security\Ilias());
     }
 
-
     protected function loadTagModel($taglist) {
-        // add Ilias to the end of the tag list that identifies the model.
-        $taglist[] = "Ilias";
+        // if the requested module is not a platform specific module
+        if ($taglist[0] != "Ilias" && $taglist[1] != "PoweTLA") {
+            // add Ilias to the end of the tag list that identifies the model.
+            $taglist[] = "Ilias";
+        }
         parent::loadTagModel($taglist);
     }
 

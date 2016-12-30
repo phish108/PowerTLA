@@ -13,8 +13,11 @@ class Moodle extends \PowerTLA\Service {
     }
 
     protected function loadTagModel($taglist) {
-        // add moodle to the end of the tag list that identifies the model.
-        $taglist[] = "Moodle";
+        
+        if ($taglist[0] != "Moodle" && $taglist[1] != "PoweTLA") {
+            // add moodle to the end of the tag list that identifies the model.
+            $taglist[] = "Moodle";
+        }
         parent::loadTagModel($taglist);
     }
 
