@@ -13,10 +13,6 @@ info:
     communication service.
 tags:
   -
-    name: PowerTLA
-  -
-    name: Model
-  -
     name: LRS
   -
     name: XAPI
