@@ -28,7 +28,7 @@ class Service extends \RESTling\OpenAPI {
         $aConfig[] = strtolower(array_shift($aPath));
 
         // check if we find an OpenApi Definition
-        $this->findApiDefinition($aConfig);
+        $this->findApiSpecification($aConfig);
 
         // reset path_info
         array_unshift($aPath, $e);
