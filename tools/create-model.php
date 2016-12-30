@@ -1,10 +1,25 @@
 <?php
 
 $baseDir = dirname(__DIR__);
+while ($baseDir != "/" && !file_exists("$baseDir/vendor")) {
+    $baseDir = dirname($baseDir);
+}
+
 require_once "$baseDir/vendor/autoload.php";
 
+// load the composer file to resolve the file names
+$cfg = json_decode(file_get_contents("$baseDir/composer.json"), true);
+
 $SubModels = ["Moodle", "Ilias"];
-$PathModelMap  = ["PowerTLA" => "$baseDir/src"];
+
+$targetDir = "$baseDir/src/Model/";
+$baseNamespace = "PowerTLA\\Model";
+
+if (array_key_exists("Local\\PowerTLA\\", $cfg["autoload"]["psr-4"])) {
+    $targetDir = "$baseDir/" . $cfg["autoload"]["psr-4"]["Local\\PowerTLA\\"];
+    $baseNamespace = "Local\\PowerTLA";
+    $SubModels = [];
+}
 
 $config = [];
 
@@ -19,22 +34,13 @@ catch (Exception $err) {
     die($err->getMessage());
 }
 
-$tags = $oaiConfig->getTags();
-$tt = [];
-foreach ($tags as $t) {
-    $tt[] = $t["name"];
-}
-$tags = $tt;
+$tags = $oaiConfig->getTags(true);
 
 $modelName = array_pop($tags);
-$modelRoot = array_shift($tags);
+
 $pModel = $oaiConfig->getPaths();
 
-if (!in_array($modelRoot, array_keys($PathModelMap))) {
-    die("Model Root is not matched");
-}
-
-$path = $PathModelMap[$modelRoot];
+$path = $targetDir;
 
 if (!(file_exists($path) && is_dir($path))) {
     die("Model Root is not a Directory");
@@ -47,47 +53,34 @@ foreach ($tags as $tag) {
 
     $tag = ucfirst(strtolower($tag));
 
-    if (!file_exists("$path/$tag")) {
-        if (!mkdir("$path/$tag")) {
-            die("Cannot create directory $path/$tag");
+    if (!file_exists("$path$tag")) {
+        if (!mkdir("$path$tag")) {
+            die("Cannot create directory $path$tag");
         }
     }
-    $path .= "/$tag";
+    $path .= "$tag/";
+    $baseNamespace .= "\\$tag";
 }
 
-$tags  = $oaiConfig->getTags();
-$tt = [];
-foreach ($tags as $t) {
-    $tt[] = $t["name"];
-}
-$tags = $tt;
-
-$paths = $oaiConfig->getPaths();
-// array_unshift($tags, "");
-
-$fqModelName = "\\" . join("\\", $tags);
-$fileName = "$path/$modelName.php";
-createModel($fileName, $tags, $paths);
+$fileName = "$path$modelName.php";
+createModel($fileName, $modelName, $baseNamespace);
 
 if (!empty($SubModels)) {
-    if (!file_exists("$path/$modelName")) {
-        mkdir("$path/$modelName");
+    if (!file_exists("$path$modelName")) {
+        mkdir("$path$modelName");
     }
 
     foreach ($SubModels as $submodel) {
-        $parentCls = '\\' . join('\\', $tags);
-        $fileName = "$path/$modelName/$submodel.php";
-        $ttags = array_merge($tags, [$submodel]);
-        createModel($fileName, $ttags, $paths, $parentCls);
+        $parentCls = "\\$baseNamespace\\$modelName";
+        $fileName = "$path$modelName/$submodel.php";
+        createModel($fileName, $submodel, "$baseNamespace\\$modelName", $parentCls);
     }
 }
 
-function createModel($fname, $tags, $pathList, $parent=null) {
+function createModel($fname, $modelName, $nameSpace, $parent=null) {
     global $oaiConfig;
 
     if (!file_exists($fname)) {
-        $modelName   = array_pop($tags);
-        $nameSpace   = join("\\", $tags);
 
         $parentClass = "\\RESTling\\Model";
         if (!empty($parent)) {
@@ -102,6 +95,7 @@ function createModel($fname, $tags, $pathList, $parent=null) {
             fwrite($fh, "class $modelName extends $parentClass\n");
             fwrite($fh, "{\n");
             if (!$parent) {
+                $pathList = $oaiConfig->getPaths();
                 foreach ($pathList as $path => $pathObj) {
                     $pathObj = $oaiConfig->expandObject($pathObj);
 
