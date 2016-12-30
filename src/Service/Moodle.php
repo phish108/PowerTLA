@@ -8,17 +8,10 @@ class Moodle extends \PowerTLA\Service {
     public function __construct() {
         parent::__construct();
 
+        $this->platform = "Moodle";
+
         // connect moodle's security model
         $this->setSecurityModel(new PowerTLA\Security\Moodle());
-    }
-
-    protected function loadTagModel($taglist) {
-        
-        if ($taglist[0] != "Moodle" && $taglist[1] != "PoweTLA") {
-            // add moodle to the end of the tag list that identifies the model.
-            $taglist[] = "Moodle";
-        }
-        parent::loadTagModel($taglist);
     }
 
     private function findVLE() {

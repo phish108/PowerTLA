@@ -9,17 +9,9 @@ class Ilias extends \PowerTLA\Service {
     public function __construct() {
         parent::__construct();
 
+        $this->platform = "Ilias";
         // connect moodle's security model
         $this->setSecurityModel(new PowerTLA\Security\Ilias());
-    }
-
-    protected function loadTagModel($taglist) {
-        // if the requested module is not a platform specific module
-        if ($taglist[0] != "Ilias" && $taglist[1] != "PoweTLA") {
-            // add Ilias to the end of the tag list that identifies the model.
-            $taglist[] = "Ilias";
-        }
-        parent::loadTagModel($taglist);
     }
 
     private function findVLE() {
