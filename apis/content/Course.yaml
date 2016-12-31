@@ -1,0 +1,106 @@
+swagger: '2.0'
+
+# This is your document metadata
+info:
+  version: 1.0.0
+  title: Course List
+  x-protocol: ch.xapi.protocols.courses
+  description: |
+    Implements a content provided to return a course list that is available for an authorization.
+tags:
+  -
+    name: Content
+  -
+    name: Course
+
+# Describe your paths here
+paths:
+  # This is a path endpoint. Change it.
+  /:
+    # This is a HTTP operation
+    get:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Returns the a list of courses that are available to an authorization. This typically means that
+        a user is enrolled into a course.
+
+        A system MAY return courses that are accessible for guest users if no authorization is present.
+      # This is array of GET operation parameters:
+      operationId: getCourses
+      produces:
+        - application/json
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+  /{courseId}/contents:
+    get:
+      description: |
+        Returns a list of links and protocol types of course resources.
+
+        A client may use the protocol type to infer which service it can use for accessing a resource.
+      operationId: getCourseContents
+      produces:
+        - application/json
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+        403:
+          description: User has no access to the course contents
+      parameters:
+        - name: courseId
+          in: path
+          description: |
+            the official courseId that is exposed in System URLs.
+          type: string
+          required: true
+  /{courseId}/participants:
+    get:
+      description: |
+        Returns a list of participants that are enrolled in a course.
+      operationId: getCourseParticipants
+      produces:
+        - application/json
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+        403:
+          description: User is not enrolled in the course
+      parameters:
+        - name: courseId
+          in: path
+          description: |
+            the official courseId that is exposed in System URLs.
+          type: string
+          required: true
+    put:
+      description: |
+        Enrolls a user account into a course.
+
+        If a user self-enrolls the userId must match the authorization.
+
+        Unauthorized requests or guest accounts MUST not use this operation.
+      operationId: enrolCourseParticipant
+      consumes:
+        - application/json
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+        404:
+          description: User account does not exist
+        403:
+          description: User is not allowed to entrol users into the course
+      parameters:
+        - name: courseId
+          in: path
+          description: |
+            The official courseId that is exposed in System URLs.
+          type: string
+          required: true

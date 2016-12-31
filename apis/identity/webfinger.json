@@ -1,0 +1,132 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Webfinger",
+        "x-protocol": "org.ietf.webfinger",
+        "description": "Implements a [Webfinger](https://tools.ietf.org/html/rfc7033) service.\n\nAn ```acctUri``` contains of a local account identifier and the hostname of the system. \nAn ```acctUri``` that has a different hostname in the host-section MUST be rejected. \n\nAll user parts of ```acctUris``` are contextualised, that means that no user part links to \nactual user accounts. \n"
+    },
+    "tags": [
+        {
+            "name": "Identity"
+        },
+        {
+            "name": "Webfinger"
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "description": "Returns the a webfinger query response.\n\nAn LMS webfinger MUST respond to acctUris. It MAY allow to verify the author of a resource.\nThis could be used to verify a XAPI result URL and the actor.\n\nFor authorised requests this also includes ```links``` to additional resources. \n\nFor authorised requests that are linked to the same context as the ```resource``` this will also\ninclude ```aliases``` that cover all alias acctUris are used in overlapping or sub-contexts.\n\nUnauthorized requests just receive the subject information. \n",
+                "operationId": "getResource",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Resource is not found in the registry"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "resource",
+                        "in": "query",
+                        "description": "the webfinger acct uri to test\n",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "rel",
+                        "in": "query",
+                        "description": "limit the resulting relations relation type. Multiple occurences possible.\n",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/rel": {
+            "get": {
+                "description": "Returns possible relations of the registry.\n",
+                "operationId": "getRelations",
+                "responses": {
+                    "200": {
+                        "description": "Successful Create response"
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "put": {
+                "description": "Adds a new ```acctUri``` to the registry. \n\nThe PowerTLA Webfinger service requires for all acctUris an account context that is a complete\nor partial XAPI Context. \n\nThis is primarily used for front-end resources that create sub-contexts for external services\nand resource providers.\n",
+                "operationId": "addAccount",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful Create response"
+                    }
+                }
+            }
+        },
+        "/profile/{acctUri}": {
+            "get": {
+                "description": "Returns the a user profile.\n\nThis will return the full profile and preferences for authorized users.\n\nFor users sharing the same context as the profile will see core details, but no user preferences.\nThe available profile information might be restricted by the system's ACL.\n\nUsers outside the context will receive a confirmation that the profile exists.\n\nUnauthorised requests are ```Forbidden```.\n",
+                "operationId": "getProfilePage",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "204": {
+                        "description": "Successful response for profile confirmation outside of the context"
+                    },
+                    "404": {
+                        "description": "acctUri is not found in the registry"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "acctUri",
+                        "in": "path",
+                        "description": "the webfinger acct-uri to test. The acctUri MUST be percent encoded, as per \n[Section 2.1 of RFC3986](https://tools.ietf.org/html/rfc3986#section-2.1).\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "put": {
+                "description": "Add a new resource to the ```acctUri``` in the registry. \n\nThis operation might be used to add external (potentially short lived) resources to a profile.\n\nA resource must already exists in the same context as the acctUri.\n\nOne resource might be added to serveral accounts.\n",
+                "operationId": "addAccountResource",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful Create response"
+                    },
+                    "404": {
+                        "description": "acctUri is not found in the registry"
+                    },
+                    "409": {
+                        "description": "the provided resource Uri exists outside of the acctUri context."
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "acctUri",
+                        "in": "path",
+                        "description": "the webfinger acct-uri to test. The acctUri MUST be percent encoded, as per \n[Section 2.1 of RFC3986](https://tools.ietf.org/html/rfc3986#section-2.1).\n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            }
+        }
+    }
+}

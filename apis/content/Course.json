@@ -1,0 +1,112 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Course List",
+        "x-protocol": "ch.xapi.protocols.courses",
+        "description": "Implements a content provided to return a course list that is available for an authorization.\n"
+    },
+    "tags": [
+        {
+            "name": "Content"
+        },
+        {
+            "name": "Course"
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "description": "Returns the a list of courses that are available to an authorization. This typically means that \na user is enrolled into a course.\n\nA system MAY return courses that are accessible for guest users if no authorization is present.\n",
+                "operationId": "getCourses",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/{courseId}/contents": {
+            "get": {
+                "description": "Returns a list of links and protocol types of course resources.\n\nA client may use the protocol type to infer which service it can use for accessing a resource.\n",
+                "operationId": "getCourseContents",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "User has no access to the course contents"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "description": "the official courseId that is exposed in System URLs. \n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/{courseId}/participants": {
+            "get": {
+                "description": "Returns a list of participants that are enrolled in a course. \n",
+                "operationId": "getCourseParticipants",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "User is not enrolled in the course"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "description": "the official courseId that is exposed in System URLs. \n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            },
+            "put": {
+                "description": "Enrolls a user account into a course.\n\nIf a user self-enrolls the userId must match the authorization. \n\nUnauthorized requests or guest accounts MUST not use this operation.\n",
+                "operationId": "enrolCourseParticipant",
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "403": {
+                        "description": "User is not allowed to entrol users into the course"
+                    },
+                    "404": {
+                        "description": "User account does not exist"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "description": "The official courseId that is exposed in System URLs. \n",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            }
+        }
+    }
+}
