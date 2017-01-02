@@ -42,7 +42,10 @@ class File implements PowerTLA\Interfaces\Loader {
             throw new \PowerTLA\Exception\MissingBaseDirectory();
         }
 
-        if (!in_array($apiIdentifier[0], ["identity", "lrs", "content", "orchestration"])) {
+        if (!($apiIdentifier &&
+              is_array($apiIdentifier)  &&
+              count($apiIdentifier) == 2 && 
+              in_array($apiIdentifier[0], ["identity", "lrs", "content", "orchestration"]))) {
             throw new \PowerTLA\Exception\InvalidTlaCluster();
         }
 
