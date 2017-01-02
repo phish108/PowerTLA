@@ -20,6 +20,7 @@ class Service extends \RESTling\OpenAPI {
 
         $aPath = explode('/', $_SERVER["PATH_INFO"]);
         $e = array_shift($aPath);
+
         if (count($aPath) < 2) {
             throw new Exception\MissingOperationCluster();
         }
@@ -28,38 +29,11 @@ class Service extends \RESTling\OpenAPI {
         $aConfig[] = strtolower(array_shift($aPath));
         $aConfig[] = strtolower(array_shift($aPath));
 
-        // check if we find an OpenApi Definition
-        $this->findApiSpecification($aConfig);
-
-        // reset path_info
-        array_unshift($aPath, $e);
-        $_SERVER["PATH_INFO"] = join('/', $aPath);
-
-        // pass down to RESTling\OpenApi
-        parent::verifyModel();
-    }
-
-    /**
- 	 * This method loads the api specification for an API Identifier.
-     *
-     * An API identifier is an array containing the TLA cluster and protocol
-     * name.
-     *
-     * Valid TLA Cluster names are
-     * - identity
-     * - lrs
-     * - content
-     * - orchestration
- 	 *
- 	 * @param array $apiIdentifier
- 	 * @return void
-     * @throws PowerTLA\Exception\MissingApiSpecification if no specification was found
-	 */
-	private function findApiSpecification($apiIdentifier) {
+        // check if we find an OpenApi Definition via a Loader
         $loaded = false;
         foreach ($this->specLoader as $loader) {
             try {
-                $loader->findAndLoad($this, $apiIdentifier);
+                $loader->findAndLoad($this, $aConfig);
                 $loaded = ($loaded || $loader->loaded());
                 if ($loaded) {
                     break;
@@ -72,6 +46,18 @@ class Service extends \RESTling\OpenAPI {
         if (!$loaded) {
             throw new Exception\MissingApiSpecification();
         }
+
+        // reset path_info
+        if (empty($aPath)) {
+            // set the PATH_INFO to '/'
+            array_unshift($aPath, $e);
+        }
+
+        array_unshift($aPath, $e);
+        $_SERVER["PATH_INFO"] = join('/', $aPath);
+
+        // pass down to RESTling\OpenApi
+        parent::verifyModel();
     }
 }
 
