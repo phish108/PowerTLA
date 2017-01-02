@@ -2,8 +2,10 @@
 
 namespace PowerTLA\Model\LRS;
 
-class XAPI extends \RESTling\Model
+abstract class XAPI extends \RESTling\Model
 {
+    const VERB_VOIDED = "http://adlnet.gov/expapi/verbs/voided";
+
     public function xapiVersion($input) {
         $this->data = ["version" => $this->getVersion()];
     }
@@ -126,6 +128,57 @@ class XAPI extends \RESTling\Model
     public function deleteActivityState($input) {
 
     }
+
+    protected function getActorUserId($actorObject) {
+        if (is_string($actorObject)) {
+            $actorObject = json_decode($actorObject, true);
+        }
+
+        $wfm = $this->getWebfingerModel($account[0]);
+        if (!$wfm) {
+            throw new \PowerTLA\Exception\MissingWebfingerModel();
+        }
+
+        if (array_key_exists("mbox", $actorObject)) {
+            $account = explode(":", $actorObject["mbox"], 2);
+
+            switch ($account[0]) {
+                case "mailto":
+                    return $wfm->findSubjectByEMail($account[1]);
+                    break;
+                case "acct":
+                    // an acct also allows setting the context
+                    return $wfm->findSubjectByAcct($account[1]);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (array_key_exists("openid", $actorObject)) {
+            return $wfm->findSubjectByOpenId($actorObject["openid"]);
+        }
+
+        if (array_key_exists("account", $actor) &&
+            array_key_exists("homepage", $actor["account"]) &&
+            !empty($actor["account"]["homepage"]))
+        {
+            return $wfm->findSubjectByHomepage($actor["account"]["homepage"]);
+        }
+        return 0;
+    }
+
+    /**
+ 	 * an implementing system MUST return an instance to its corresponding
+     * webfinger model (e.g. \PowerTLA\Model\Identity\Webfinger\Moodle).
+ 	 *
+ 	 * @param type
+ 	 * @return void
+	 */
+	abstract protected function getWebfingerModel();
+    abstract protected function findStatementByUuid($uuid);
+    abstract protected function findDocumentByUuid($uuid);
+
 
     /**
      * Returns the pathmap of the model.
@@ -997,6 +1050,28 @@ class XAPI extends \RESTling\Model
      */
     final public function getProtocol() {
         return 'gov.adlnet.xapi.communication';
+    }
+
+    private function generateUUID()
+    {
+        $uuid = sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                        mt_rand( 0, 0xffff ),
+                        mt_rand( 0, 0xffff ),
+                        mt_rand( 0, 0xffff ),
+                        mt_rand( 0, 0x0fff ) | 0x4000,
+                        mt_rand( 0, 0x3fff ) | 0x8000,
+                        mt_rand( 0, 0xffff ),
+                        mt_rand( 0, 0xffff ),
+                        mt_rand( 0, 0xffff ));
+
+        $this->statement["id"] = trim($uuid);
+        return $this->statement["id"];
+    }
+
+    private function generateTimestamp()
+    {
+        $dt = new DateTime('NOW');
+        return $dt->format(DateTime::ISO8601);
     }
 }
 
