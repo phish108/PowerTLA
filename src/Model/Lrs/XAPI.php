@@ -130,6 +130,10 @@ abstract class XAPI extends \RESTling\Model
     }
 
     protected function getActorUserId($actorObject) {
+        if (empty($actorObject)) {
+            throw new \PowerTLA\Exception\MissingActorIdentifier();
+        }
+
         if (is_string($actorObject)) {
             $actorObject = json_decode($actorObject, true);
         }
@@ -151,6 +155,7 @@ abstract class XAPI extends \RESTling\Model
                     return $wfm->findSubjectByAcct($account[1]);
                     break;
                 default:
+                    throw new \PowerTLA\Exception\InvalidActorIdentifier();
                     break;
             }
         }
@@ -165,7 +170,9 @@ abstract class XAPI extends \RESTling\Model
         {
             return $wfm->findSubjectByHomepage($actor["account"]["homepage"]);
         }
-        return 0;
+
+        // No actor identifier found in the actorObject.
+        throw new \PowerTLA\Exception\MissingActorIdentifier();
     }
 
     /**
