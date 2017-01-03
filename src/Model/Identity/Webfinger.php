@@ -4,53 +4,65 @@ namespace PowerTLA\Model\Identity;
 
 abstract class Webfinger extends \RESTling\Model
 {
-    protected $userid;
-    protected $acct;
+    protected $resource;
+    protected $userid = null;
+    protected $acct = null;
     protected $aliases =[];
     protected $context = [];
-    protected $type = 'user';
+    protected $type = '';
 
-    public function getAcct() {
-        return $this->acct;
-    }
-
-    public function getUserId() {
-        return $this->userid;
-    }
-
-    public function getAliases() {
-        return $this->aliases;
+    protected function clear() {
+        $this->resource = null;
+        $this->userid   = null;
+        $this->acct     = null;
+        $this->aliases  = [];
+        $this->context  = [];
+        $this->type     = "";
     }
 
     public function getResource($input) {
+        $this->clear();
         $this->data = [];
 
-        $baseAcct = $input->getParameter("resource");
-        $acct = urldecode($baseAcct);
+        $resource = $input->getParameter("resource", "query");
 
-        $this->findSubjectByUri($acct);
+        if (empty($resource)) {
+            // find out about oneself
+            $userid = $input->getUser();
+            $subject = $this->getUsername($userid);
+            if (empty($subject)) {
+                throw new \RESTling\Exception\BadRequest();
+            }
+            $resource = urlencode($subject);
+        }
+        else {
+            $subject = urldecode($resource);
+        }
 
-        if ($this->userid <= 0) {
+        $this->findSubjectByUri($subject);
+
+        if (!$this->resource) {
             throw new \RESTling\Exception\NotFound();
         }
 
-        $this->data["subject"] = $acct;
-
+        // prepare response
+        $this->data["subject"] = $subject;
         $this->data["links"] = [];
+
         $reqUri = trim($_SERVER["REQUEST_URI"], "/");
 
         if ($input->hasActiveUser($this->userid)) {
             // I try to request my own data
-            $this->data["aliases"] = $this->loadAliases();
+            $this->data["aliases"] = $this->loadAliases($subject);
 
-            $this->data["links"] = ["https://xapi.li/webfinger/rel/profile" => "$reqUri/profile/$baseAcct"];
-            // $this->loadPreferences();
+            $this->data["links"] = ["https://xapi.li/webfinger/rel/profile" => "$reqUri/profile/$resource"];
+            $this->data["properties"] = $this->loadSubjectProperties();
         }
 
         if ($this->hasSharedContext($input->getUser())) {
-            $this->data["aliases"] = $this->loadContextAliases();
+            $this->data["aliases"] = $this->loadContextAliases($input->getUser(), $subject);
 
-            $this->data["links"] = ["https://xapi.li/webfinger/rel/profile" => "$reqUri/profile/$baseAcct"];
+            $this->data["links"] = ["https://xapi.li/webfinger/rel/profile" => "$reqUri/profile/$resource"];
         }
     }
 
@@ -62,21 +74,26 @@ abstract class Webfinger extends \RESTling\Model
     }
 
     public function addAccount($input) {
-        $body = $input->getBody();
-        if (array_key_exists("context", $body)) {
-            $this->context = $body["context"];
-        }
-
-        $users = $input->getUser();
-        if (!empty($users)) {
-            $this->userid = $users[0];
-        }
-
-        $this->generateAcct();
+        throw new \RESTling\Exception\NotImplemented();
+        // $body = $input->getBody();
+        // if (array_key_exists("context", $body)) {
+        //     $this->context = $body["context"];
+        // }
+        //
+        // $users = $input->getUser();
+        // if (!empty($users)) {
+        //     $this->userid = $users[0];
+        // }
+        //
+        // $this->generateContext();
+        // $this->generateAcct();
     }
 
     public function getProfilePage($input) {
         $acct = urldecode($input->getParameter("acctUri", "path"));
+
+        $this->findSubjectByAcct($acct);
+
         if ($this->userid <= 0) {
             throw new \RESTling\Exception\NotFound();
         }
@@ -87,10 +104,10 @@ abstract class Webfinger extends \RESTling\Model
 
         // TODO add access scoping
         // by default just pass the user name and not extra information
-        $profile = $this->loadUserProfile();
+        $profile = $this->getSubjectProfile();
 
-        foreach (["givenname", "familyname"] as $k) {
-            $this->data[$k] = $profile[$k];
+        foreach ($profile as $k => $v) {
+            $this->data[$k] = $v;
         }
     }
 
@@ -98,74 +115,59 @@ abstract class Webfinger extends \RESTling\Model
         throw new \RESTling\Exception\NotImplemented();
     }
 
-    abstract public function findSubjectByUserId($userid);
+    // abstract public function findSubjectByUserId($userid);
+    abstract public function getUsername($useridList);
     abstract public function findSubjectByEMail($email);
     abstract public function findSubjectByAcct($acct);
+    abstract public function findSubjectByUserId($userId);
     abstract public function findSubjectByOpenId($openIdUri);
     abstract public function findSubjectByHomepage($homepageUri);
-    abstract public function findAcctByUserContext($userid, $context);
-    abstract public function findAcctByUserRegistration($userid, $registration);
+    // abstract public function findAcctByUserContext($userid, $context);
+
+    /**
+ 	 * Tries to find a resource by a Link URI. It is used for regular objects
+     * not users.
+ 	 *
+ 	 * @param string $resourceUri
+ 	 * @return void
+	 */
+	// abstract public function findSubjectByLink($resourceUrl);
 
     abstract protected function getSystemId();
 
-    abstract protected function getSubjectPreferences();
+    abstract protected function getSubjectProperties();
     abstract protected function getSubjectProfile();
 
-    abstract protected function hasSharedContext($userid);
-    abstract protected function loadUserProfile($userid);
+    abstract protected function hasSharedContext($useridList);
+
+    abstract protected function loadContextAliases($otherUserId, $excludeSubject);
+    abstract protected function loadAliases($excludeSubject);
 
     /**
  	 * Creates a new acct instance using the member properties.
  	 *
  	 * @return void
 	 */
-	abstract protected function storeAcct();
-
-    /**
- 	 * loads the acct for the given condition.
-     * if an acct has aliases (that share a context), this will populate the aliases as well
- 	 *
- 	 * @param type
- 	 * @return void
-	 */
-	abstract protected function loadAcct();
+	// abstract protected function storeAcct();
 
     public function findSubjectByUri($acct){
         if (strpos($acct, "acct:") === 0) {
             // search for users
             $this->findSubjectByAcct($acct);
+            $this->type = "user";
         }
         elseif (strpos($acct, "mailto:") === 0) {
             $email = array_pop(explode(":", $acct));
             $this->findSubjectByEMail($email);
+            $this->type = "user";
         }
         else {
             // search for resources
+            $this->type = "resource";
         }
     }
 
-    public function clearAcct() {
-        $this->userid = 0;
-        $this->acct   = "";
-        $this->registration = "";
-        $this->context = [];
-    }
-
-    public function setActor($userid, $safe = false) {
-        if (!($userid || empty($this->userid) || !$safe)) {
-            return;
-        }
-        $this->userid = $userid;
-    }
-
-    public function setContext($context, $safe = false) {
-        if (!($contetx || empty($this->context) || !$safe)) {
-            return;
-        }
-        $this->context = $contetx;
-    }
-
-    private function generateAcct() {
+    protected function generateAcct() {
         if ($this->userid) {
             $uuid = sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
                             mt_rand( 0, 0xffff ),
@@ -359,7 +361,6 @@ abstract class Webfinger extends \RESTling\Model
                         'description' => 'the webfinger acct uri to test
             ',
                         'type' => 'string',
-                        'required' => true,
                       ),
                       1 =>
                       array (
