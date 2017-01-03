@@ -35,8 +35,7 @@
                         "name": "resource",
                         "in": "query",
                         "description": "the webfinger acct uri to test\n",
-                        "type": "string",
-                        "required": true
+                        "type": "string"
                     },
                     {
                         "name": "rel",

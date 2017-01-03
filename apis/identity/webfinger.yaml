@@ -55,7 +55,6 @@ paths:
           description: |
             the webfinger acct uri to test
           type: string
-          required: true
         - name: rel
           in: query
           description: |
@@ -77,7 +76,7 @@ paths:
         Adds a new ```acctUri``` to the registry.
 
         The PowerTLA Webfinger service requires for all acctUris an account context that is a
-        XAPI context or registration. Consequently, a request requires 
+        XAPI context or registration. Consequently, a request requires
         an object containing a registration key, a XAPI context object, or both.
 
         This is primarily used for front-end resources that create sub-contexts for external services
