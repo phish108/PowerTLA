@@ -4,14 +4,23 @@ namespace PowerTLA\Model\Identity\Webfinger;
 
 class Moodle extends \PowerTLA\Model\Identity\Webfinger
 {
+    private $sysId;
+    /**
+     * The userCache is used for limiting database requests if
+     * the LRS accepts large streams with similar actors.
+     */
+    protected $userCache = [];
+
     protected function getSystemId() {
         global $CFG;
-
-        $url = parse_url($CFG->wwwroot, PHP_URL_HOST);
-        if (!empty($url)) {
-             return $url;
+        if (!$this->sysId) {
+            $this->sysId = $_SERVER["SERVER_NAME"];
+            $url = parse_url($CFG->wwwroot, PHP_URL_HOST);
+            if (!empty($url)) {
+                $this->sysId = $url;
+            }
         }
-        return $_SERVER["SERVER_NAME"];
+        return $this->sysId;
     }
 
     public function findSubjectByAcct($acct) {
@@ -33,8 +42,8 @@ class Moodle extends \PowerTLA\Model\Identity\Webfinger
     }
 
     public function findSubjectByOpenId($openIdUri) {
-        // FIXME use the correct openIdUri
         return $this->findUserResource(["url" => $openIdUri]);
+        // FIXME use the correct openIdUri
     }
 
     public function findSubjectByHomepage($homepageUri) {
@@ -45,15 +54,34 @@ class Moodle extends \PowerTLA\Model\Identity\Webfinger
         global $DB;
         $this->clear();
 
+        // verify the cache
+        foreach ($attr as $k => $v) {
+            if (array_key_exists($v, $this->userCache)) {
+                $user = $this->userCache[$v];
+                $this->resource = $user;
+                $this->userid   = $user->id;
+                $this->acct = $user->acct;
+                return $this->userid;
+            }
+        }
+
+        // if the resource is not cached then load it
         $user = $DB->get_record("user", $attr);
 
         if ($user && !($user->deleted || $user->suspended)) {
             if (!strpos($user->username, "@")) {
-                $user->username = $user->username . "@" . $this->getSystemId();
+                $user->acct = $user->username . "@" . $this->getSystemId();
             }
             $this->resource = $user;
             $this->userid   = $user->id;
-            $this->acct = $user->username;
+            $this->acct = $user->acct;
+
+            // populate the cache
+            $this->userCache[$this->userid] = $user;
+            $this->userCache[$this->acct] = $user;
+            $this->userCache[$this->username] = $user;
+            $this->userCache[$user->url] = $user;
+            $this->userCache[$user->mail] = $user;
         }
         return $this->userid;
     }
