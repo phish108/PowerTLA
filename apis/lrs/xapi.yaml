@@ -129,6 +129,8 @@ paths:
             includes all attachments as described previously. If false,
             the LRS sends the prescribed response with Content-Type
             application/json and does not send attachment data.
+
+            This parameter is silently ignored.
           type: boolean
         - name: ascending
           in: query
