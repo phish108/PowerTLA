@@ -179,8 +179,14 @@ class Moodle extends \PowerTLA\Model\LRS\XAPI
 
         if ($records) {
             $rf = $this->fields;
+            $output = false;
             foreach ($records as $record) {
+                if ($output) {
+                    // we need an array separator between the statements.
+                    $output->data(',');
+                }
                 $output->data($record->$rf);
+                $output = true;
             }
         }
     }
