@@ -1,5 +1,4 @@
 <?php
-
 namespace PowerTLA\Model\Identity;
 
 class OAuth2 extends \RESTling\Model
@@ -7,6 +6,7 @@ class OAuth2 extends \RESTling\Model
     protected $trustAssertion;
     protected $stateInfo = null;
 
+    // get /cb operation handler
     public function oidcCallback($input) {
         if ($error = $input->get("error", "query")) {
             throw new \RESTling\Exception\Forbidden();
@@ -18,6 +18,8 @@ class OAuth2 extends \RESTling\Model
             $this->requestAuthorizationToken($input);
         }
         elseif ($token = $input->get("id_token", "query")) {
+            // received a successful authorization
+            // process the incoming IdToken
             $loader = new \Jose\Loader();
             try {
                 $jwt = $loader->load($token);
@@ -28,12 +30,15 @@ class OAuth2 extends \RESTling\Model
 
             $this->handleIdToken($this->decryptJWE($jwt));
 
+            // no errors? we grant access to the user
             $access_token  = $input->get("access_token", "query");
             $refresh_token = $input->get("refresh_token", "query");
-            $exprires      = $input->get("expires_id", "query");
+            $exprires      = $input->get("expires_in", "query");
 
+            // keep the tokens for reference
             $this->storeToken($access_token, $refesh_token, $expires);
 
+            // hand the tokens to the client
             $this->data = [
                 "access_token"  => $access_token,
                 "refresh_token" => $refresh_token,
@@ -43,6 +48,7 @@ class OAuth2 extends \RESTling\Model
         }
     }
 
+    // /token endpoint operation handler
     final public function handleTokenRequest($input) {
         $gType = $input->get("grant_type", "formData");
 
@@ -55,6 +61,7 @@ class OAuth2 extends \RESTling\Model
         $this->$fname($input);
     }
 
+    // /revoke endpoint operation handler
     public function revokeToken($input) {
         $hint = $input->get("token_hint", "body");
         $token = $input->get("token", "body");
@@ -110,6 +117,7 @@ class OAuth2 extends \RESTling\Model
     }
 
     protected function getSupportedClaims() {
+        // by default we support all claims
         return [
                 "sub",
                 "name",
@@ -170,7 +178,8 @@ class OAuth2 extends \RESTling\Model
                 throw new \RESTling\Exception\Security\SharedKeyValidationUnsupported();
             }
 
-            if (!($keyString = $model->getSharedKey($keyId, $jku))) {
+            list($azp, $keyString) = $model->getSharedKey($keyId, $jku);
+            if (empty($keyString)) {
                 throw new \RESTling\Exception\Security\SharedKeyMissing();
             }
 
@@ -202,7 +211,7 @@ class OAuth2 extends \RESTling\Model
 
             if (method_exists($this, "verifyIssuer")) {
                 try {
-                    $model->verifyIssuer($iss, $keyId);
+                    $model->verifyIssuer($iss, $azp);
                 }
                 catch (Exception $err){
                     throw new \RESTling\Exception\Security\IssuerRejected();
@@ -230,33 +239,43 @@ class OAuth2 extends \RESTling\Model
                 }
             }
 
-            if ($this->trustAssertion instanceof \Jose\Object\JWS) {
-                // in this case we need to validate the ID Token against the
-                // trust agent
-                if ($this->trustAssertion->getClaim("sub") != $userClaims["sub"]) {
-                    throw new \RESTling\Exception\Forbidden();
-                }
+            // need for validating assertion that is used to trigger the authorization request
+            // this part runs ONLY if the OP responded to a primary token assertion.
+            $this->validateTrustAssertion($userClaims);
 
-                $kid = $this->trustAssertion->getSignature(0)->getProtectedHeader('kid');
-                $alg = $this->trustAssertion->getSignature(0)->getProtectedHeader('alg');
+            // No errors? we can accept the user.
+            // the plugin MAY reject certain users
+            $userid = $this->handleUser($userClaims);
+            return [$azp, $userid];
+        }
+        return [null, null];
+    }
 
-                $kid = array_pop(explode(":", $kid));
-
-                $key = "";
-                $fname = "get_".$kid."_param";
-                $jwk_set = $this->$fname($userClaims);
-
-                // verify the assertion
-                $verifier = \Jose\Verifier::createVerifier([$alg]);
-                try {
-                    $verifier->verifyWithKeySet($this->trustAssertion, $jwk_set, null, null);
-                }
-                catch (Exception $err) {
-                    throw new \RESTling\Exception\Security\TokenRejected();
-                }
+    private function validateTrustAssertion($userClaims) {
+        if ($this->trustAssertion instanceof \Jose\Object\JWS) {
+            // in this case we need to validate the ID Token against the
+            // trust agent
+            if ($this->trustAssertion->getClaim("sub") != $userClaims["sub"]) {
+                throw new \RESTling\Exception\Forbidden();
             }
 
-            $this->grantAccessForId($userClaims);
+            $kid = $this->trustAssertion->getSignature(0)->getProtectedHeader('kid');
+            $alg = $this->trustAssertion->getSignature(0)->getProtectedHeader('alg');
+
+            $kid = array_pop(explode(":", $kid));
+
+            $key = "";
+            $fname = "get_".$kid."_param";
+            $jwk_set = $this->$fname($userClaims);
+
+            // verify the assertion
+            $verifier = \Jose\Verifier::createVerifier([$alg]);
+            try {
+                $verifier->verifyWithKeySet($this->trustAssertion, $jwk_set, null, null);
+            }
+            catch (Exception $err) {
+                throw new \RESTling\Exception\Security\TokenRejected();
+            }
         }
     }
 
@@ -331,10 +350,6 @@ class OAuth2 extends \RESTling\Model
         return $jwk_set;
     }
 
-    private function handle_refresh_token($input) {
-
-    }
-
     private function handle_jwt_bearer($input) {
         // handle assertion
         $token = $input->get("assertion", "body");
@@ -354,37 +369,22 @@ class OAuth2 extends \RESTling\Model
             // check if we have to deal with an client assertion
             $kid = $jwt->getSignature(0)->getProtectedHeader('kid');
             if (!empty($kid) && $kid == "urn:oidc:email") {
-                // find assertion target in the azp
-                $azp = $jwt->getClaim("azp"); // link to the authorization party
-
-                $authParam = $this->findTargetAuthority($azp); // lookup the target or throw an exception!
-
-                // keep the compact JWS String, so we can verify later
-                $authParam["state"]  = $this->generateState($jwt->toCompactJSON(0)); // create a new state
-                $authParam["prompt"] = 'none';
-
-                if (!array_key_exists("scope", $authParam)) {
-                    $authParam["scope"] = "openid";
-                }
-                $kid = array_pop(explode(":", $kid));
-                $authParam["scope"] .= " $kid";
-
-                if (!array_key_exists("response_type", $authParam)) {
-                    $authParam["response_type"] = "code id_token token";
-                }
-
-                $query = [];
-                foreach ($authParam as $p => $v) {
-                    $query[] = urlencode($p) . '=' . urlencode($v);
-                }
-                $azp .= "?" . join("&", $query);
-                $this->redirect($azp); // throw the redirect exception!
+                $this->handleAgentAssertion($kid, $jwt); // ends in a redirect
             }
             elseif ($sub = $jwt->getClaim('sub')) {
                 // a regular assertion coming from a registered source
-                $this->verifyState($input->get("state", "formData"));
-                
-                $this->handleIdToken($jwt);
+                // $this->verifyState($input->get("state", "formData"));
+
+                list($azp, $userid) = $this->handleIdToken($jwt);
+
+                list($access_token, $refresh_token, $expires) = $this->grantAccessTokens($azp, $userid);
+
+                $this->data = [
+                    "access_token"  => $access_token,
+                    "refresh_token" => $refresh_token,
+                    "expires_in"    => $expires,
+                    "token_type"    => "Bearer"
+                ];
             }
             elseif ($iss = $jwt->getClaim('iss')) {
                 // secondary token assertions do not contain a sub hint.
@@ -392,6 +392,33 @@ class OAuth2 extends \RESTling\Model
                 $this->handleSecondaryToken($jwt, $input);
             }
         }
+    }
+
+    protected function handleAgentAssertion($kid, $jwt) {
+        $azp = $jwt->getClaim("azp"); // link to the authorization party
+
+        $authParam = $this->findTargetAuthority($azp); // lookup the target or throw an exception!
+
+        // keep the compact JWS String, so we can verify later
+        $authParam["state"]  = $this->generateState($jwt->toCompactJSON(0)); // create a new state
+        $authParam["prompt"] = 'none';
+
+        if (!array_key_exists("scope", $authParam)) {
+            $authParam["scope"] = "openid";
+        }
+        $kid = array_pop(explode(":", $kid));
+        $authParam["scope"] .= " $kid";
+
+        if (!array_key_exists("response_type", $authParam)) {
+            $authParam["response_type"] = "code id_token token";
+        }
+
+        $query = [];
+        foreach ($authParam as $p => $v) {
+            $query[] = urlencode($p) . '=' . urlencode($v);
+        }
+        $azp .= "?" . join("&", $query);
+        $this->redirect($azp); // throw the redirect exception!
     }
 
     protected function handleSecondaryToken($jwt, $input) {
@@ -408,7 +435,7 @@ class OAuth2 extends \RESTling\Model
 
         $issuer = $this->getToken("access_token", $token);
         // verify the token expiration
-        $ts = (new DateTime('NOW'))->getTimestamp();
+        $ts = time();
         if ($issuer["expires"] > $ts) {
             // give the client a chance to refresh
             throw new \RESTling\Exception\Unauthorized();
@@ -488,7 +515,8 @@ class OAuth2 extends \RESTling\Model
                 }
 
                 // 3d ask JOSE Key Context (for $kid or $jku) from model
-                if (!($keyString = $model->getSharedKey($keyId))) {
+                list($azp, $keystring) = $model->getSharedKey($keyId, $jku);
+                if (empty($keyString)) {
                     throw new \RESTling\Exception\Security\SharedKeyMissing();
                 }
             }
@@ -530,6 +558,7 @@ class OAuth2 extends \RESTling\Model
         return $jwt;
     }
 
+    // authorization code flow is presently unsupported
     private function requestAuthorizationToken($input) {
         throw new \RESTling\Exception\NotImplemented();
     }
@@ -822,6 +851,19 @@ class OAuth2 extends \RESTling\Model
      */
     final public function getProtocol() {
         return 'org.ieft.oauth2';
+    }
+
+
+    final protected function randomString($length=10) {
+        $resstring = "";
+        $chars = "abcdefghijklmnopqrstuvwxyz._ABCDEFGHIJKLNOPQRSTUVWXYZ-1234567890";
+        $len = strlen($chars);
+        for ($i = 0; $i < $length; $i++)
+        {
+            $x = rand(0, $len-1);
+            $resstring .= substr($chars, $x, 1);
+        }
+        return $resstring;
     }
 }
 
