@@ -1,0 +1,169 @@
+swagger: '2.0'
+
+# This is your document metadata
+info:
+  version: 1.0.0
+  title: OAuth2/OIDC endpoints
+  x-protocol: org.ieft.oauth2
+  description: |
+    Implements the [OpenId Connect Resource Provider](http://openid.net/specs/openid-connect-core-1_0.html) token endpoint.
+
+    The token endpoint implements the OIDC callback endpoint that receives an
+    authorization.
+
+    The token endpoint also provides OAuth2 assertion support so [OIDC token agents](http://openid.bitbucket.org/draft-native-application-agent-core-01.html)
+    and regular [OAuth2 Assertions](https://tools.ietf.org/html/rfc7521) will be supported.
+tags:
+  -
+    name: Identity
+  -
+    name: OAuth2
+
+paths:
+  /cb:
+    get:
+      description: |
+        callback support for OIDC redirects
+      operationId: oidcCallback
+      produces:
+        - application/json
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+        403:
+          description: Authorization failed
+      parameters:
+        - name: code
+          in: query
+          description: |
+            OAuth2 Access code
+          type: string
+        - name: state
+          in: query
+          description: |
+            OAuth2 state string
+          type: string
+        - name: error
+          in: query
+          description: |
+            OAuth2 Refresh Token
+          type: string
+        - name: error_description
+          in: query
+          description: |
+            OAuth2 Refresh Token
+          type: string
+        - name: access_token
+          in: query
+          description: |
+            OAuth2 Refresh Token
+          type: string
+        - name: id_token
+          in: query
+          description: |
+            OIDC ID Token
+          type: string
+        - name: refresh_token
+          in: query
+          description: |
+            OAuth2 Refresh Token
+          type: string
+        - name: expires_in
+          in: query
+          description: |
+            expires_in seconds
+          type: string
+        - name: token_type
+          in: query
+          description: |
+            token type
+          type: string
+  /token:
+    post:
+      description: |
+        regular OAuth2 token endpoint API
+
+        This endpoint also handles [OAuth2 JWT assertions](https://tools.ietf.org/html/rfc7523)
+      operationId: handleTokenRequest
+      produces:
+        - application/json
+      responses:
+      # Response code
+        200:
+         description: Successful response
+        302:
+          description: Forwards a subject to the registred authorization service
+        401:
+          description: Authorization expired
+        403:
+          description: Authorization failed
+      parameters:
+        - name: grant_type
+          in: formData
+          description: |
+            OAuth2 Grant Type
+          type: string
+          required: true
+        - name: state
+          in: formData
+          description: |
+            OAuth2 state string
+          type: string
+        - name: code
+          in: formData
+          description: |
+            OAuth2 Refresh Token
+          type: string
+        - name: redirect_uri
+          in: formData
+          description: |
+            OAuth2 parameter
+          type: string
+        - name: client_id
+          in: formData
+          description: |
+            OAuth2 parameter
+          type: string
+        - name: refresh_token
+          in: formData
+          description: |
+            OAuth2 parameter
+          type: string
+        - name: assertion
+          in: formData
+          description: |
+            OAuth2 assertion token
+          type: string
+        - name: scope
+          in: formData
+          description: |
+            OAuth2 client credentials scope
+          type: string
+  /revoke:
+    post:
+      description: |
+        [OAuth2 revocation](https://tools.ietf.org/html/rfc7009) endpoint API
+      operationId: revokeToken
+      produces:
+        - application/json
+      responses:
+      # Response code
+        200:
+         description: Successful response
+        401:
+          description: Authorization expired
+        403:
+          description: Authorization failed
+      parameters:
+        - name: token
+          in: formData
+          description: |
+            OAuth2 access or refresh token
+          type: string
+        - name: token_hint
+          in: formData
+          description: |
+            Informs which token type is used (either access or refresh token)
+          type: string
