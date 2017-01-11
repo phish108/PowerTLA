@@ -101,6 +101,11 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
         return (array) $object;
     }
 
+    protected function storeState($state, $attr) {
+        $attr["id"] = $state;
+        $DB->insert_record("pwrtla_oauth_state", $attr);
+    }
+
     protected function loadState($state) {
         // loads the state Object
         global $DB;
@@ -199,6 +204,8 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
         }
         throw new \RESTling\Exception\ServiceUnavailable();
     }
+
+
 }
 
 ?>

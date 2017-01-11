@@ -6,6 +6,31 @@ class OAuth2 extends \RESTling\Model
     protected $trustAssertion;
     protected $stateInfo = null;
 
+    public function initAuthorization($input) {
+        // get target
+        $myredirectUri = $this->getMyCallbackUri();
+        $idp           = $this->getIDP($input->get("idp", "query"));
+
+        if (!$idp || $ipd["flow"] == "assertion") {
+            throw new \RESTling\Exception\NotFound();
+        }
+
+        // create a new state
+        $param = [
+            "redirect_uri" => urlencode($myredirectUri),
+            "client_id"    => urlencode($idp["client_id"]),
+            "response_type" => urlencode("code id_token"),
+            "scope"         => urlencode("openid profile email")
+        ];
+        $param["state"] = urlencode($this->prepareState($idp));
+
+        $res = [];
+        foreach ($param as $k => $v) {
+            $res[] = "$k=$v";
+        }
+        $this->redirect($idp["url"] . "?" . join('&', $res));
+    }
+
     // get /cb operation handler
     public function oidcCallback($input) {
         if ($error = $input->get("error", "query")) {
@@ -399,8 +424,12 @@ class OAuth2 extends \RESTling\Model
 
         $authParam = $this->findTargetAuthority($azp); // lookup the target or throw an exception!
 
+        if (!$authParam || $authParam["flow"] == "assertion") {
+            throw new \RESTling\Exception\NotFound();
+        }
+
         // keep the compact JWS String, so we can verify later
-        $authParam["state"]  = $this->generateState($jwt->toCompactJSON(0)); // create a new state
+        $authParam["state"]  = $this->prepareState($authParam); // create a new state
         $authParam["prompt"] = 'none';
 
         if (!array_key_exists("scope", $authParam)) {
@@ -419,6 +448,13 @@ class OAuth2 extends \RESTling\Model
         }
         $azp .= "?" . join("&", $query);
         $this->redirect($azp); // throw the redirect exception!
+    }
+
+    protected function prepareState($idp) {
+        $data = join("",[time(), $idp["client_id"]]);
+        $state = $this->randomSelection(hash_hmac("sha256", $data, $this->randomString(5)), 20);
+
+        $this->storeState($state, ["azp_id" => $idp["id"]]);
     }
 
     protected function handleSecondaryToken($jwt, $input) {
@@ -864,6 +900,16 @@ class OAuth2 extends \RESTling\Model
             $resstring .= substr($chars, $x, 1);
         }
         return $resstring;
+    }
+
+    final protected function randomSelection(string $source, $length=10) {
+        if (strlen($source) <= $length) {
+            return $source;
+        }
+
+        $len = strlen($source) - $length;
+        $x = rand(0, $len - 1);
+        return substr($source, $x, $length);
     }
 }
 

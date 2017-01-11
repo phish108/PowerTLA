@@ -20,6 +20,24 @@ tags:
     name: OAuth2
 
 paths:
+  /id:
+    get:
+      description: |
+        callback for initiating the OAuth Request
+      operationId: initAuthorization
+      responses:
+        # Response code
+        302:
+          description: Successful response redirects to the IDP
+        404:
+          description: Unknown IDP
+      parameters:
+        - name: idp
+          in: query
+          description: |
+            Internal OAuth2 IDP Id
+          type: string
+          required: true
   /cb:
     get:
       description: |

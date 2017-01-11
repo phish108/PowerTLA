@@ -15,6 +15,29 @@
         }
     ],
     "paths": {
+        "/id": {
+            "get": {
+                "description": "callback initiating for OAuth requests\n",
+                "operationId": "initAuthorization",
+                "responses": {
+                    "302": {
+                        "description": "Successful response redirects to the IDP"
+                    },
+                    "404": {
+                        "description": "Unknown IDP"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "idp",
+                        "in": "query",
+                        "description": "Internal OAuth2 IDP Id",
+                        "type": "string",
+                        "required": true
+                    }
+                ]
+            }
+        },
         "/cb": {
             "get": {
                 "description": "callback support for OIDC redirects\n",
