@@ -36,21 +36,9 @@ class Database implements PowerTLA\Interfaces\Loader {
         }
 
         $nsMap = json_decode($config["autoload"], true);
-        if (empty($config["postfix"])) {
-            $config["postfix"] = "";
-        }
-
-        $postfix = explode("\\", trim($config["postfix"], "\\"));
-
-        if (!($postfix && is_array($postfix) && count($postfix))) {
-            $postfix = [];
-        }
 
         $apiConfig = new \RESTling\Config\OpenApi();
         $apiConfig->loadConfigString($config["api"]);
-
-        $tags = $apiConfig->getTags(true);
-        $k = [];
 
         if (!empty($nsMap) && is_array($nsMap)) {
             $k = array_keys($nsMap);
@@ -61,7 +49,14 @@ class Database implements PowerTLA\Interfaces\Loader {
             $k = explode("\\", trim($k[0], "\\"));
         }
 
-        $apiConfig = $apiConfig->setTagModel(array_merge($k, $tags, $postfix));
+        if (empty($config["classname"])) {
+            $tags = $apiConfig->getTags(true);
+            $k = [];
+            $apiConfig->setTagModel(array_merge($k, $tags));
+        }
+        else {
+            $apiConfig->setTagModel(explode("\\", trim($config["classname"], '\\')));
+        }
 
         $service->setApiConfig($apiConfig);
         $this->cfgLoaded = true;
