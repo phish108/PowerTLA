@@ -119,7 +119,7 @@ abstract class OAuth2 extends \RESTling\Model
     abstract protected function getSharedKey($kid, $jku);
     abstract protected function getIssuerKey($kid, $iss);
     abstract protected function verifyIssuer($iss, $id);
-    abstract protected function handleUser($userClaims);
+    abstract protected function handleUser($userClaims, $azp_id);
 
     protected function verifyState($state) {
         $stateObj = $this->loadState($state);
@@ -281,7 +281,8 @@ abstract class OAuth2 extends \RESTling\Model
 
             // No errors? we can accept the user.
             // the plugin MAY reject certain users
-            $userid = $this->handleUser($userClaims);
+            // we need the azp, so we may change the auth method
+            $userid = $this->handleUser($userClaims, $azp);
             return [$azp, $userid];
         }
         return [null, null];

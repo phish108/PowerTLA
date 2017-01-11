@@ -194,13 +194,13 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
         }
     }
 
-    protected function handleUser($userClaims) {
+    protected function handleUser($userClaims, $azp_id) {
         // update or create
         // the plugin function should take care of this because of the mapping
         // the function MUST return an id
         global $OauthPlugin;
         if ($OauthPlugin) {
-            return $OauthPlugin->handleUser($userClaims);
+            return $OauthPlugin->handleUser($userClaims, $azp_id);
         }
         throw new \RESTling\Exception\ServiceUnavailable();
     }
