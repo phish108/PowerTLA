@@ -1,7 +1,7 @@
 <?php
 namespace PowerTLA\Model\Identity;
 
-class OAuth2 extends \RESTling\Model
+abstract class OAuth2 extends \RESTling\Model
 {
     protected $trustAssertion;
     protected $stateInfo = null;
@@ -55,6 +55,11 @@ class OAuth2 extends \RESTling\Model
 
             $this->handleIdToken($this->decryptJWE($jwt));
 
+            if (empty($this->stateInfo["token"]) &&
+                empty($this->stateInfo["token_id"]) &&
+                empty($this->stateInfo["refresh_id"])) {
+                $this->redirectHome();
+            }
             // no errors? we grant access to the user
             $access_token  = $input->get("access_token", "query");
             $refresh_token = $input->get("refresh_token", "query");
@@ -102,13 +107,19 @@ class OAuth2 extends \RESTling\Model
         $this->deleteTokenEntry($hint, $token);
     }
 
-    protected function loadState($state) {
-        // loads the state Object
-    }
-
-    protected function grantSecondaryTokens($issuer) {
-        // receives an issuer structure as provided by the getToken function
-    }
+    abstract protected function loadState($state);
+    abstract protected function storeState($state, $attr);
+    abstract protected function grantSecondaryTokens($issuer) ;
+    abstract protected function grantAccessTokens($authority, $userid);
+    abstract protected function storeToken($aT, $rT, $ex);
+    abstract protected function redirectHome();
+    abstract protected function deleteToken($field, $token);
+    abstract protected function getToken($field, $token);
+    abstract protected function getPrivateKey();
+    abstract protected function getSharedKey($kid, $jku);
+    abstract protected function getIssuerKey($kid, $iss);
+    abstract protected function verifyIssuer($iss, $id);
+    abstract protected function handleUser($userClaims);
 
     protected function verifyState($state) {
         $stateObj = $this->loadState($state);
@@ -888,7 +899,6 @@ class OAuth2 extends \RESTling\Model
     final public function getProtocol() {
         return 'org.ieft.oauth2';
     }
-
 
     final protected function randomString($length=10) {
         $resstring = "";

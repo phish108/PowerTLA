@@ -205,7 +205,10 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
         throw new \RESTling\Exception\ServiceUnavailable();
     }
 
-
+    protected function redirectHome() {
+        global $CFG;
+        $this->redirect($CFG->wwwroot);
+    }
 }
 
 ?>
