@@ -2,16 +2,15 @@
 
 namespace PowerTLA\Model\Identity\OAuth2;
 
-// hook for the moodle auth plugin
-// require_once "auth/eduid/lib/tlaSupport.php";
-// MUST define a global $OauthPlugin object
-
 class Moodle extends \PowerTLA\Model\Identity\OAuth2
 {
     protected function isActive() {
+        // hook for the moodle auth plugin
+        require_once "auth/oauth/lib/tlaSupport.php";
+
         global $OauthPlugin;
 
-        if (!$OauthPlugin || $OauthPlugin->inactive()) {
+        if (!$OAuthPlugin || $OAuthPlugin->inactive()) {
             throw new \RESTling\Exception\ServiveUnavailable();
         }
     }
