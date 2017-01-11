@@ -28,6 +28,9 @@ class Moodle extends \PowerTLA\Service {
         if (empty($lmsPath)) {
             throw new \PowerTLA\Exception\MissingLearningEnvironment();
         }
+
+        // set the LMS as include path
+        set_include_path(get_include_path() . PATH_SEPARATOR . $lmsPath);
         $this->lmsRoot = $lmsPath;
     }
 
