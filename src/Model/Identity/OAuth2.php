@@ -6,12 +6,12 @@ abstract class OAuth2 extends \RESTling\Model
     protected $trustAssertion;
     protected $stateInfo = null;
 
-    public function initAuthorization($input) {
+    public function initAuthorization($input) { // used by web authentication for local sessions
         // get target
         $myredirectUri = $this->getMyCallbackUri();
         $idp           = $this->getIDP($input->get("idp", "query"));
 
-        if (!$idp || $ipd["flow"] == "assertion") {
+        if (!$idp) {
             throw new \RESTling\Exception\NotFound();
         }
 
@@ -19,9 +19,35 @@ abstract class OAuth2 extends \RESTling\Model
         $param = [
             "redirect_uri" => urlencode($myredirectUri),
             "client_id"    => urlencode($idp["client_id"]),
-            "response_type" => urlencode("code id_token"),
+            "response_type" => urlencode("id_token"),
             "scope"         => urlencode("openid profile email")
         ];
+
+        $flowtype = "hybrid";
+
+        if ($input->has("flow", "query")) {
+            $flowtype = $input->get("flow", "query");
+        }
+
+        if (!in_array($flowtype, ["hybrid", "implicit", "code"]) ||
+            strpos($idp["flow"], $flowtype) === false) {
+
+            throw new \RESTling\Exception\BadRequest();
+        }
+
+        switch ($flowtype) {
+            case "code":
+                $param["response_type"] = "code";
+                break;
+            case "hybrid":
+                $param["response_type"] = "code id_token";
+            default:
+                if (!empty($input->get("token", "query"))) {
+                    $param["response_type"] .= " token";
+                 }
+                break;
+        }
+
         $param["state"] = urlencode($this->prepareState($idp));
 
         $res = [];
@@ -58,6 +84,8 @@ abstract class OAuth2 extends \RESTling\Model
             if (empty($this->stateInfo["token"]) &&
                 empty($this->stateInfo["token_id"]) &&
                 empty($this->stateInfo["refresh_id"])) {
+
+                // TODO crete User Session
                 $this->redirectHome();
             }
             // no errors? we grant access to the user

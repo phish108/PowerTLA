@@ -38,6 +38,16 @@ paths:
             Internal OAuth2 IDP Id
           type: string
           required: true
+        - name: flow
+          in: query
+          description: |
+            request specific flow type (code, hybrid or implicit)
+          type: string
+        - name: token
+          in: query
+          description: |
+            if non-empty, then request also an access token (only hybrid and implicit flows)
+          type: string
   /cb:
     get:
       description: |
