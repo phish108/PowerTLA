@@ -59,9 +59,11 @@ class Service extends \RESTling\OpenAPI {
         // pass down to RESTling\OpenApi
         parent::verifyModel();
 
+        $model = $this->model;
         // need to verify whether the model is active
-        if (method_exists("isActive", $this->model)) {
-            $this->model->isActive();
+        if (method_exists($model, "isActive")
+            && !$this->model->isActive()) {
+            throw new \RESTling\Exception\ServiceUnavailable();
         }
     }
 }
