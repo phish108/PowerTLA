@@ -81,13 +81,6 @@ abstract class OAuth2 extends \RESTling\Model
 
             $this->handleIdToken($this->decryptJWE($jwt));
 
-            if (empty($this->stateInfo["token"]) &&
-                empty($this->stateInfo["token_id"]) &&
-                empty($this->stateInfo["refresh_id"])) {
-
-                // TODO crete User Session
-                $this->redirectHome();
-            }
             // no errors? we grant access to the user
             $access_token  = $input->get("access_token", "query");
             $refresh_token = $input->get("refresh_token", "query");
@@ -96,13 +89,24 @@ abstract class OAuth2 extends \RESTling\Model
             // keep the tokens for reference
             $this->storeToken($access_token, $refesh_token, $expires);
 
-            // hand the tokens to the client
-            $this->data = [
-                "access_token"  => $access_token,
-                "refresh_token" => $refresh_token,
-                "expires_in"    => $expires,
-                "token_type"    => "Bearer"
-            ];
+            if (empty($this->stateInfo["token"]) &&
+                empty($this->stateInfo["token_id"]) &&
+                empty($this->stateInfo["refresh_id"])) {
+
+                // TODO create User Session
+                $this->startUserSession();
+
+                $this->redirectHome();
+            }
+            else {
+                // hand the tokens to the client if the state links to a trust agent
+                $this->data = [
+                    "access_token"  => $access_token,
+                    "refresh_token" => $refresh_token,
+                    "expires_in"    => $expires,
+                    "token_type"    => "Bearer"
+                ];
+            }
         }
     }
 
@@ -137,7 +141,7 @@ abstract class OAuth2 extends \RESTling\Model
 
     abstract protected function loadState($state);
     abstract protected function storeState($state, $attr);
-    abstract protected function grantSecondaryTokens($issuer) ;
+    abstract protected function grantSecondaryTokens($issuer, $expires) ;
     abstract protected function grantAccessTokens($authority, $userid);
     abstract protected function storeToken($aT, $rT, $ex);
     abstract protected function redirectHome();
@@ -147,7 +151,8 @@ abstract class OAuth2 extends \RESTling\Model
     abstract protected function getSharedKey($kid, $jku);
     abstract protected function getIssuerKey($kid, $iss);
     abstract protected function verifyIssuer($iss, $id);
-    abstract protected function handleUser($userClaims, $azp_id);
+    abstract protected function handleUser($userClaims);
+    abstract protected function startUserSession();
 
     protected function verifyState($state) {
         $stateObj = $this->loadState($state);
@@ -310,7 +315,7 @@ abstract class OAuth2 extends \RESTling\Model
             // No errors? we can accept the user.
             // the plugin MAY reject certain users
             // we need the azp, so we may change the auth method
-            $userid = $this->handleUser($userClaims, $azp);
+            $userid = $this->handleUser($userClaims);
             return [$azp, $userid];
         }
         return [null, null];
@@ -536,7 +541,7 @@ abstract class OAuth2 extends \RESTling\Model
 
         // we accept the assertion
         // TODO cover the SCOPE!
-        list($access_token, $refresh_token, $expires) = $this->grantSecondaryTokens($issuer);
+        list($access_token, $refresh_token, $expires) = $this->grantSecondaryTokens($issuer, $expires);
         $this->data = [
             "access_token"  => $access_token,
             "refresh_token" => $refresh_token,
