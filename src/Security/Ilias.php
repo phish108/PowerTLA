@@ -2,7 +2,7 @@
 
 namespace PowerTLA\Security;
 
-class Ilias implements \RESTling\Interfaces\Security\Model {
+class Ilias extends \PowerTLA\Security {
     public function validateKey($key, $input) {
         throw new \RESTling\Exception\Security\SharedKeyValidationUnsupported();
     }
