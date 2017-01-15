@@ -12,12 +12,17 @@
     },
     "require": {
         "php": ">=5.5.0",
-        "mobinaut/restling": "dev-dev-v2.0.1"
+        "mobinaut/restling": "dev-dev-v2.0.1",
+        "mobinaut/curler": "dev-master"
     },
     "repositories": [
         {
             "type": "vcs",
             "url": "https://github.com/phish108/RESTling"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/phish108/Curler"
         }
     ]
 }
