@@ -1,6 +1,8 @@
 <?php
 namespace PowerTLA\Model\Identity;
 
+use \Curler\Request as Curler;
+
 abstract class OAuth2 extends \RESTling\Model
 {
     protected $trustAssertion;
@@ -69,44 +71,50 @@ abstract class OAuth2 extends \RESTling\Model
             $this->requestAuthorizationToken($input);
         }
         elseif ($token = $input->get("id_token", "query")) {
-            // received a successful authorization
-            // process the incoming IdToken
-            $loader = new \Jose\Loader();
-            try {
-                $jwt = $loader->load($token);
-            }
-            catch (Exception $err) {
-                throw new \RESTling\Exception\Security\InvalidJwt();
-            }
-
-            $this->handleIdToken($this->decryptJWE($jwt));
 
             // no errors? we grant access to the user
             $access_token  = $input->get("access_token", "query");
             $refresh_token = $input->get("refresh_token", "query");
             $exprires      = $input->get("expires_in", "query");
 
-            // keep the tokens for reference
-            $this->storeToken($access_token, $refesh_token, $expires);
+            // received a successful authorization
+            // process the incoming IdToken
 
-            if (empty($this->stateInfo["token"]) &&
-                empty($this->stateInfo["token_id"]) &&
-                empty($this->stateInfo["refresh_id"])) {
+            $this->processAccess($token, $access_token, $refresh_token, $expires);
+        }
+    }
 
-                // TODO create User Session
-                $this->startUserSession();
+    private function processAccess($token, $access_token, $refresh_token, $expires) {
+        $loader = new \Jose\Loader();
+        try {
+            $jwt = $loader->load($token);
+        }
+        catch (Exception $err) {
+            throw new \RESTling\Exception\Security\InvalidJwt();
+        }
 
-                $this->redirectHome();
-            }
-            else {
-                // hand the tokens to the client if the state links to a trust agent
-                $this->data = [
-                    "access_token"  => $access_token,
-                    "refresh_token" => $refresh_token,
-                    "expires_in"    => $expires,
-                    "token_type"    => "Bearer"
-                ];
-            }
+        $this->handleIdToken($this->decryptJWE($jwt));
+
+        // keep the tokens for reference
+        $this->storeToken($access_token, $refesh_token, $expires);
+
+        if (empty($this->stateInfo["token"]) &&
+            empty($this->stateInfo["token_id"]) &&
+            empty($this->stateInfo["refresh_id"])) {
+
+            // TODO create User Session
+            $this->startUserSession();
+
+            $this->redirectHome();
+        }
+        else {
+            // hand the tokens to the client if the state links to a trust agent
+            $this->data = [
+                "access_token"  => $access_token,
+                "refresh_token" => $refresh_token,
+                "expires_in"    => $expires,
+                "token_type"    => "Bearer"
+            ];
         }
     }
 
@@ -641,7 +649,48 @@ abstract class OAuth2 extends \RESTling\Model
 
     // authorization code flow is presently unsupported
     private function requestAuthorizationToken($input) {
-        throw new \RESTling\Exception\NotImplemented();
+        // get TokenURL for the azp
+        $myredirectUri = $this->getMyCallbackUri();
+        $code   = $input->get("code", "query");
+        $state  = $input->get("state", "query");
+        $azpTokenUrl = $this->getTokenUrl($state);
+
+        $param = [
+            "grant_type" => "authorization_code",
+            "code" => $code,
+            "state" => $state,
+            "redirect_uri" => $myredirectUri
+        ];
+
+        $curler = new Curler($azpTokenUrl);
+        $curler->post($param, 'application/x-www-form-urlencoded');
+        if ($curler->getStatus() == 200) {
+            $h = $curler->getHeader();
+            switch ($h["content_type"]) {
+                case "application/json":
+                    $data = json_decode($curler->getBody());
+                    break;
+                case "application/x-www-form-urlencoded":
+                    $data = [];
+                    $elem = explode('&', $curler->getBody());
+                    foreach ($elem as $pitem) {
+                        list($param, $value) = explode("=", $pitem, 2);
+                        $data[trim(urldecode($param))] = trim(urldecode($value));
+                    }
+                    break;
+                default:
+                    $data = $curler->getBody();
+                    break;
+            }
+
+            // process the incoming token data
+            $token         = $data["id_token"];
+            $access_token  = $data["access_token"];
+            $refresh_token = $data["refresh_token"];
+            $exprires      = $data["expires_in"];
+
+            $this->processAccess($token, $access_token, $refresh_token, $expires);
+        }
     }
 
     /**
