@@ -2,7 +2,7 @@
 
 namespace PowerTLA\Model\Identity\OAuth2;
 
-require_once "auth/oauth/lib/tlaSupport.php";
+require_once "auth/oauth/lib/OAuthPlugin.php";
 
 # TODO move all DB handling into the plugin helper
 
@@ -13,19 +13,6 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
     protected function isActive() {
         // hook for the moodle auth plugin
         return !$this->inactive();
-    }
-
-    protected function deleteToken($field, $token) {
-        // we simply forget about our tokens
-        global $DB;
-
-        $attrMap = [];
-        $attrMap[$field] = $token;
-        $DB->delete_records("pwrtla_oauth_tokens", $attrMap);
-
-        $attrMap = [];
-        $attrMap["initial_$field"] = $token;
-        $DB->delete_records("pwrtla_oauth_tokens", $attrMap);
     }
 
     protected function getToken($field, $token) {
@@ -43,14 +30,6 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
         throw new \RESTling\Exception\Forbidden();
     }
 
-    private function getKey($attr) {
-        global $DB;
-        $object = $DB->get_record("pwrtla_oauth_keys", $attr);
-        if (!$object) {
-            throw new \RESTling\Exception\Forbidden();
-        }
-        return $object;
-    }
 
     protected function getPrivateKey($kid="private") {
         // return my personal global private key from the file system
@@ -80,16 +59,6 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
         return $this->getKey(["kid" => $kid, "token_id" => $iss])->key;
     }
 
-    protected function verifyIssuer($iss, $id) {
-        global $DB;
-        $object = $DB->get_record("pwrtla_oauth_azp", ["id" => $kid]);
-        if (!$object) {
-            throw new \RESTling\Exception\Forbidden();
-        }
-        if ($object->id != $id) {
-            throw new \RESTling\Exception\Forbidden();
-        }
-    }
 
     protected function findTargetAuthority($azp) {
         global $DB;
@@ -99,23 +68,6 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
             throw new \RESTling\Exception\Forbidden();
         }
         return (array) $object;
-    }
-
-    protected function storeState($state, $attr) {
-        $attr["id"] = $state;
-        $DB->insert_record("pwrtla_oauth_state", $attr);
-    }
-
-    protected function loadState($state) {
-        // loads the state Object
-        global $DB;
-
-        $stateObj = $DB->get_record("pwrtla_oauth_state", ["id" => $state]);
-        if (!$stateObj) {
-            throw new \RESTling\Exception\Forbidden();
-        }
-
-        return (array)$stateObj;
     }
 
     protected function grantSecondaryTokens($issuer, $expires) {
@@ -136,72 +88,6 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
         $attr["userid"] = $userid;
         $attr["azp_id"] = $authority["id"];
         return $this->generateToken($attr);
-    }
-
-    private function generateToken($attr, $expires = 0) {
-        global $DB;
-        $ts = time();
-
-        if ($expires) {
-            $ex = $expires - $ts;
-        }
-        else {
-            $ex= 86000;
-            $expires = $ts + $ex;
-        }
-
-        if (!array_key_exists("access_token", $attr)) {
-            $attr["access_token"] = $this->randomString(40);
-        }
-
-        $attr["refresh_token"] = $this->randomString(40);
-        $attr["expries"] = $ex;
-        $attr["created"] = $ts;
-
-        $attr["initial_access_token"]  = $attr["access_token"];
-        $attr["initial_refresh_token"] = $attr["refresh_token"];
-
-        $DB->insert_record("pwrtla_oauth_tokens", $attr);
-
-        return [$attr["access_token"], $attr["refresh_token"], $expires];
-    }
-
-    protected function storeToken($aT, $rT, $ex) {
-        global $DB;
-        global $USER;
-
-        $ts = time();
-        $ex = $ts + $ex;
-        if (!empty($this->stateInfo)) { // avoid random errors
-            $azpId  = $this->stateInfo["azp_id"];
-            $tokenId = $this->stateInfo["token_id"];
-            $updateId = $this->stateInfo["refresh_id"];
-        }
-
-        $attr = [
-            "access_token" => $aT,
-            "refresh_token" => $rT,
-            "expries" => $ex
-        ];
-
-        if (empty($updateId)) {
-            // new token
-            $attr["initial_access_token"] = $aT;
-            $attr["initial_refresh_token"] = $rT;
-            $attr["created"] = $ts;
-            $attr["azp_id"] = $azpId;
-            $attr["userid"] = $USER->id;
-
-            if (!empty($tokenId)) {
-                $attr["parent"] = $tokenId;
-            }
-            $DB->insert_record("pwrtla_oauth_tokens", $attr);
-        }
-        else {
-            // refresh token
-            $attr["id"] = $updateId;
-            $DB->update_record("pwrtla_oauth_tokens", $attr);
-        }
     }
 
     protected function redirectHome() {
