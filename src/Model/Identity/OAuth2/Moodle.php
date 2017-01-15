@@ -2,6 +2,7 @@
 
 namespace PowerTLA\Model\Identity\OAuth2;
 
+// load the local plugin support
 require_once "auth/oauth/lib/OAuthPlugin.php";
 
 # TODO move all DB handling into the plugin helper

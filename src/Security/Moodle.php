@@ -16,9 +16,9 @@ class Moodle extends \PowerTLA\Security {
     }
 
     public function translateTokenName($tokenname, $source) {
-        if (strtolower($source) == "cookie" &&
+        if (strtolower($source) === "cookie" &&
             $tokenname === strtolower('session')) {
-            return 'MoodleSession'; // this is necessary, so the cookie validation suceeds 
+            return 'MoodleSession'; // this is necessary, so the cookie validation succeeds
         }
         return $tokenname;
     }
