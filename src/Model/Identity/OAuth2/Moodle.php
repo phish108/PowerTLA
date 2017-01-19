@@ -5,8 +5,6 @@ namespace PowerTLA\Model\Identity\OAuth2;
 // load the local plugin support
 require_once "auth/oauth/lib/OAuthPlugin.php";
 
-# TODO move all DB handling into the plugin helper
-
 class Moodle extends \PowerTLA\Model\Identity\OAuth2
 {
     use OAuthPlugin;
@@ -14,27 +12,6 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
     protected function isActive() {
         // hook for the moodle auth plugin
         return !$this->inactive();
-    }
-
-    protected function getToken($field, $token) {
-        $attrMap = [];
-        $attrMap[$field] = $token;
-        if($recToken = $DB->get_record("pwrtla_oauth_tokens", $attrMap)) {
-            return (array)$recToken;
-        }
-
-        $attrMap = [];
-        $attrMap["initial_$field"] = $token;
-        if($recToken = $DB->get_record("pwrtla_oauth_tokens", $attrMap)) {
-            return (array)$recToken;
-        }
-        throw new \RESTling\Exception\Forbidden();
-    }
-
-
-    protected function getPrivateKey($kid="private") {
-        // return my personal global private key from the file system
-        return $this->getKey(["kid" => $kid, "azp_id" => null, "token_id" => null])->key;
     }
 
     protected function getSharedKey($kid, $jku) {
@@ -58,17 +35,6 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
 
     protected function getIssuerKey($kid, $iss) {
         return $this->getKey(["kid" => $kid, "token_id" => $iss])->key;
-    }
-
-
-    protected function findTargetAuthority($azp) {
-        global $DB;
-
-        $object = $DB->get_record("pwrtla_oauth_azp", ["url" => $azp]);
-        if (!$object) {
-            throw new \RESTling\Exception\Forbidden();
-        }
-        return (array) $object;
     }
 
     protected function grantSecondaryTokens($issuer, $expires) {
@@ -98,7 +64,6 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
             $urltogo = $SESSION->wantsurl;
             unset($SESSION->wantsurl);
             // the session will be automatically updated
-
             $this->redirect($urltogo);
         }
         $this->redirect($CFG->wwwroot);
@@ -117,55 +82,26 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
 
         if (!array_key_exists(["id", $user])) {
             // set the defaults for new users
-            $user['timecreated'] = $user['firstaccess'] = $user['lastaccess'] = time();
-            $user['confirmed']   = 1;
-            $user['policyagreed']   = 1;
-            $user['deleted']   = 0;
-            $user['suspended']   = 0;
-            $user['mnethostid'] = $CFG->mnet_localhost_id;
-            $user['interests'] = '';
-            $user['password'] = AUTH_PASSWORD_NOT_CACHED;
+            $user['timecreated']  = $user['firstaccess'] = $user['lastaccess'] = time();
+            $user['confirmed']    = 1;
+            $user['policyagreed'] = 1;
+            $user['suspended']    = 0;
+            $user['mnethostid']   = $CFG->mnet_localhost_id;
+            $user['interests']    = '';
+            $user['password']     = AUTH_PASSWORD_NOT_CACHED;
         }
 
-        $user['deleted']   = 0;
+        $user['deleted']   = 0; // always reset an account
         $user["username"] = $claims['sub'];
 
         // get attribute map
         // attrmap -> moodlevalue => claim
-        $defaultmap = [
-            "email" => "email",
-            "firstname" => "given_name",
-            "lastname" => "family_name",
-            "idnumber" => "",
-            "icq" => "",
-            "skype" => "",
-            "yahoo" => "",
-            "aim" => "",
-            "msn" => "",
-            "phone1" => "phone_number",
-            "phone2" => "",
-            "institution" => "",
-            "departement" => "",
-            "address" => "address.street_address",
-            "city" => "address.city",
-            "country" => "",
-            "lang" => "locale",
-            "url" => "website",
-            "middlename" => "middle_name",
-            "firstnamephonetic" => "",
-            "lastnamephonetic" => "",
-            "alternatename" => "nickname"
-        ];
-
         $map = $this->getAttributeMap();
-        if (empty($map)) {
-            // if no alternative, then use a reasonable default
-            $map = $defaultmap;
-        }
 
         $didUpdate = false;
         foreach ($map as $mKey => $cKey) {
             $cs = $claims;
+            // this trick is needed for handling the address claim
             if (strpos(".", $cKey) !== false) {
                 // handle combined claims
                 list($pKey, $cKey) = explode(".", $cKey);
@@ -189,6 +125,72 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
             $user['timemodified'] = time();
         }
         return $user;
+    }
+
+    protected function startUserSession() {
+        global $USER;
+        \core\session\manager::login_user($USER);
+    }
+
+    protected function handleUser($userClaims) {
+        global $DB, $USER; // NOTE: Moodle, but not plugin specific
+
+        // create or update the user
+        $username = $userClaims["sub"];
+        if ($user = $DB->get_record("user", ["username" => $username])) {
+            // update a user
+            $user = $this->handleAttributeMap($user, $userClaims);
+            user_update_user($user, false, false);
+
+            $USER = $DB->get_record('user', array('id' => $user['id']));
+        }
+        else {
+            // create a new user
+            $user = $this->handleAttributeMap([], $userClaims);
+            $user['id'] = user_create_user($user, false, false);
+            if ($user['id'] > 0)
+            {
+                // moodle wants additional profile setups
+                $usercontext = context_user::instance($user['id']);
+
+                // Update preferences.
+                useredit_update_user_preference($user);
+
+                if (!empty($CFG->usetags)) {
+                    useredit_update_interests($user, $user['interests']);
+                }
+
+                // Update mail bounces.
+                useredit_update_bounces($user, $user);
+
+                // Update forum track preference.
+                useredit_update_trackforums($user, $user);
+
+                // Save custom profile fields data.
+                profile_save_data($user);
+
+                // Reload from db.
+                $usernew = $DB->get_record('user', array('id' => $user['id']));
+
+                // allow Moodle components to respond to the new user.
+                core\event\user_created::create_from_userid($usernew->id)->trigger();
+            }
+        }
+
+        return $user["id"];
+    }
+
+
+    protected function grantInternalToken($userid, $expires) {
+        // Internal Tokens from the OAuth perspective are tokens issued by
+        // the service, whereas moodle considers tokens that are not used as
+        // sessions as external.
+        return external_generate_token(EXTERNAL_TOKEN_PERMANENT,
+                                       $this->service->id,
+                                       $userid,
+                                       context_system::instance(),
+                                       $expires,
+                                       '');
     }
 }
 
