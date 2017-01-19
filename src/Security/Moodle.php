@@ -4,6 +4,7 @@ namespace PowerTLA\Security;
 
 class Moodle extends \PowerTLA\Security {
 
+    // probably never used
     public function getSharedKey($kid, $jku) {
         global $DB;
 
