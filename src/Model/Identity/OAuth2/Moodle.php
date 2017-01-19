@@ -30,11 +30,11 @@ class Moodle extends \PowerTLA\Model\Identity\OAuth2
         }
 
         $o = $this->getKey($attr);
-        return [$o->azp_id, $o->key];
+        return [$o->azp_id, $o->crypt_key];
     }
 
     protected function getIssuerKey($kid, $iss) {
-        return $this->getKey(["kid" => $kid, "token_id" => $iss])->key;
+        return $this->getKey(["kid" => $kid, "token_id" => $iss])->crypt_key;
     }
 
     protected function grantSecondaryTokens($issuer, $expires) {
