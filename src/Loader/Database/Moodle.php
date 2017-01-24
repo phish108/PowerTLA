@@ -7,7 +7,7 @@ class Moodle extends \PowerTLA\Loader\Database {
 
         $retval  = [];
         if ($spec = $DB->get_record($this->relation,
-                                    array("cluster" => $apiId))) {
+                                    array("cluster" => $apiId, "active" => 1))) {
             $retval["api"] = $spec->api;
             $retval["classname"] = $spec->classname;
             $retval["autoload"] = $spec->autoload;
