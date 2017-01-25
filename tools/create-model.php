@@ -82,7 +82,7 @@ function createModel($fname, $modelName, $nameSpace, $parent=null) {
 
     if (!file_exists($fname)) {
 
-        $parentClass = "\\RESTling\\Model";
+        $parentClass = "";
         if (!empty($parent)) {
             $parentClass = $parent;
         }
@@ -92,7 +92,12 @@ function createModel($fname, $modelName, $nameSpace, $parent=null) {
             fwrite($fh, "<?php\n\n");
             // TODO add copyright statement
             fwrite($fh, "namespace $nameSpace;\n\n");
-            fwrite($fh, "class $modelName extends $parentClass\n");
+            if (strlen($parentClass)) {
+                fwrite($fh, "class $modelName extends $parentClass\n");
+            }
+            else {
+                fwrite($fh, "class $modelName\n");
+            }
             fwrite($fh, "{\n");
             if (!$parent) {
                 $pathList = $oaiConfig->getPaths();

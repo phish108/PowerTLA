@@ -2,7 +2,7 @@
 
 namespace PowerTLA\Model\LRS;
 
-abstract class XAPI extends \RESTling\Model
+abstract class XAPI
 {
     const VERB_VOIDED = "http://adlnet.gov/expapi/verbs/voided";
 

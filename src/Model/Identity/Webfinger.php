@@ -2,7 +2,7 @@
 
 namespace PowerTLA\Model\Identity;
 
-abstract class Webfinger extends \RESTling\Model
+abstract class Webfinger
 {
     protected $resource;
     protected $userid = null;

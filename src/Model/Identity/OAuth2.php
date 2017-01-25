@@ -3,7 +3,7 @@ namespace PowerTLA\Model\Identity;
 
 use \Curler\Request as Curler;
 
-abstract class OAuth2 extends \RESTling\Model
+abstract class OAuth2
 {
     protected $trustAssertion;
     protected $stateInfo = null;

@@ -2,7 +2,7 @@
 
 namespace PowerTLA\Model\Content;
 
-class Course extends \RESTling\Model
+class Course
 {
     public function getCourses($input) {
 
@@ -19,79 +19,79 @@ class Course extends \RESTling\Model
 
     /**
      * Returns the pathmap of the model.
-     * 
+     *
      * This is automatically generated from the API specification. You can
      * safely ignore this part.
-     * 
+     *
      * Note: on API changes, this method may change too.
      */
     final public function getPathMap() {
         return array (
-              0 => 
+              0 =>
               array (
                 'pattern' => '/^\\/([^\\/]+)\\/participants(?:\\/(.+))?$/',
-                'pathitem' => 
+                'pathitem' =>
                 array (
-                  'get' => 
+                  'get' =>
                   array (
                     'operationId' => 'getCourseParticipants',
-                    'produces' => 
+                    'produces' =>
                     array (
                       0 => 'application/json',
                     ),
-                    'responses' => 
+                    'responses' =>
                     array (
-                      200 => 
+                      200 =>
                       array (
                         'description' => 'Successful response',
                       ),
-                      403 => 
+                      403 =>
                       array (
                         'description' => 'User is not enrolled in the course',
                       ),
                     ),
-                    'parameters' => 
+                    'parameters' =>
                     array (
-                      0 => 
+                      0 =>
                       array (
                         'name' => 'courseId',
                         'in' => 'path',
-                        'description' => 'the official courseId that is exposed in System URLs. 
+                        'description' => 'the official courseId that is exposed in System URLs.
             ',
                         'type' => 'string',
                         'required' => true,
                       ),
                     ),
                   ),
-                  'put' => 
+                  'put' =>
                   array (
                     'operationId' => 'enrolCourseParticipant',
-                    'consumes' => 
+                    'consumes' =>
                     array (
                       0 => 'application/json',
                     ),
-                    'responses' => 
+                    'responses' =>
                     array (
-                      200 => 
+                      200 =>
                       array (
                         'description' => 'Successful response',
                       ),
-                      403 => 
+                      403 =>
                       array (
                         'description' => 'User is not allowed to entrol users into the course',
                       ),
-                      404 => 
+                      404 =>
                       array (
                         'description' => 'User account does not exist',
                       ),
                     ),
-                    'parameters' => 
+                    'parameters' =>
                     array (
-                      0 => 
+                      0 =>
                       array (
                         'name' => 'courseId',
                         'in' => 'path',
-                        'description' => 'The official courseId that is exposed in System URLs. 
+                        'description' => 'The official courseId that is exposed in System URLs.
             ',
                         'type' => 'string',
                         'required' => true,
@@ -99,42 +99,42 @@ class Course extends \RESTling\Model
                     ),
                   ),
                 ),
-                'vars' => 
+                'vars' =>
                 array (
                   0 => 'courseId',
                 ),
                 'path' => '/{courseId}/participants',
               ),
-              1 => 
+              1 =>
               array (
                 'pattern' => '/^\\/([^\\/]+)\\/contents(?:\\/(.+))?$/',
-                'pathitem' => 
+                'pathitem' =>
                 array (
-                  'get' => 
+                  'get' =>
                   array (
                     'operationId' => 'getCourseContents',
-                    'produces' => 
+                    'produces' =>
                     array (
                       0 => 'application/json',
                     ),
-                    'responses' => 
+                    'responses' =>
                     array (
-                      200 => 
+                      200 =>
                       array (
                         'description' => 'Successful response',
                       ),
-                      403 => 
+                      403 =>
                       array (
                         'description' => 'User has no access to the course contents',
                       ),
                     ),
-                    'parameters' => 
+                    'parameters' =>
                     array (
-                      0 => 
+                      0 =>
                       array (
                         'name' => 'courseId',
                         'in' => 'path',
-                        'description' => 'the official courseId that is exposed in System URLs. 
+                        'description' => 'the official courseId that is exposed in System URLs.
             ',
                         'type' => 'string',
                         'required' => true,
@@ -142,34 +142,34 @@ class Course extends \RESTling\Model
                     ),
                   ),
                 ),
-                'vars' => 
+                'vars' =>
                 array (
                   0 => 'courseId',
                 ),
                 'path' => '/{courseId}/contents',
               ),
-              2 => 
+              2 =>
               array (
                 'pattern' => '/^\\/(?:\\/(.+))?$/',
-                'pathitem' => 
+                'pathitem' =>
                 array (
-                  'get' => 
+                  'get' =>
                   array (
                     'operationId' => 'getCourses',
-                    'produces' => 
+                    'produces' =>
                     array (
                       0 => 'application/json',
                     ),
-                    'responses' => 
+                    'responses' =>
                     array (
-                      200 => 
+                      200 =>
                       array (
                         'description' => 'Successful response',
                       ),
                     ),
                   ),
                 ),
-                'vars' => 
+                'vars' =>
                 array (
                 ),
                 'path' => '/',
