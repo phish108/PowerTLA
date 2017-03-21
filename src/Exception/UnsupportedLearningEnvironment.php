@@ -1,6 +1,6 @@
 <?php
 namespace PowerTLA\Exception;
 
-class UnsupportedLearningEnvironment extends \RESTling\Exception {
+class UnsupportedLearningEnvironment extends \RESTling\Exception\BadRequest {
 }
 ?>

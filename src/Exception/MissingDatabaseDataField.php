@@ -1,6 +1,6 @@
 <?php
 namespace PowerTLA\Exception;
 
-class MissingDatabaseDataField extends \RESTling\Exception {
+class MissingDatabaseDataField extends \RESTling\Exception\BadRequest {
 }
 ?>

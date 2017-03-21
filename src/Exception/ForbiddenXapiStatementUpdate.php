@@ -1,6 +1,6 @@
 <?php
 namespace PowerTLA\Exception;
 
-class ForbiddenXapiStatementUpdate extends \RESTling\Exception {
+class ForbiddenXapiStatementUpdate extends \RESTling\Exception\BadRequest {
 }
 ?>

@@ -1,6 +1,6 @@
 <?php
 namespace PowerTLA\Exception;
 
-class MissingDatabaseFilterMap extends \RESTling\Exception {
+class MissingDatabaseFilterMap extends \RESTling\Exception\BadRequest {
 }
 ?>

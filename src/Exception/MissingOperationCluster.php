@@ -1,6 +1,6 @@
 <?php
 namespace PowerTLA\Exception;
 
-class MissingOperationCluster extends \RESTling\Exception {
+class MissingOperationCluster extends \RESTling\Exception\BadRequest {
 }
 ?>

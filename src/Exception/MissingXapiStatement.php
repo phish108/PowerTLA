@@ -1,6 +1,6 @@
 <?php
 namespace PowerTLA\Exception;
 
-class MissingXapiStatement extends \RESTling\Exception {
+class MissingXapiStatement extends \RESTling\Exception\BadRequest {
 }
 ?>

@@ -1,6 +1,6 @@
 <?php
 namespace PowerTLA\Exception;
 
-class InvalidConfigurationDirectory extends \RESTling\Exception {
+class InvalidConfigurationDirectory extends \RESTling\Exception\BadRequest {
 }
 ?>

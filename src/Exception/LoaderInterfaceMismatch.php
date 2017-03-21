@@ -1,6 +1,6 @@
 <?php
 namespace PowerTLA\Exception;
 
-class LoaderInterfaceMismatch extends \RESTling\Exception {
+class LoaderInterfaceMismatch extends \RESTling\Exception\BadRequest {
 }
 ?>
